@@ -11,6 +11,7 @@ import { RareValuesEvent, RequestRareValuesComposer } from './messages';
 import { WheelBuySpinComposer, WheelDataEvent, WheelOpenComposer, WheelRecentWinsEvent, WheelResultEvent, WheelSpinComposer } from './messages';
 import { WheelAdminGetPrizesComposer, WheelAdminPrizesEvent, WheelAdminSavePrizesComposer } from './messages';
 import { SoundboardPlayEvent, SoundboardSettingsEvent, SoundboardPlayComposer, SoundboardSetEnabledComposer } from './messages';
+import { PressKeybindComposer } from './messages';
 import { EarningsCenterEvent, EarningsClaimResultEvent, RequestEarningsCenterComposer, ClaimEarningsRewardComposer, ClaimAllEarningsRewardsComposer } from './messages';
 import { DeleteMentionComposer, MarkMentionsReadComposer, MentionReceivedEvent, MentionsListEvent, RequestMentionsComposer } from './messages';
 export class NitroMessages implements IMessageConfiguration
@@ -1348,6 +1349,7 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.WHEEL_ADMIN_SAVE_PRIZES, WheelAdminSavePrizesComposer);
         this._composers.set(OutgoingHeader.SOUNDBOARD_PLAY, SoundboardPlayComposer);
         this._composers.set(OutgoingHeader.SOUNDBOARD_SET_ENABLED, SoundboardSetEnabledComposer);
+        this._composers.set(OutgoingHeader.PRESS_KEYBIND, PressKeybindComposer);
         this._composers.set(OutgoingHeader.EARNINGS_REQUEST, RequestEarningsCenterComposer);
         this._composers.set(OutgoingHeader.EARNINGS_CLAIM, ClaimEarningsRewardComposer);
         this._composers.set(OutgoingHeader.EARNINGS_CLAIM_ALL, ClaimAllEarningsRewardsComposer);

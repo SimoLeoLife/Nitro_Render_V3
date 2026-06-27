@@ -577,4 +577,5 @@ export class OutgoingHeader
     public static EARNINGS_REQUEST = 9308;
     public static EARNINGS_CLAIM = 9309;
     public static EARNINGS_CLAIM_ALL = 9310;
+    public static PRESS_KEYBIND = 9311;
 }
