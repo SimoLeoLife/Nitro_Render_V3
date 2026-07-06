@@ -70,11 +70,11 @@ export class FigurePartSet implements IFigurePartSet
         return -1;
     }
 
-    public getPart(k: string, _arg_2: number): IFigurePart
+    public getPart(type: string, id: number): IFigurePart
     {
         for(const part of this._parts)
         {
-            if((part.type !== k) || (part.id !== _arg_2)) continue;
+            if((part.type !== type) || (part.id !== id)) continue;
 
             return part;
         }

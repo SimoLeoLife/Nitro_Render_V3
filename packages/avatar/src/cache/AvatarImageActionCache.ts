@@ -27,23 +27,23 @@ export class AvatarImageActionCache
         this._cache.clear();
     }
 
-    public getDirectionCache(k: number): AvatarImageDirectionCache
+    public getDirectionCache(direction: number): AvatarImageDirectionCache
     {
-        const existing = this._cache.get(k.toString());
+        const existing = this._cache.get(direction.toString());
 
         if(!existing) return null;
 
         return existing;
     }
 
-    public updateDirectionCache(k: number, _arg_2: AvatarImageDirectionCache): void
+    public updateDirectionCache(direction: number, directionCache: AvatarImageDirectionCache): void
     {
-        this._cache.set(k.toString(), _arg_2);
+        this._cache.set(direction.toString(), directionCache);
     }
 
-    public setLastAccessTime(k: number): void
+    public setLastAccessTime(time: number): void
     {
-        this._lastAccessTime = k;
+        this._lastAccessTime = time;
     }
 
     public getLastAccessTime(): number
@@ -51,7 +51,7 @@ export class AvatarImageActionCache
         return this._lastAccessTime;
     }
 
-    private debugInfo(k: string): void
+    private debugInfo(message: string): void
     {
     }
 }

@@ -9,12 +9,12 @@ export class ImageData
     private _flipH: boolean;
     private _colorTransform: number;
 
-    constructor(texture: Texture, rectangle: Rectangle, _arg_3: Point, flipH: boolean, color: number, container: Container = null)
+    constructor(texture: Texture, rectangle: Rectangle, regPoint: Point, flipH: boolean, color: number, container: Container = null)
     {
         this._texture = texture;
         this._container = container;
         this._rect = rectangle;
-        this._regPoint = _arg_3;
+        this._regPoint = regPoint;
         this._flipH = flipH;
         this._colorTransform = color;
 

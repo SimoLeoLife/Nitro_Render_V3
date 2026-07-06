@@ -16,7 +16,7 @@ export class FigurePart implements IFigurePart
         this._id = data.id;
         this._type = data.type;
         this._index = data.index;
-        this._colorLayerIndex = data.colorindex;
+        this._colorLayerIndex = (data.colorindex ?? -1);
         this._paletteMapId = -1;
         this._breed = -1;
     }

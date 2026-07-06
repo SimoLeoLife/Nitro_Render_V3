@@ -61,31 +61,31 @@ export class ActionDefinition implements IActionDefinition
         }
     }
 
-    public setOffsets(k: string, _arg_2: number, _arg_3: number[]): void
+    public setOffsets(size: string, direction: number, offsets: number[]): void
     {
         if(!this._canvasOffsets) this._canvasOffsets = new Map();
 
-        let existing = this._canvasOffsets.get(k);
+        let existing = this._canvasOffsets.get(size);
 
         if(!existing)
         {
             existing = new Map();
 
-            this._canvasOffsets.set(k, existing);
+            this._canvasOffsets.set(size, existing);
         }
 
-        existing.set(_arg_2, _arg_3);
+        existing.set(direction, offsets);
     }
 
-    public getOffsets(k: string, _arg_2: number): number[]
+    public getOffsets(size: string, direction: number): number[]
     {
         if(!this._canvasOffsets) return null;
 
-        const existing = this._canvasOffsets.get(k);
+        const existing = this._canvasOffsets.get(size);
 
         if(!existing) return null;
 
-        return existing.get(_arg_2);
+        return existing.get(direction);
     }
 
     public getType(id: string): ActionType
@@ -126,22 +126,22 @@ export class ActionDefinition implements IActionDefinition
         return existing.prevents;
     }
 
-    public getPreventHeadTurn(k: string): boolean
+    public getPreventHeadTurn(typeId: string): boolean
     {
-        if(!k) return this._preventHeadTurn;
+        if(!typeId) return this._preventHeadTurn;
 
-        const type = this.getType(k);
+        const type = this.getType(typeId);
 
         if(!type) return this._preventHeadTurn;
 
         return type.preventHeadTurn;
     }
 
-    public isAnimated(k: string): boolean
+    public isAnimated(typeId: string): boolean
     {
-        if(!k) return true;
+        if(!typeId) return true;
 
-        const type = this.getType(k);
+        const type = this.getType(typeId);
 
         if(!type) return true;
 

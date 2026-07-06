@@ -9,11 +9,11 @@ export class AssetAliasCollection
     private _avatarRenderManager: AvatarRenderManager;
     private _missingAssetNames: string[];
 
-    constructor(k: AvatarRenderManager, _arg_2: IAssetManager)
+    constructor(avatarRenderManager: AvatarRenderManager, assets: IAssetManager)
     {
-        this._avatarRenderManager = k;
+        this._avatarRenderManager = avatarRenderManager;
         this._aliases = new Map();
-        this._assets = _arg_2;
+        this._assets = assets;
         this._missingAssetNames = [];
     }
 
@@ -49,29 +49,31 @@ export class AssetAliasCollection
         }
     }
 
-    public hasAlias(k: string): boolean
+    public hasAlias(name: string): boolean
     {
-        const alias = this._aliases.get(k);
+        const alias = this._aliases.get(name);
 
         if(alias) return true;
 
         return false;
     }
 
-    public getAssetName(k: string): string
+    public getAssetName(name: string): string
     {
-        let _local_2 = k;
-        let _local_3 = 5;
+        let resolvedName = name;
+        let remainingHops = 5;
 
-        while(this.hasAlias(_local_2) && (_local_3 >= 0))
+        while(this.hasAlias(resolvedName) && (remainingHops >= 0))
         {
-            const _local_4 = this._aliases.get(_local_2);
+            const alias = this._aliases.get(resolvedName);
 
-            _local_2 = _local_4.link;
-            _local_3--;
+            if(!alias || !alias.link) break;
+
+            resolvedName = alias.link;
+            remainingHops--;
         }
 
-        return _local_2;
+        return resolvedName;
     }
 
     public getAsset(name: string): IGraphicAsset

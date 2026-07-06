@@ -14,7 +14,7 @@ export class AvatarImagePartContainer
     private _isBlendable: boolean;
     private _paletteMapId: number;
 
-    constructor(bodyPartId: string, partType: string, partId: string, partColor: IPartColor, frames: AvatarAnimationFrame[], action: IActionDefinition, isColorable: boolean, paletteMapId: number, flippedPartType: string = '', isBlendable: boolean = false, _arg_11: number = 1)
+    constructor(bodyPartId: string, partType: string, partId: string, partColor: IPartColor, frames: AvatarAnimationFrame[], action: IActionDefinition, isColorable: boolean, paletteMapId: number, flippedPartType: string = '', isBlendable: boolean = false, scale: number = 1)
     {
         this._bodyPartId = bodyPartId;
         this._partType = partType;
@@ -30,11 +30,11 @@ export class AvatarImagePartContainer
         if(this._partType === 'ey') this._isColorable = false;
     }
 
-    public getFrameIndex(k: number): number
+    public getFrameIndex(frameCount: number): number
     {
         if(!this._frames || !this._frames.length) return 0;
 
-        const frameNumber = (k % this._frames.length);
+        const frameNumber = (frameCount % this._frames.length);
 
         if(this._frames[frameNumber] instanceof AvatarAnimationFrame)
         {
@@ -44,9 +44,9 @@ export class AvatarImagePartContainer
         return frameNumber;
     }
 
-    public getFrameDefinition(k: number): AvatarAnimationFrame
+    public getFrameDefinition(frameCount: number): AvatarAnimationFrame
     {
-        const frameNumber = (k % this._frames.length);
+        const frameNumber = (frameCount % this._frames.length);
 
         if(this._frames && (this._frames.length > frameNumber))
         {
@@ -59,9 +59,9 @@ export class AvatarImagePartContainer
         return null;
     }
 
-    public getCacheableKey(k: number): string
+    public getCacheableKey(frameCount: number): string
     {
-        const frameNumber = (k % this._frames.length);
+        const frameNumber = (frameCount % this._frames.length);
 
         if(this._frames && (this._frames.length > frameNumber))
         {
@@ -106,9 +106,9 @@ export class AvatarImagePartContainer
         return this._isColorable;
     }
 
-    public set isColorable(k: boolean)
+    public set isColorable(isColorable: boolean)
     {
-        this._isColorable = k;
+        this._isColorable = isColorable;
     }
 
     public get paletteMapId(): number

@@ -4,9 +4,9 @@ export class DirectionDataContainer
 {
     private _offset: number;
 
-    constructor(k: IAssetAnimationDirection)
+    constructor(direction: IAssetAnimationDirection)
     {
-        this._offset = k.offset;
+        this._offset = direction.offset;
     }
 
     public get offset(): number

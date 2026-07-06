@@ -6,9 +6,9 @@ export class AvatarImageDirectionCache
     private _partList: AvatarImagePartContainer[];
     private _images: Map<string, AvatarImageBodyPartContainer>;
 
-    constructor(k: AvatarImagePartContainer[])
+    constructor(partList: AvatarImagePartContainer[])
     {
-        this._partList = k;
+        this._partList = partList;
         this._images = new Map();
     }
 
@@ -24,36 +24,36 @@ export class AvatarImageDirectionCache
         return this._partList;
     }
 
-    public getImageContainer(k: number): AvatarImageBodyPartContainer
+    public getImageContainer(frameCount: number): AvatarImageBodyPartContainer
     {
-        const existing = this._images.get(this.getCacheKey(k));
+        const existing = this._images.get(this.getCacheKey(frameCount));
 
         if(!existing) return null;
 
         return existing;
     }
 
-    public updateImageContainer(k: AvatarImageBodyPartContainer, _arg_2: number): void
+    public updateImageContainer(container: AvatarImageBodyPartContainer, frameCount: number): void
     {
-        const name = this.getCacheKey(_arg_2);
+        const name = this.getCacheKey(frameCount);
 
         const existing = this._images.get(name);
 
         if(existing) existing.dispose();
 
-        this._images.set(name, k);
+        this._images.set(name, container);
     }
 
-    private getCacheKey(k: number): string
+    private getCacheKey(frameCount: number): string
     {
         let name = '';
 
-        for(const part of this._partList) name += (part.getCacheableKey(k) + '/');
+        for(const part of this._partList) name += (part.getCacheableKey(frameCount) + '/');
 
         return name;
     }
 
-    private debugInfo(k: string): void
+    private debugInfo(message: string): void
     {
     }
 }

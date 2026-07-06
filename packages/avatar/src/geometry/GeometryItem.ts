@@ -1,4 +1,4 @@
-﻿import { Node3D, Vector3d } from '@nitrots/utils';
+import { Node3D, Vector3d } from '@nitrots/utils';
 
 export class GeometryItem extends Node3D
 {
@@ -8,23 +8,23 @@ export class GeometryItem extends Node3D
     private _isDoubleSided: boolean;
     private _isDynamic: boolean;
 
-    constructor(k: any, _arg_2: boolean = false)
+    constructor(data: any, isDynamic: boolean = false)
     {
-        super(parseFloat(k.x), parseFloat(k.y), parseFloat(k.z));
+        super(parseFloat(data.x), parseFloat(data.y), parseFloat(data.z));
 
-        this._id = k.id;
-        this._radius = parseFloat(k.radius);
-        this._normal = new Vector3d(parseFloat(k.nx), parseFloat(k.ny), parseFloat(k.nz));
-        this._isDoubleSided = k.double || false;
-        this._isDynamic = _arg_2;
+        this._id = data.id;
+        this._radius = parseFloat(data.radius);
+        this._normal = new Vector3d(parseFloat(data.nx), parseFloat(data.ny), parseFloat(data.nz));
+        this._isDoubleSided = data.double || false;
+        this._isDynamic = isDynamic;
     }
 
-    public getDistance(k: Vector3d): number
+    public getDistance(location: Vector3d): number
     {
-        const _local_2 = Math.abs(((k.z - this.transformedLocation.z) - this._radius));
-        const _local_3 = Math.abs(((k.z - this.transformedLocation.z) + this._radius));
+        const nearEdge = Math.abs(((location.z - this.transformedLocation.z) - this._radius));
+        const farEdge = Math.abs(((location.z - this.transformedLocation.z) + this._radius));
 
-        return Math.min(_local_2, _local_3);
+        return Math.min(nearEdge, farEdge);
     }
 
     public get id(): string

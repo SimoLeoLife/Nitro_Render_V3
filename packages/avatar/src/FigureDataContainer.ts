@@ -48,27 +48,27 @@
         return this._isDisposed;
     }
 
-    private parseFigureString(k: string): void
+    private parseFigureString(figure: string): void
     {
-        if(!k) return;
+        if(!figure) return;
 
-        for(const set of k.split('.'))
+        for(const set of figure.split('.'))
         {
-            const _local_3 = set.split('-');
+            const pieces = set.split('-');
 
-            if(_local_3.length > 0)
+            if(pieces.length > 0)
             {
-                const part = _local_3[0];
-                const setId = parseInt(_local_3[1]);
+                const part = pieces[0];
+                const setId = parseInt(pieces[1]);
                 const colors: number[] = [];
 
-                let i = 2;
+                let index = 2;
 
-                while(i < _local_3.length)
+                while(index < pieces.length)
                 {
-                    colors.push(parseInt(_local_3[i]));
+                    colors.push(parseInt(pieces[index]));
 
-                    i++;
+                    index++;
                 }
 
                 if(!colors.length) colors.push(0);
@@ -79,21 +79,21 @@
         }
     }
 
-    public hasSetType(k: string): boolean
+    public hasSetType(partType: string): boolean
     {
-        return !!this._data.get(k);
+        return !!this._data.get(partType);
     }
 
-    public getPartSetId(k: string): number
+    public getPartSetId(partType: string): number
     {
-        if(this.hasSetType(k)) return this._data.get(k);
+        if(this.hasSetType(partType)) return this._data.get(partType);
 
         return -1;
     }
 
-    public getColourIds(k: string): number[]
+    public getColourIds(partType: string): number[]
     {
-        if(this._colors.get(k)) return this._colors.get(k);
+        if(this._colors.get(partType)) return this._colors.get(partType);
 
         return [];
     }
@@ -115,29 +115,29 @@
             sets.push(set);
         }
 
-        let i = 0;
+        let index = 0;
 
-        while(i < sets.length)
+        while(index < sets.length)
         {
-            figure = (figure + sets[i]);
+            figure = (figure + sets[index]);
 
-            if(i < (sets.length - 1)) figure = (figure + '.');
+            if(index < (sets.length - 1)) figure = (figure + '.');
 
-            i++;
+            index++;
         }
 
         return figure;
     }
 
-    public savePartData(k: string, _arg_2: number, _arg_3: number[], _arg_4: boolean = false): void
+    public savePartData(partType: string, partSetId: number, colorIds: number[], isDefault: boolean = false): void
     {
-        this.savePartSetId(k, _arg_2, _arg_4);
-        this.savePartSetColourId(k, _arg_3, _arg_4);
+        this.savePartSetId(partType, partSetId, isDefault);
+        this.savePartSetColourId(partType, colorIds, isDefault);
     }
 
-    private savePartSetId(k: string, _arg_2: number, _arg_3: boolean = true): void
+    private savePartSetId(partType: string, partSetId: number, isDefault: boolean = true): void
     {
-        switch(k)
+        switch(partType)
         {
             case FigureDataContainer.HD:
             case FigureDataContainer.HAIR:
@@ -152,20 +152,20 @@
             case FigureDataContainer.TROUSERS:
             case FigureDataContainer.SHOES:
             case FigureDataContainer.TROUSER_ACCESSORIES:
-                if(_arg_2 >= 0)
+                if(partSetId >= 0)
                 {
-                    this._data.set(k, _arg_2);
+                    this._data.set(partType, partSetId);
                 }
                 else
                 {
-                    this._data.delete(k);
+                    this._data.delete(partType);
                 }
         }
     }
 
-    public savePartSetColourId(k: string, _arg_2: number[], _arg_3: boolean = true): void
+    public savePartSetColourId(partType: string, colorIds: number[], isDefault: boolean = true): void
     {
-        switch(k)
+        switch(partType)
         {
             case FigureDataContainer.HD:
             case FigureDataContainer.HAIR:
@@ -180,12 +180,12 @@
             case FigureDataContainer.TROUSERS:
             case FigureDataContainer.SHOES:
             case FigureDataContainer.TROUSER_ACCESSORIES:
-                this._colors.set(k, _arg_2);
+                this._colors.set(partType, colorIds);
                 return;
         }
     }
 
-    public getFigureStringWithFace(k: number): string
+    public getFigureStringWithFace(faceSetId: number): string
     {
         const partSets: string[] = [FigureDataContainer.HD];
 
@@ -200,19 +200,19 @@
             {
                 let setId = this._data.get(part);
 
-                if(part === FigureDataContainer.HD) setId = k;
+                if(part === FigureDataContainer.HD) setId = faceSetId;
 
                 let set = ((part + '-') + setId);
 
                 if(setId >= 0)
                 {
-                    let i = 0;
+                    let colorIndex = 0;
 
-                    while(i < colors.length)
+                    while(colorIndex < colors.length)
                     {
-                        set = (set + ('-' + colors[i]));
+                        set = (set + ('-' + colors[colorIndex]));
 
-                        i++;
+                        colorIndex++;
                     }
                 }
 
@@ -220,15 +220,15 @@
             }
         }
 
-        let i = 0;
+        let index = 0;
 
-        while(i < sets.length)
+        while(index < sets.length)
         {
-            figure = (figure + sets[i]);
+            figure = (figure + sets[index]);
 
-            if(i < (sets.length - 1)) figure = (figure + '.');
+            if(index < (sets.length - 1)) figure = (figure + '.');
 
-            i++;
+            index++;
         }
 
         return figure;

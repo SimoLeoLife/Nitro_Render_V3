@@ -12,19 +12,19 @@ export class SpriteDataContainer implements ISpriteDataContainer
     private _dy: number[];
     private _dz: number[];
 
-    constructor(k: IAnimation, _arg_2: IAssetAnimationSprite)
+    constructor(animation: IAnimation, sprite: IAssetAnimationSprite)
     {
-        this._animation = k;
-        this._id = _arg_2.id;
-        this._ink = _arg_2.ink;
-        this._member = _arg_2.member;
-        this._hasStaticY = _arg_2.staticY ? true : false;
-        this._hasDirections = _arg_2.directions ? true : false;
+        this._animation = animation;
+        this._id = sprite.id;
+        this._ink = sprite.ink;
+        this._member = sprite.member;
+        this._hasStaticY = sprite.staticY ? true : false;
+        this._hasDirections = sprite.directions ? true : false;
         this._dx = [];
         this._dy = [];
         this._dz = [];
 
-        const directions = _arg_2.directionList;
+        const directions = sprite.directionList;
 
         if(directions && directions.length)
         {
@@ -41,23 +41,23 @@ export class SpriteDataContainer implements ISpriteDataContainer
         }
     }
 
-    public getDirectionOffsetX(k: number): number
+    public getDirectionOffsetX(direction: number): number
     {
-        if(k < this._dx.length) return this._dx[k];
+        if(direction < this._dx.length) return this._dx[direction];
 
         return 0;
     }
 
-    public getDirectionOffsetY(k: number): number
+    public getDirectionOffsetY(direction: number): number
     {
-        if(k < this._dy.length) return this._dy[k];
+        if(direction < this._dy.length) return this._dy[direction];
 
         return 0;
     }
 
-    public getDirectionOffsetZ(k: number): number
+    public getDirectionOffsetZ(direction: number): number
     {
-        if(k < this._dz.length) return this._dz[k];
+        if(direction < this._dz.length) return this._dz[direction];
 
         return 0;
     }

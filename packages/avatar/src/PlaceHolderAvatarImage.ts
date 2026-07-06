@@ -6,9 +6,9 @@ import { EffectAssetDownloadManager } from './EffectAssetDownloadManager';
 
 export class PlaceHolderAvatarImage extends AvatarImage
 {
-    constructor(k: AvatarStructure, _arg_2: AssetAliasCollection, _arg_3: AvatarFigureContainer, _arg_4: string, _arg_5: EffectAssetDownloadManager)
+    constructor(structure: AvatarStructure, assets: AssetAliasCollection, figure: AvatarFigureContainer, scale: string, effectManager: EffectAssetDownloadManager)
     {
-        super(k, _arg_2, _arg_3, _arg_4, _arg_5, null);
+        super(structure, assets, figure, scale, effectManager, null);
     }
 
     public isPlaceholder(): boolean

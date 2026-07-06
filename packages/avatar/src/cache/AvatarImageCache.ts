@@ -28,12 +28,12 @@ export class AvatarImageCache
     private _unionImages: ImageData[];
     private _matrix: Matrix;
 
-    constructor(k: AvatarStructure, _arg_2: IAvatarImage, _arg_3: AssetAliasCollection, _arg_4: string)
+    constructor(structure: AvatarStructure, avatar: IAvatarImage, assets: AssetAliasCollection, scale: string)
     {
-        this._structure = k;
-        this._avatar = _arg_2;
-        this._assets = _arg_3;
-        this._scale = _arg_4;
+        this._structure = structure;
+        this._avatar = avatar;
+        this._assets = assets;
+        this._scale = scale;
         this._cache = new Map();
         this._canvas = null;
         this._disposed = false;
@@ -76,7 +76,7 @@ export class AvatarImageCache
         }
     }
 
-    public disposeInactiveActions(k: number = 60000): void
+    public disposeInactiveActions(maxAge: number = 60000): void
     {
         const time = GetTickerTime();
 
@@ -86,12 +86,12 @@ export class AvatarImageCache
             {
                 if(!cache) continue;
 
-                cache.disposeActions(k, time);
+                cache.disposeActions(maxAge, time);
             }
         }
     }
 
-    public resetBodyPartCache(k: IActiveActionData): void
+    public resetBodyPartCache(action: IActiveActionData): void
     {
         if(this._cache)
         {
@@ -99,14 +99,14 @@ export class AvatarImageCache
             {
                 if(!cache) continue;
 
-                cache.setAction(k, 0);
+                cache.setAction(action, 0);
             }
         }
     }
 
-    public setDirection(k: string, _arg_2: number): void
+    public setDirection(partType: string, direction: number): void
     {
-        const parts = this._structure.getBodyPartsUnordered(k);
+        const parts = this._structure.getBodyPartsUnordered(partType);
 
         if(parts)
         {
@@ -116,43 +116,43 @@ export class AvatarImageCache
 
                 if(!actionCache) continue;
 
-                actionCache.setDirection(_arg_2);
+                actionCache.setDirection(direction);
             }
         }
     }
 
-    public setAction(k: IActiveActionData, _arg_2: number): void
+    public setAction(action: IActiveActionData, time: number): void
     {
-        const _local_3 = this._structure.getActiveBodyPartIds(k, this._avatar);
+        const bodyPartIds = this._structure.getActiveBodyPartIds(action, this._avatar);
 
-        for(const _local_4 of _local_3)
+        for(const bodyPartId of bodyPartIds)
         {
-            const _local_5 = this.getBodyPartCache(_local_4);
+            const bodyPartCache = this.getBodyPartCache(bodyPartId);
 
-            if(_local_5) _local_5.setAction(k, _arg_2);
+            if(bodyPartCache) bodyPartCache.setAction(action, time);
         }
     }
 
-    public setGeometryType(k: string): void
+    public setGeometryType(geometryType: string): void
     {
-        if(this._geometryType === k) return;
+        if(this._geometryType === geometryType) return;
 
-        if((((this._geometryType === GeometryType.SITTING) && (k === GeometryType.VERTICAL)) || ((this._geometryType === GeometryType.VERTICAL) && (k === GeometryType.SITTING)) || ((this._geometryType === GeometryType.SNOWWARS_HORIZONTAL) && (k = GeometryType.SNOWWARS_HORIZONTAL))))
+        if((((this._geometryType === GeometryType.SITTING) && (geometryType === GeometryType.VERTICAL)) || ((this._geometryType === GeometryType.VERTICAL) && (geometryType === GeometryType.SITTING)) || ((this._geometryType === GeometryType.SNOWWARS_HORIZONTAL) && (geometryType === GeometryType.SNOWWARS_HORIZONTAL))))
         {
             this.disposeInactiveActions(0);
 
-            this._geometryType = k;
+            this._geometryType = geometryType;
             this._canvas = null;
-			this._defaultAction = (k === GeometryType.HORIZONTAL) ? 'lay' : 'std';
+			this._defaultAction = (geometryType === GeometryType.HORIZONTAL) ? 'lay' : 'std';
 
             return;
         }
 
         this.disposeInactiveActions(0);
 
-        this._geometryType = k;
-        this._canvas = null;		
-		this._defaultAction = (k === GeometryType.HORIZONTAL) ? 'lay' : 'std';
+        this._geometryType = geometryType;
+        this._canvas = null;
+		this._defaultAction = (geometryType === GeometryType.HORIZONTAL) ? 'lay' : 'std';
     }
 
     public getImageContainer(key: string, frameNumber: number, forceRefresh: boolean = false): AvatarImageBodyPartContainer
@@ -257,15 +257,15 @@ export class AvatarImageCache
         return imageContainer;
     }
 
-    public getBodyPartCache(k: string): AvatarImageBodyPartCache
+    public getBodyPartCache(key: string): AvatarImageBodyPartCache
     {
-        let existing = this._cache.get(k);
+        let existing = this._cache.get(key);
 
         if(!existing)
         {
             existing = new AvatarImageBodyPartCache();
 
-            this._cache.set(k, existing);
+            this._cache.set(key, existing);
         }
 
         return existing;
@@ -388,9 +388,9 @@ export class AvatarImageCache
 
         while(imageIndex >= 0)
         {
-            const _local_17 = this._unionImages.pop();
+            const unionImage = this._unionImages.pop();
 
-            if(_local_17) _local_17.dispose();
+            if(unionImage) unionImage.dispose();
 
             imageIndex--;
         }
@@ -398,21 +398,21 @@ export class AvatarImageCache
         return new AvatarImageBodyPartContainer(imageData.container, offset, isCacheable);
     }
 
-    private convertColorToHex(k: number): string
+    private convertColorToHex(color: number): string
     {
-        let _local_2: string = (k * 0xFF).toString(16);
-        if(_local_2.length < 2)
+        let hex: string = (color * 0xFF).toString(16);
+        if(hex.length < 2)
         {
-            _local_2 = ('0' + _local_2);
+            hex = ('0' + hex);
         }
-        return _local_2;
+        return hex;
     }
 
-    private createUnionImage(k: ImageData[], isFlipped: boolean): ImageData
+    private createUnionImage(images: ImageData[], isFlipped: boolean): ImageData
     {
         const bounds = new Rectangle();
 
-        for(const data of k) data && bounds.enlarge(data.offsetRect);
+        for(const data of images) data && bounds.enlarge(data.offsetRect);
 
         const point = new Point(-(bounds.x), -(bounds.y));
         const container = new Container();
@@ -424,7 +424,7 @@ export class AvatarImageCache
 
         container.addChild(sprite);
 
-        for(const data of k)
+        for(const data of images)
         {
             if(!data) continue;
 

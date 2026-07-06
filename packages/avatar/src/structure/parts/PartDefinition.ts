@@ -27,9 +27,9 @@ export class PartDefinition
         return this._staticId;
     }
 
-    public set staticId(k: number)
+    public set staticId(id: number)
     {
-        this._staticId = k;
+        this._staticId = id;
     }
 
     public get setType(): string

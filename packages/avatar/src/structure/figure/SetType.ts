@@ -18,6 +18,7 @@ export class SetType implements ISetType
         this._isMandatory = {};
         this._isMandatory['F'] = [data.mandatory_f_0, data.mandatory_f_1];
         this._isMandatory['M'] = [data.mandatory_m_0, data.mandatory_m_1];
+        this._isMandatory['U'] = [false, false];
         this._partSets = new AdvancedMap();
 
         this.append(data);
@@ -70,9 +71,9 @@ export class SetType implements ISetType
         return null;
     }
 
-    public getPartSet(k: number): IFigurePartSet
+    public getPartSet(id: number): IFigurePartSet
     {
-        return this._partSets.getValue(k.toString());
+        return this._partSets.getValue(id.toString());
     }
 
     public get type(): string
@@ -85,16 +86,16 @@ export class SetType implements ISetType
         return this._paletteId;
     }
 
-    public isMandatory(k: string, _arg_2: number): boolean
+    public isMandatory(gender: string, clubLevel: number): boolean
     {
-        return this._isMandatory[k.toUpperCase()][Math.min(_arg_2, 1)];
+        return this._isMandatory[gender.toUpperCase()][Math.min(clubLevel, 1)];
     }
 
-    public optionalFromClubLevel(k: string): number
+    public optionalFromClubLevel(gender: string): number
     {
-        const _local_2 = this._isMandatory[k.toUpperCase()];
+        const mandatoryFlags = this._isMandatory[gender.toUpperCase()];
 
-        return _local_2.indexOf(false);
+        return mandatoryFlags.indexOf(false);
     }
 
     public get partSets(): IAdvancedMap<string, IFigurePartSet>

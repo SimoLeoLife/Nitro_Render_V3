@@ -9,14 +9,14 @@ export class AvatarCanvas
     private _offset: Point;
     private _regPoint: Point;
 
-    constructor(k: any, _arg_2: string)
+    constructor(data: any, scale: string)
     {
-        this._id = k.id;
-        this._width = k.width;
-        this._height = k.height;
-        this._offset = new Point(k.dx, k.dy);
+        this._id = data.id;
+        this._width = data.width;
+        this._height = data.height;
+        this._offset = new Point(data.dx, data.dy);
 
-        if(_arg_2 == AvatarScaleType.LARGE) this._regPoint = new Point(((this._width - 64) / 2), 0);
+        if(scale == AvatarScaleType.LARGE) this._regPoint = new Point(((this._width - 64) / 2), 0);
         else this._regPoint = new Point(((this._width - 32) / 2), 0);
     }
 

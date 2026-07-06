@@ -80,13 +80,13 @@ export class FigureSetData implements IFigureSetData, IStructureData
         return false;
     }
 
-    public getMandatorySetTypeIds(k: string, _arg_2: number): string[]
+    public getMandatorySetTypeIds(gender: string, clubLevel: number): string[]
     {
         const types: string[] = [];
 
         for(const set of this._setTypes.values())
         {
-            if(!set || !set.isMandatory(k, _arg_2)) continue;
+            if(!set || !set.isMandatory(gender, clubLevel)) continue;
 
             types.push(set.type);
         }
@@ -103,21 +103,21 @@ export class FigureSetData implements IFigureSetData, IStructureData
         return setType.getDefaultPartSet(gender);
     }
 
-    public getSetType(k: string): ISetType
+    public getSetType(setType: string): ISetType
     {
-        return (this._setTypes.get(k) || null);
+        return (this._setTypes.get(setType) || null);
     }
 
-    public getPalette(k: number): IPalette
+    public getPalette(paletteId: number): IPalette
     {
-        return (this._palettes.get(k.toString()) || null);
+        return (this._palettes.get(paletteId.toString()) || null);
     }
 
-    public getFigurePartSet(k: number): IFigurePartSet
+    public getFigurePartSet(id: number): IFigurePartSet
     {
         for(const set of this._setTypes.values())
         {
-            const partSet = set.getPartSet(k);
+            const partSet = set.getPartSet(id);
 
             if(!partSet) continue;
 

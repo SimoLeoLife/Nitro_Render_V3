@@ -8,21 +8,21 @@ export class AddDataContainer
     private _ink: number;
     private _blend: number;
 
-    constructor(k: IAssetAnimationAdd)
+    constructor(data: IAssetAnimationAdd)
     {
-        this._id = k.id || '';
-        this._align = k.align || '';
-        this._base = k.base || '';
-        this._ink = k.ink || 0;
+        this._id = data.id || '';
+        this._align = data.align || '';
+        this._base = data.base || '';
+        this._ink = data.ink || 0;
         this._blend = 0;
 
-        const _local_2 = k.blend;
+        const blend = data.blend;
 
-        if(_local_2)
+        if(blend)
         {
-            if(_local_2.length > 0)
+            if(blend.length > 0)
             {
-                this._blend = parseInt(_local_2);
+                this._blend = parseInt(blend);
 
                 if(this._blend > 1) this._blend = (this._blend / 100);
             }

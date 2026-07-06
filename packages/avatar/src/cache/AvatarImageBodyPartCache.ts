@@ -13,15 +13,15 @@ export class AvatarImageBodyPartCache
         this._cache = new Map();
     }
 
-    public setAction(k: IActiveActionData, _arg_2: number): void
+    public setAction(action: IActiveActionData, time: number): void
     {
-        if(!this._currentAction) this._currentAction = k;
+        if(!this._currentAction) this._currentAction = action;
 
-        const _local_3 = this.getActionCache(this._currentAction);
+        const actionCache = this.getActionCache(this._currentAction);
 
-        if(_local_3) _local_3.setLastAccessTime(_arg_2);
+        if(actionCache) actionCache.setLastAccessTime(time);
 
-        this._currentAction = k;
+        this._currentAction = action;
     }
 
     public dispose(): void
@@ -39,7 +39,7 @@ export class AvatarImageBodyPartCache
         }
     }
 
-    public disposeActions(k: number, _arg_2: number): void
+    public disposeActions(maxAge: number, time: number): void
     {
         if(!this._cache || this._disposed) return;
 
@@ -47,9 +47,9 @@ export class AvatarImageBodyPartCache
         {
             if(!cache) continue;
 
-            const _local_3 = cache.getLastAccessTime();
+            const lastAccessTime = cache.getLastAccessTime();
 
-            if((_arg_2 - _local_3) >= k)
+            if((time - lastAccessTime) >= maxAge)
             {
                 cache.dispose();
 
@@ -63,9 +63,9 @@ export class AvatarImageBodyPartCache
         return this._currentAction;
     }
 
-    public setDirection(k: number): void
+    public setDirection(direction: number): void
     {
-        this._currentDirection = k;
+        this._currentDirection = direction;
     }
 
     public getDirection(): number
@@ -73,24 +73,24 @@ export class AvatarImageBodyPartCache
         return this._currentDirection;
     }
 
-    public getActionCache(k: IActiveActionData = null): AvatarImageActionCache
+    public getActionCache(action: IActiveActionData = null): AvatarImageActionCache
     {
         if(!this._currentAction) return null;
 
-        if(!k) k = this._currentAction;
+        if(!action) action = this._currentAction;
 
-        if(k.overridingAction) return this._cache.get(k.overridingAction);
+        if(action.overridingAction) return this._cache.get(action.overridingAction);
 
-        return this._cache.get(k.id);
+        return this._cache.get(action.id);
     }
 
-    public updateActionCache(k: IActiveActionData, _arg_2: AvatarImageActionCache): void
+    public updateActionCache(action: IActiveActionData, actionCache: AvatarImageActionCache): void
     {
-        if(k.overridingAction) this._cache.set(k.overridingAction, _arg_2);
-        else this._cache.set(k.id, _arg_2);
+        if(action.overridingAction) this._cache.set(action.overridingAction, actionCache);
+        else this._cache.set(action.id, actionCache);
     }
 
-    private debugInfo(k: string): void
+    private debugInfo(message: string): void
     {
     }
 }

@@ -1,4 +1,4 @@
-﻿import { IAvatarImage } from '@nitrots/api';
+import { IAvatarImage } from '@nitrots/api';
 import { Matrix4x4, Node3D, Vector3d } from '@nitrots/utils';
 import { GeometryItem } from './GeometryItem';
 
@@ -9,18 +9,18 @@ export class GeometryBodyPart extends Node3D
     private _parts: Map<string, GeometryItem>;
     private _dynamicParts: Map<IAvatarImage, { [index: string]: GeometryItem }>;
 
-    constructor(k: any)
+    constructor(data: any)
     {
-        super(parseFloat(k.x), parseFloat(k.y), parseFloat(k.z));
+        super(parseFloat(data.x), parseFloat(data.y), parseFloat(data.z));
 
-        this._id = k.id;
-        this._radius = parseFloat(k.radius);
+        this._id = data.id;
+        this._radius = parseFloat(data.radius);
         this._parts = new Map();
         this._dynamicParts = new Map();
 
-        if(k.items && (k.items.length > 0))
+        if(data.items && (data.items.length > 0))
         {
-            for(const item of k.items)
+            for(const item of data.items)
             {
                 if(!item) continue;
 
@@ -31,9 +31,9 @@ export class GeometryBodyPart extends Node3D
         }
     }
 
-    public getDynamicParts(k: IAvatarImage): GeometryItem[]
+    public getDynamicParts(avatar: IAvatarImage): GeometryItem[]
     {
-        const existing = this._dynamicParts.get(k);
+        const existing = this._dynamicParts.get(avatar);
         const parts: GeometryItem[] = [];
 
         if(existing)
@@ -51,7 +51,7 @@ export class GeometryBodyPart extends Node3D
         return parts;
     }
 
-    public getPartIds(k: IAvatarImage): string[]
+    public getPartIds(avatar: IAvatarImage): string[]
     {
         const ids: string[] = [];
 
@@ -62,9 +62,9 @@ export class GeometryBodyPart extends Node3D
             ids.push(part.id);
         }
 
-        if(k)
+        if(avatar)
         {
-            const existing = this._dynamicParts.get(k);
+            const existing = this._dynamicParts.get(avatar);
 
             if(existing)
             {
@@ -82,44 +82,44 @@ export class GeometryBodyPart extends Node3D
         return ids;
     }
 
-    public removeDynamicParts(k: IAvatarImage): boolean
+    public removeDynamicParts(avatar: IAvatarImage): boolean
     {
-        this._dynamicParts.delete(k);
+        this._dynamicParts.delete(avatar);
 
         return true;
     }
 
-    public addPart(k: any, _arg_2: IAvatarImage): boolean
+    public addPart(data: any, avatar: IAvatarImage): boolean
     {
-        if(this.hasPart(k.id, _arg_2)) return false;
+        if(this.hasPart(data.id, avatar)) return false;
 
-        let existing = this._dynamicParts.get(_arg_2);
+        let existing = this._dynamicParts.get(avatar);
 
         if(!existing)
         {
             existing = {};
 
-            this._dynamicParts.set(_arg_2, existing);
+            this._dynamicParts.set(avatar, existing);
         }
 
-        existing[k.id] = new GeometryItem(k, true);
+        existing[data.id] = new GeometryItem(data, true);
 
         return true;
     }
 
-    public hasPart(k: string, _arg_2: IAvatarImage): boolean
+    public hasPart(partId: string, avatar: IAvatarImage): boolean
     {
-        let existingPart = (this._parts.get(k) || null);
+        let existingPart = (this._parts.get(partId) || null);
 
-        if(!existingPart && (this._dynamicParts.get(_arg_2) !== undefined))
+        if(!existingPart && (this._dynamicParts.get(avatar) !== undefined))
         {
-            existingPart = (this._dynamicParts.get(_arg_2)[k] || null);
+            existingPart = (this._dynamicParts.get(avatar)[partId] || null);
         }
 
         return (existingPart !== null);
     }
 
-    public getParts(k: Matrix4x4, _arg_2: Vector3d, _arg_3: any[], _arg_4: IAvatarImage): string[]
+    public getParts(matrix: Matrix4x4, cameraLocation: Vector3d, activeParts: any[], avatar: IAvatarImage): string[]
     {
         const parts: [number, GeometryItem][] = [];
 
@@ -127,12 +127,12 @@ export class GeometryBodyPart extends Node3D
         {
             if(!part) continue;
 
-            part.applyTransform(k);
+            part.applyTransform(matrix);
 
-            parts.push([part.getDistance(_arg_2), part]);
+            parts.push([part.getDistance(cameraLocation), part]);
         }
 
-        const existingDynamic = this._dynamicParts.get(_arg_4);
+        const existingDynamic = this._dynamicParts.get(avatar);
 
         if(existingDynamic)
         {
@@ -142,20 +142,20 @@ export class GeometryBodyPart extends Node3D
 
                 if(!part) continue;
 
-                part.applyTransform(k);
+                part.applyTransform(matrix);
 
-                parts.push([part.getDistance(_arg_2), part]);
+                parts.push([part.getDistance(cameraLocation), part]);
             }
         }
 
         parts.sort((a, b) =>
         {
-            const partA = a[0];
-            const partB = b[0];
+            const distanceA = a[0];
+            const distanceB = b[0];
 
-            if(partA < partB) return -1;
+            if(distanceA < distanceB) return -1;
 
-            if(partA > partB) return 1;
+            if(distanceA > distanceB) return 1;
 
             return 0;
         });
@@ -172,12 +172,12 @@ export class GeometryBodyPart extends Node3D
         return partIds;
     }
 
-    public getDistance(k: Vector3d): number
+    public getDistance(location: Vector3d): number
     {
-        const _local_2 = Math.abs(((k.z - this.transformedLocation.z) - this._radius));
-        const _local_3 = Math.abs(((k.z - this.transformedLocation.z) + this._radius));
+        const nearEdge = Math.abs(((location.z - this.transformedLocation.z) - this._radius));
+        const farEdge = Math.abs(((location.z - this.transformedLocation.z) + this._radius));
 
-        return Math.min(_local_2, _local_3);
+        return Math.min(nearEdge, farEdge);
     }
 
     public get id(): string

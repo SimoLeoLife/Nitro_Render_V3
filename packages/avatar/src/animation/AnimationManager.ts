@@ -11,11 +11,11 @@ export class AnimationManager implements IAnimationManager
         this._animations = new Map();
     }
 
-    public registerAnimation(structure: AvatarStructure, _arg_2: { [index: string]: IAssetAnimation }): boolean
+    public registerAnimation(structure: AvatarStructure, animations: { [index: string]: IAssetAnimation }): boolean
     {
-        if(!_arg_2) return false;
+        if(!animations) return false;
 
-        const animationData = _arg_2[Object.keys(_arg_2)[0]];
+        const animationData = animations[Object.keys(animations)[0]];
 
         const animation = new Animation(structure, animationData);
 

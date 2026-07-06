@@ -63,9 +63,9 @@ export class PartSetsData implements IFigureSetData
         return false;
     }
 
-    public getActiveParts(k: IActionDefinition): string[]
+    public getActiveParts(action: IActionDefinition): string[]
     {
-        const activePartSet = this._activePartSets.get(k.activePartSet);
+        const activePartSet = this._activePartSets.get(action.activePartSet);
 
         if(!activePartSet) return [];
 
@@ -81,25 +81,25 @@ export class PartSetsData implements IFigureSetData
         return existing;
     }
 
-    public addPartDefinition(k: any): PartDefinition
+    public addPartDefinition(data: any): PartDefinition
     {
-        const _local_2 = k.setType as string;
+        const setType = data.setType as string;
 
-        let existing = this._parts.get(_local_2);
+        let existing = this._parts.get(setType);
 
         if(!existing)
         {
-            existing = new PartDefinition(k);
+            existing = new PartDefinition(data);
 
-            this._parts.set(_local_2, existing);
+            this._parts.set(setType, existing);
         }
 
         return existing;
     }
 
-    public getActivePartSet(k: ActionDefinition): ActivePartSet
+    public getActivePartSet(action: ActionDefinition): ActivePartSet
     {
-        const existing = this._activePartSets.get(k.activePartSet);
+        const existing = this._activePartSets.get(action.activePartSet);
 
         if(!existing) return null;
 

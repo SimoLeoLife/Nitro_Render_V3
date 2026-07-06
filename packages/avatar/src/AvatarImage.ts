@@ -111,9 +111,9 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         return this._scale;
     }
 
-    public getPartColor(k: string): IPartColor
+    public getPartColor(partType: string): IPartColor
     {
-        return this._structure.getPartColor(this._figure, k);
+        return this._structure.getPartColor(this._figure, partType);
     }
 
     public setDirection(avatarPart: string, direction: number): void
@@ -143,9 +143,9 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         this._changes = true;
     }
 
-    public setDirectionAngle(k: string, _arg_2: number): void
+    public setDirectionAngle(avatarSet: string, angle: number): void
     {
-        this.setDirection(k, Math.floor(_arg_2 / 45));
+        this.setDirection(avatarSet, Math.floor(angle / 45));
     }
 
     public getSprites(): ISpriteDataContainer[]
@@ -168,14 +168,14 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         return this._effectIdInUse;
     }
 
-    public getLayerData(k: ISpriteDataContainer): IAnimationLayerData
+    public getLayerData(sprite: ISpriteDataContainer): IAnimationLayerData
     {
-        return this._structure.getBodyPartData(k.animation.id, this._frameCounter, k.id);
+        return this._structure.getBodyPartData(sprite.animation.id, this._frameCounter, sprite.id);
     }
 
-    public updateAnimationByFrames(k: number = 1): void
+    public updateAnimationByFrames(frameCount: number = 1): void
     {
-        this._frameCounter += k;
+        this._frameCounter += frameCount;
         this._changes = true;
     }
 
@@ -348,37 +348,37 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         const textureCanvas = TextureUtils.generateCanvas(texture);
         const textureCtx = textureCanvas.getContext('2d');
         const textureImageData = textureCtx.getImageData(0, 0, textureCanvas.width, textureCanvas.height);
-        const data = textureImageData.data;
+        const pixelData = textureImageData.data;
 
-        for(let i = 0; i < data.length; i += 4)
+        for(let pixelIndex = 0; pixelIndex < pixelData.length; pixelIndex += 4)
         {
             if(reds.length == 256)
             {
-                let paletteColor = reds[data[i]];
+                let paletteColor = reds[pixelData[pixelIndex]];
                 if(paletteColor === undefined) paletteColor = 0;
 
-                data[i] = ((paletteColor >> 16) & 0xFF);
-                data[i + 1] = ((paletteColor >> 8) & 0xFF);
-                data[i + 2] = (paletteColor & 0xFF);
+                pixelData[pixelIndex] = ((paletteColor >> 16) & 0xFF);
+                pixelData[pixelIndex + 1] = ((paletteColor >> 8) & 0xFF);
+                pixelData[pixelIndex + 2] = (paletteColor & 0xFF);
             }
 
             if(greens.length == 256)
             {
-                let paletteColor = greens[data[i + 1]];
+                let paletteColor = greens[pixelData[pixelIndex + 1]];
                 if(paletteColor === undefined) paletteColor = 0;
 
-                data[i] = ((paletteColor >> 16) & 0xFF);
-                data[i + 1] = ((paletteColor >> 8) & 0xFF);
-                data[i + 2] = (paletteColor & 0xFF);
+                pixelData[pixelIndex] = ((paletteColor >> 16) & 0xFF);
+                pixelData[pixelIndex + 1] = ((paletteColor >> 8) & 0xFF);
+                pixelData[pixelIndex + 2] = (paletteColor & 0xFF);
             }
             if(blues.length == 256)
             {
-                let paletteColor = greens[data[i + 2]];
+                let paletteColor = blues[pixelData[pixelIndex + 2]];
                 if(paletteColor === undefined) paletteColor = 0;
 
-                data[i] = ((paletteColor >> 16) & 0xFF);
-                data[i + 1] = ((paletteColor >> 8) & 0xFF);
-                data[i + 2] = (paletteColor & 0xFF);
+                pixelData[pixelIndex] = ((paletteColor >> 16) & 0xFF);
+                pixelData[pixelIndex + 1] = ((paletteColor >> 8) & 0xFF);
+                pixelData[pixelIndex + 2] = (paletteColor & 0xFF);
             }
         }
 
@@ -418,11 +418,11 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
     {
         if(!this.sortActions()) return;
 
-        for(const k of this._sortedActions)
+        for(const action of this._sortedActions)
         {
-            if(k.actionType === AvatarAction.EFFECT)
+            if(action.actionType === AvatarAction.EFFECT)
             {
-                if(!this._effectManager.isAvatarEffectReady(parseInt(k.actionParameter))) this._effectManager.downloadAvatarEffect(parseInt(k.actionParameter), this);
+                if(!this._effectManager.isAvatarEffectReady(parseInt(action.actionParameter))) this._effectManager.downloadAvatarEffect(parseInt(action.actionParameter), this);
             }
         }
 
@@ -430,20 +430,20 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         this.setActionsToParts();
     }
 
-    public appendAction(k: string, ..._args: any[]): boolean
+    public appendAction(actionType: string, ...actionParameters: any[]): boolean
     {
-        let _local_3 = '';
+        let actionParameter = '';
 
         this._actionsSorted = false;
 
-        if(_args && (_args.length > 0)) _local_3 = _args[0];
+        if(actionParameters && (actionParameters.length > 0)) actionParameter = actionParameters[0];
 
-        if((_local_3 !== undefined) && (_local_3 !== null)) _local_3 = _local_3.toString();
+        if((actionParameter !== undefined) && (actionParameter !== null)) actionParameter = actionParameter.toString();
 
-        switch(k)
+        switch(actionType)
         {
             case AvatarAction.POSTURE:
-                switch(_local_3)
+                switch(actionParameter)
                 {
                     case AvatarAction.POSTURE_LAY:
                     case AvatarAction.POSTURE_WALK:
@@ -456,9 +456,9 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
                     case AvatarAction.SNOWWAR_DIE_BACK:
                     case AvatarAction.SNOWWAR_PICK:
                     case AvatarAction.SNOWWAR_THROW:
-                        if((_local_3 === AvatarAction.POSTURE_LAY) || (_local_3 === AvatarAction.POSTURE_LAY) || (_local_3 === AvatarAction.POSTURE_LAY))
+                        if((actionParameter === AvatarAction.POSTURE_LAY) || (actionParameter === AvatarAction.POSTURE_LAY) || (actionParameter === AvatarAction.POSTURE_LAY))
                         {
-                            if(_local_3 === AvatarAction.POSTURE_LAY)
+                            if(actionParameter === AvatarAction.POSTURE_LAY)
                             {
                                 if(this._mainDirection == 0)
                                 {
@@ -471,18 +471,18 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
                             }
                         }
 
-                        this.addActionData(_local_3);
+                        this.addActionData(actionParameter);
                         break;
                 }
                 break;
             case AvatarAction.GESTURE:
-                switch(_local_3)
+                switch(actionParameter)
                 {
                     case AvatarAction.GESTURE_AGGRAVATED:
                     case AvatarAction.GESTURE_SAD:
                     case AvatarAction.GESTURE_SMILE:
                     case AvatarAction.GESTURE_SURPRISED:
-                        this.addActionData(_local_3);
+                        this.addActionData(actionParameter);
                         break;
                 }
                 break;
@@ -501,21 +501,21 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
             case AvatarAction.EXPRESSION_SNOWBOARD_OLLIE:
             case AvatarAction.EXPRESSION_SNOWBORD_360:
             case AvatarAction.EXPRESSION_RIDE_JUMP:
-                if(_local_3 === AvatarAction.EFFECT)
+                if(actionParameter === AvatarAction.EFFECT)
                 {
-                    if((((((_local_3 === '33') || (_local_3 === '34')) || (_local_3 === '35')) || (_local_3 === '36')) || (_local_3 === '38')) || (_local_3 === '39'))
+                    if((((((actionParameter === '33') || (actionParameter === '34')) || (actionParameter === '35')) || (actionParameter === '36')) || (actionParameter === '38')) || (actionParameter === '39'))
                     {
                         //
                     }
                 }
 
-                this.addActionData(k, _local_3);
+                this.addActionData(actionType, actionParameter);
                 break;
             case AvatarAction.CARRY_OBJECT:
             case AvatarAction.USE_OBJECT: {
-                const _local_4 = this._structure.getActionDefinitionWithState(k);
-                if(_local_4) _local_3 = _local_4.getParameterValue(_local_3);
-                this.addActionData(k, _local_3);
+                const actionDefinition = this._structure.getActionDefinitionWithState(actionType);
+                if(actionDefinition) actionParameter = actionDefinition.getParameterValue(actionParameter);
+                this.addActionData(actionType, actionParameter);
                 break;
             }
         }

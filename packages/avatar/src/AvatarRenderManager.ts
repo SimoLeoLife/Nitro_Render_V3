@@ -252,13 +252,13 @@ export class AvatarRenderManager implements IAvatarRenderManager
         return !!(partSet && ((partSet.gender.toUpperCase() === 'U') || (partSet.gender.toUpperCase() === gender.toUpperCase())));
     }
 
-    public getFigureStringWithFigureIds(figure: string, gender: string, _arg_3: number[]): string
+    public getFigureStringWithFigureIds(figure: string, gender: string, setIds: number[]): string
     {
         const container = new FigureDataContainer();
 
         container.loadAvatarData(figure, gender);
 
-        const partSets: IFigurePartSet[] = this.resolveFigureSets(_arg_3);
+        const partSets: IFigurePartSet[] = this.resolveFigureSets(setIds);
 
         for(const partSet of partSets)
         {
@@ -283,11 +283,11 @@ export class AvatarRenderManager implements IAvatarRenderManager
         return partSets;
     }
 
-    public getMandatoryAvatarPartSetIds(k: string, _arg_2: number): string[]
+    public getMandatoryAvatarPartSetIds(gender: string, clubLevel: number): string[]
     {
         if(!this._structure) return null;
 
-        return this._structure.getMandatorySetTypeIds(k, _arg_2);
+        return this._structure.getMandatorySetTypeIds(gender, clubLevel);
     }
 
     public getAssetByName(name: string): IGraphicAsset

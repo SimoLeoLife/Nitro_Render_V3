@@ -6,17 +6,17 @@
     private _bodyParts: string[];
     private _allBodyParts: string[];
 
-    constructor(k: any)
+    constructor(data: any)
     {
-        this._id = k.id;
-        this._isMain = k.main || false;
+        this._id = data.id;
+        this._isMain = data.main || false;
         this._avatarSets = new Map();
         this._bodyParts = [];
         this._allBodyParts = [];
 
-        if(k.avatarSets && (k.avatarSets.length > 0))
+        if(data.avatarSets && (data.avatarSets.length > 0))
         {
-            for(const avatarSet of k.avatarSets)
+            for(const avatarSet of data.avatarSets)
             {
                 if(!avatarSet) continue;
 
@@ -26,9 +26,9 @@
             }
         }
 
-        if(k.bodyParts && (k.bodyParts.length > 0))
+        if(data.bodyParts && (data.bodyParts.length > 0))
         {
-            for(const bodyPart of k.bodyParts)
+            for(const bodyPart of data.bodyParts)
             {
                 if(!bodyPart) continue;
 
@@ -48,17 +48,17 @@
         this._allBodyParts = bodyParts;
     }
 
-    public findAvatarSet(k: string): AvatarSet
+    public findAvatarSet(avatarSetId: string): AvatarSet
     {
-        if(k === this._id) return this;
+        if(avatarSetId === this._id) return this;
 
         for(const avatarSet of this._avatarSets.values())
         {
             if(!avatarSet) continue;
 
-            if(!avatarSet.findAvatarSet(k)) continue;
+            const found = avatarSet.findAvatarSet(avatarSetId);
 
-            return avatarSet;
+            if(found) return found;
         }
 
         return null;

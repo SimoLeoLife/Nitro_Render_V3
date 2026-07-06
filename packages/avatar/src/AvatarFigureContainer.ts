@@ -16,27 +16,27 @@ export class AvatarFigureContainer implements IAvatarFigureContainer
         return this.partSets().keys();
     }
 
-    public hasPartType(k: string): boolean
+    public hasPartType(partType: string): boolean
     {
-        return !!this.partSets().get(k);
+        return !!this.partSets().get(partType);
     }
 
-    public getPartSetId(k: string): number
+    public getPartSetId(partType: string): number
     {
-        const existing = this.partSets().get(k);
+        const existing = this.partSets().get(partType);
 
         if(!existing) return 0;
 
         return existing.get('setid');
     }
 
-    public getPartColorIds(k: string): number[]
+    public getPartColorIds(partType: string): number[]
     {
-        const existing = this.partSets().get(k);
+        const existing = this.partSets().get(partType);
 
-        if(!existing) return null;
+        if(!existing) return [];
 
-        return existing.get('colorids');
+        return (existing.get('colorids') ?? []);
     }
 
     public updatePart(setType: string, partSetId: number, colorIds: number[]): void
@@ -53,9 +53,9 @@ export class AvatarFigureContainer implements IAvatarFigureContainer
         existingSets.set(setType, set);
     }
 
-    public removePart(k: string): void
+    public removePart(partType: string): void
     {
-        this.partSets().delete(k);
+        this.partSets().delete(partType);
     }
 
     public getFigureString(): string

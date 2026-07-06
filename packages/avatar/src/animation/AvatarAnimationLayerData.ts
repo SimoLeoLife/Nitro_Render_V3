@@ -17,28 +17,28 @@ export class AvatarAnimationLayerData implements IAnimationLayerData
     private _base: string;
     private _items: Map<string, string>;
 
-    constructor(k: IAssetAnimationFramePart, _arg_2: string, _arg_3: IActionDefinition)
+    constructor(framePart: IAssetAnimationFramePart, type: string, action: IActionDefinition)
     {
-        this._id = k.id;
-        this._animationFrame = (k.frame || 0);
-        this._dx = (k.dx || 0);
-        this._dy = (k.dy || 0);
-        this._dz = (k.dz || 0);
-        this._directionOffset = (k.dd || 0);
-        this._type = _arg_2;
-        this._base = (k.base || '');
+        this._id = framePart.id;
+        this._animationFrame = (framePart.frame || 0);
+        this._dx = (framePart.dx || 0);
+        this._dy = (framePart.dy || 0);
+        this._dz = (framePart.dz || 0);
+        this._directionOffset = (framePart.dd || 0);
+        this._type = type;
+        this._base = (framePart.base || '');
         this._items = new Map();
 
-        if(k.items) for(const _local_4 of k.items) this._items.set(_local_4.id, _local_4.base);
+        if(framePart.items) for(const item of framePart.items) this._items.set(item.id, item.base);
 
-        let _local_5 = '';
+        let baseAsString = '';
 
-        if(this._base !== '') _local_5 = this.baseAsInt().toString();
+        if(this._base !== '') baseAsString = this.baseAsInt().toString();
 
-        if(_arg_3)
+        if(action)
         {
-            this._action = new ActiveActionData(_arg_3.state, this.base);
-            this._action.definition = _arg_3;
+            this._action = new ActiveActionData(action.state, this.base);
+            this._action.definition = action;
         }
     }
 
@@ -49,17 +49,17 @@ export class AvatarAnimationLayerData implements IAnimationLayerData
 
     private baseAsInt(): number
     {
-        let k = 0;
+        let base = 0;
         let index = 0;
 
         while(index < this._base.length)
         {
-            k = (k + this._base.charCodeAt(index));
+            base = (base + this._base.charCodeAt(index));
 
             index++;
         }
 
-        return k;
+        return base;
     }
 
     public get id(): string

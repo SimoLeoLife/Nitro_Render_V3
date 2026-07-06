@@ -18,12 +18,12 @@ export class AvatarDataContainer implements IAvatarDataContainer
     private _colorMap: Map<string, number[]>;
     private _paletteIsGrayscale: boolean;
 
-    constructor(k: IAssetAnimationAvatar)
+    constructor(data: IAssetAnimationAvatar)
     {
-        this._ink = k.ink;
+        this._ink = data.ink;
 
-        let foreground = k.foreground;
-        let background = k.background;
+        let foreground = data.foreground;
+        let background = data.background;
 
         foreground = foreground.replace('#', '');
         background = background.replace('#', '');

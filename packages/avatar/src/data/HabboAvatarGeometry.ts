@@ -75,8 +75,8 @@ export const HabboAvatarGeometry = {
                         'id': 'swim',
                         'width': 64,
                         'height': 70,
-                        'dx': 0,
-                        'dy': 0
+                        'dx': 25,
+                        'dy': 10
                     }
                 ]
             }

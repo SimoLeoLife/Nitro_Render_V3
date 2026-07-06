@@ -139,11 +139,14 @@ export class EffectAssetDownloadManager
 
                 const listeners = this._effectListeners.get(id);
 
-                for(const listener of listeners)
+                if(listeners)
                 {
-                    if(!listener || listener.disposed) continue;
+                    for(const listener of listeners)
+                    {
+                        if(!listener || listener.disposed) continue;
 
-                    listener.resetEffect(parseInt(id));
+                        listener.resetEffect(parseInt(id));
+                    }
                 }
 
                 this._effectListeners.delete(id);

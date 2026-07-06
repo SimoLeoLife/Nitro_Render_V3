@@ -27,11 +27,11 @@ export class AvatarAnimationData implements IFigureSetData
         return true;
     }
 
-    public appendJSON(k: any): boolean
+    public appendJSON(data: any): boolean
     {
-        for(const _local_2 of k.action)
+        for(const action of data.action)
         {
-            this._actions.set(_local_2.id, new AnimationAction(_local_2));
+            this._actions.set(action.id, new AnimationAction(action));
         }
 
         return true;
@@ -46,9 +46,9 @@ export class AvatarAnimationData implements IFigureSetData
         return existing;
     }
 
-    public getFrameCount(k: IActionDefinition): number
+    public getFrameCount(action: IActionDefinition): number
     {
-        const animationAction = this.getAction(k);
+        const animationAction = this.getAction(action);
 
         if(!animationAction) return 0;
 

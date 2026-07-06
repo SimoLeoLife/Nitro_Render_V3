@@ -7,9 +7,9 @@ export class AvatarActionManager
     private _actions: Map<string, ActionDefinition>;
     private _defaultAction: ActionDefinition;
 
-    constructor(k: IAssetManager, data: any)
+    constructor(assets: IAssetManager, data: any)
     {
-        this._assets = k;
+        this._assets = assets;
         this._actions = new Map();
         this._defaultAction = null;
 
@@ -101,16 +101,16 @@ export class AvatarActionManager
         return null;
     }
 
-    public getCanvasOffsets(k: IActiveActionData[], _arg_2: string, _arg_3: number): number[]
+    public getCanvasOffsets(activeActions: IActiveActionData[], size: string, direction: number): number[]
     {
         let canvasOffsets: number[] = [];
 
-        for(const activeAction of k)
+        for(const activeAction of activeActions)
         {
             if(!activeAction) continue;
 
             const action = this.getActionByState(activeAction.actionType);
-            const offsets = action && action.getOffsets(_arg_2, _arg_3);
+            const offsets = action && action.getOffsets(size, direction);
 
             if(offsets) canvasOffsets = offsets;
         }
