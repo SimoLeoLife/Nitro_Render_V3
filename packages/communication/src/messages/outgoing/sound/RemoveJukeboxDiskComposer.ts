@@ -4,9 +4,9 @@ export class RemoveJukeboxDiskComposer implements IMessageComposer<ConstructorPa
 {
     private _data: ConstructorParameters<typeof RemoveJukeboxDiskComposer>;
 
-    constructor(k: number)
+    constructor(slotNumber: number)
     {
-        this._data = [k];
+        this._data = [slotNumber];
     }
 
     public getMessageArray()

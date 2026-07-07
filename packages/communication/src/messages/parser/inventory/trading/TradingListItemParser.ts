@@ -49,13 +49,13 @@ export class TradingListItemParser implements IMessageParser
         return true;
     }
 
-    private parseItems(k: IMessageDataWrapper, itemArray: ItemDataStructure[]): boolean
+    private parseItems(wrapper: IMessageDataWrapper, itemArray: ItemDataStructure[]): boolean
     {
-        let count = k.readInt();
+        let count = wrapper.readInt();
 
         while(count > 0)
         {
-            itemArray.push(new ItemDataStructure(k));
+            itemArray.push(new ItemDataStructure(wrapper));
 
             count--;
         }

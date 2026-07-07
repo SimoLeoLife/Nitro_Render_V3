@@ -4,9 +4,9 @@ export class CallForHelpFromSelfieMessageComposer implements IMessageComposer<Co
 {
     private _data: ConstructorParameters<typeof CallForHelpFromSelfieMessageComposer>;
 
-    constructor(k: string, _arg_2: number, _arg_3: number, _arg_4: string, _arg_5: number)
+    constructor(extraData: string, roomId: number, reportedUserId: number, message: string, roomObjectId: number)
     {
-        this._data = [k, _arg_2, _arg_3, _arg_4, _arg_5];
+        this._data = [extraData, roomId, reportedUserId, message, roomObjectId];
     }
 
     public getMessageArray()

@@ -48,9 +48,9 @@ export class UserMessageData
     private _borderId: number = 0;
     private _isReadOnly: boolean = false;
 
-    constructor(k: number)
+    constructor(roomIndex: number)
     {
-        this._roomIndex = k;
+        this._roomIndex = roomIndex;
     }
 
     public setReadOnly(): void
@@ -68,11 +68,11 @@ export class UserMessageData
         return this._x;
     }
 
-    public set x(k: number)
+    public set x(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._x = k;
+            this._x = value;
         }
     }
 
@@ -81,11 +81,11 @@ export class UserMessageData
         return this._y;
     }
 
-    public set y(k: number)
+    public set y(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._y = k;
+            this._y = value;
         }
     }
 
@@ -94,11 +94,11 @@ export class UserMessageData
         return this._z;
     }
 
-    public set z(k: number)
+    public set z(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._z = k;
+            this._z = value;
         }
     }
 
@@ -107,11 +107,11 @@ export class UserMessageData
         return this._dir;
     }
 
-    public set dir(k: number)
+    public set dir(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._dir = k;
+            this._dir = value;
         }
     }
 
@@ -120,11 +120,11 @@ export class UserMessageData
         return this._name;
     }
 
-    public set name(k: string)
+    public set name(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._name = k;
+            this._name = value;
         }
     }
 
@@ -133,11 +133,11 @@ export class UserMessageData
         return this._userType;
     }
 
-    public set userType(k: number)
+    public set userType(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._userType = k;
+            this._userType = value;
         }
     }
 
@@ -146,11 +146,11 @@ export class UserMessageData
         return this._sex;
     }
 
-    public set sex(k: string)
+    public set sex(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._sex = k;
+            this._sex = value;
         }
     }
 
@@ -159,11 +159,11 @@ export class UserMessageData
         return this._figure;
     }
 
-    public set figure(k: string)
+    public set figure(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._figure = k;
+            this._figure = value;
         }
     }
 
@@ -172,11 +172,11 @@ export class UserMessageData
         return this._custom;
     }
 
-    public set custom(k: string)
+    public set custom(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._custom = k;
+            this._custom = value;
         }
     }
 
@@ -185,11 +185,11 @@ export class UserMessageData
         return this._activityPoints;
     }
 
-    public set activityPoints(k: number)
+    public set activityPoints(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._activityPoints = k;
+            this._activityPoints = value;
         }
     }
 	
@@ -198,9 +198,9 @@ export class UserMessageData
         return this._background;
     }
 
-    public set background(k: number)
+    public set background(value: number)
     {
-        this._background = k;
+        this._background = value;
     }
 
     public get stand(): number
@@ -208,9 +208,9 @@ export class UserMessageData
         return this._stand;
     }
 
-    public set stand(k: number)
+    public set stand(value: number)
     {
-        this._stand = k;
+        this._stand = value;
     }
 
     public get overlay(): number
@@ -218,9 +218,9 @@ export class UserMessageData
         return this._overlay;
     }
 
-    public set overlay(k: number)
+    public set overlay(value: number)
     {
-        this._overlay = k;
+        this._overlay = value;
     }
 
     public get cardBackground(): number
@@ -228,9 +228,9 @@ export class UserMessageData
         return this._cardBackground;
     }
 
-    public set cardBackground(k: number)
+    public set cardBackground(value: number)
     {
-        this._cardBackground = k;
+        this._cardBackground = value;
     }
 
     public get webID(): number
@@ -238,11 +238,11 @@ export class UserMessageData
         return this._webID;
     }
 
-    public set webID(k: number)
+    public set webID(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._webID = k;
+            this._webID = value;
         }
     }
 
@@ -264,11 +264,11 @@ export class UserMessageData
         return this._groupName;
     }
 
-    public set groupName(k: string)
+    public set groupName(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._groupName = k;
+            this._groupName = value;
         }
     }
 
@@ -277,11 +277,11 @@ export class UserMessageData
         return this._groupStatus;
     }
 
-    public set groupStatus(k: number)
+    public set groupStatus(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._groupStatus = k;
+            this._groupStatus = value;
         }
     }
 
@@ -290,11 +290,11 @@ export class UserMessageData
         return this._subType;
     }
 
-    public set subType(k: string)
+    public set subType(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._subType = k;
+            this._subType = value;
         }
     }
 
@@ -303,11 +303,11 @@ export class UserMessageData
         return this._ownerId;
     }
 
-    public set ownerId(k: number)
+    public set ownerId(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._ownerId = k;
+            this._ownerId = value;
         }
     }
 
@@ -316,11 +316,11 @@ export class UserMessageData
         return this._ownerName;
     }
 
-    public set ownerName(k: string)
+    public set ownerName(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._ownerName = k;
+            this._ownerName = value;
         }
     }
 
@@ -329,11 +329,11 @@ export class UserMessageData
         return this._rarityLevel;
     }
 
-    public set rarityLevel(k: number)
+    public set rarityLevel(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._rarityLevel = k;
+            this._rarityLevel = value;
         }
     }
 
@@ -342,11 +342,11 @@ export class UserMessageData
         return this._hasSaddle;
     }
 
-    public set hasSaddle(k: boolean)
+    public set hasSaddle(value: boolean)
     {
         if(!this._isReadOnly)
         {
-            this._hasSaddle = k;
+            this._hasSaddle = value;
         }
     }
 
@@ -355,11 +355,11 @@ export class UserMessageData
         return this._isRiding;
     }
 
-    public set isRiding(k: boolean)
+    public set isRiding(value: boolean)
     {
         if(!this._isReadOnly)
         {
-            this._isRiding = k;
+            this._isRiding = value;
         }
     }
 
@@ -368,11 +368,11 @@ export class UserMessageData
         return this._canBreed;
     }
 
-    public set canBreed(k: boolean)
+    public set canBreed(value: boolean)
     {
         if(!this._isReadOnly)
         {
-            this._canBreed = k;
+            this._canBreed = value;
         }
     }
 
@@ -381,11 +381,11 @@ export class UserMessageData
         return this._canHarvest;
     }
 
-    public set canHarvest(k: boolean)
+    public set canHarvest(value: boolean)
     {
         if(!this._isReadOnly)
         {
-            this._canHarvest = k;
+            this._canHarvest = value;
         }
     }
 
@@ -394,11 +394,11 @@ export class UserMessageData
         return this._canRevive;
     }
 
-    public set canRevive(k: boolean)
+    public set canRevive(value: boolean)
     {
         if(!this._isReadOnly)
         {
-            this._canRevive = k;
+            this._canRevive = value;
         }
     }
 
@@ -407,11 +407,11 @@ export class UserMessageData
         return this._hasBreedingPermission;
     }
 
-    public set hasBreedingPermission(k: boolean)
+    public set hasBreedingPermission(value: boolean)
     {
         if(!this._isReadOnly)
         {
-            this._hasBreedingPermission = k;
+            this._hasBreedingPermission = value;
         }
     }
 
@@ -420,11 +420,11 @@ export class UserMessageData
         return this._petLevel;
     }
 
-    public set petLevel(k: number)
+    public set petLevel(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._petLevel = k;
+            this._petLevel = value;
         }
     }
 
@@ -433,11 +433,11 @@ export class UserMessageData
         return this._petPosture;
     }
 
-    public set petPosture(k: string)
+    public set petPosture(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._petPosture = k;
+            this._petPosture = value;
         }
     }
 
@@ -446,9 +446,9 @@ export class UserMessageData
         return this._botSkills;
     }
 
-    public set botSkills(k: number[])
+    public set botSkills(value: number[])
     {
-        this._botSkills = k;
+        this._botSkills = value;
     }
 
     public get isModerator(): boolean
@@ -461,11 +461,11 @@ export class UserMessageData
         return this._nickIcon;
     }
 
-    public set nickIcon(k: string)
+    public set nickIcon(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._nickIcon = k;
+            this._nickIcon = value;
         }
     }
 
@@ -474,11 +474,11 @@ export class UserMessageData
         return this._prefixText;
     }
 
-    public set prefixText(k: string)
+    public set prefixText(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._prefixText = k;
+            this._prefixText = value;
         }
     }
 
@@ -487,11 +487,11 @@ export class UserMessageData
         return this._prefixColor;
     }
 
-    public set prefixColor(k: string)
+    public set prefixColor(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._prefixColor = k;
+            this._prefixColor = value;
         }
     }
 
@@ -500,11 +500,11 @@ export class UserMessageData
         return this._prefixIcon;
     }
 
-    public set prefixIcon(k: string)
+    public set prefixIcon(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._prefixIcon = k;
+            this._prefixIcon = value;
         }
     }
 
@@ -513,11 +513,11 @@ export class UserMessageData
         return this._prefixEffect;
     }
 
-    public set prefixEffect(k: string)
+    public set prefixEffect(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._prefixEffect = k;
+            this._prefixEffect = value;
         }
     }
 
@@ -526,11 +526,11 @@ export class UserMessageData
         return this._prefixFont;
     }
 
-    public set prefixFont(k: string)
+    public set prefixFont(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._prefixFont = k;
+            this._prefixFont = value;
         }
     }
 
@@ -539,19 +539,19 @@ export class UserMessageData
         return this._displayOrder;
     }
 
-    public set displayOrder(k: string)
+    public set displayOrder(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._displayOrder = k;
+            this._displayOrder = value;
         }
     }
 
-    public set isModerator(k: boolean)
+    public set isModerator(value: boolean)
     {
         if(!this._isReadOnly)
         {
-            this._isModerator = k;
+            this._isModerator = value;
         }
     }
 
@@ -560,11 +560,11 @@ export class UserMessageData
         return this._roomEntryMethod;
     }
 
-    public set roomEntryMethod(k: string)
+    public set roomEntryMethod(value: string)
     {
         if(!this._isReadOnly)
         {
-            this._roomEntryMethod = k;
+            this._roomEntryMethod = value;
         }
     }
 
@@ -573,11 +573,11 @@ export class UserMessageData
         return this._roomEntryTeleportId;
     }
 
-    public set roomEntryTeleportId(k: number)
+    public set roomEntryTeleportId(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._roomEntryTeleportId = k;
+            this._roomEntryTeleportId = value;
         }
     }
 
@@ -586,11 +586,11 @@ export class UserMessageData
         return this._borderId;
     }
 
-    public set borderId(k: number)
+    public set borderId(value: number)
     {
         if(!this._isReadOnly)
         {
-            this._borderId = k;
+            this._borderId = value;
         }
     }
 }

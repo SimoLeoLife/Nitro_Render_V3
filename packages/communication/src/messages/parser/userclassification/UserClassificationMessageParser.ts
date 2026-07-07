@@ -23,9 +23,9 @@ export class UserClassificationMessageParser implements IMessageParser
     {
         if(!wrapper) return false;
 
-        let _local_3: number;
-        let _local_4: string;
-        let _local_5: string;
+        let userId: number;
+        let userName: string;
+        let userClass: string;
 
         let count: number = wrapper.readInt();
 
@@ -34,11 +34,11 @@ export class UserClassificationMessageParser implements IMessageParser
 
         while(count > 0)
         {
-            _local_3 = wrapper.readInt();
-            _local_4 = wrapper.readString();
-            _local_5 = wrapper.readString();
-            this._classifiedUsersNames.set(_local_3, _local_4);
-            this._classifiedUsersClass.set(_local_3, _local_5);
+            userId = wrapper.readInt();
+            userName = wrapper.readString();
+            userClass = wrapper.readString();
+            this._classifiedUsersNames.set(userId, userName);
+            this._classifiedUsersClass.set(userId, userClass);
             count--;
         }
 

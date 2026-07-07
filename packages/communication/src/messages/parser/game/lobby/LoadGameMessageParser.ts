@@ -31,11 +31,11 @@ export class LoadGameMessageParser implements IMessageParser
         this._minMinorVersion = wrapper.readInt();
         this._params = new Map<string,string>();
         const count = wrapper.readInt();
-        let _local_3 = 0;
-        while(_local_3 < count)
+        let i = 0;
+        while(i < count)
         {
             this._params.set(wrapper.readString(), wrapper.readString());
-            _local_3++;
+            i++;
         }
 
         return true;

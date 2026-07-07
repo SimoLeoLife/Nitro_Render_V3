@@ -4,9 +4,9 @@ export class RoomTextSearchMessageComposer implements IMessageComposer<Construct
 {
     private _data: ConstructorParameters<typeof RoomTextSearchMessageComposer>;
 
-    constructor(k: string)
+    constructor(query: string)
     {
-        this._data = [k];
+        this._data = [query];
     }
 
     public getMessageArray()

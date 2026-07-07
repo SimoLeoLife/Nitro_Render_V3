@@ -4,9 +4,9 @@ export class ControlYoutubeDisplayPlaybackMessageComposer implements IMessageCom
 {
     private _data: ConstructorParameters<typeof ControlYoutubeDisplayPlaybackMessageComposer>;
 
-    constructor(k: number, _arg_2: number)
+    constructor(itemId: number, command: number)
     {
-        this._data = [k, _arg_2];
+        this._data = [itemId, command];
     }
 
     public getMessageArray()

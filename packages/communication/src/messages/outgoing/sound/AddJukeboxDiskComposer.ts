@@ -4,9 +4,9 @@ export class AddJukeboxDiskComposer implements IMessageComposer<ConstructorParam
 {
     private _data: ConstructorParameters<typeof AddJukeboxDiskComposer>;
 
-    constructor(k: number, _arg2: number)
+    constructor(slotNumber: number, diskId: number)
     {
-        this._data = [k, _arg2];
+        this._data = [slotNumber, diskId];
     }
 
     public getMessageArray()

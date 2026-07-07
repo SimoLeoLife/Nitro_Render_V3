@@ -58,9 +58,9 @@ export class Triggerable
         return this._stuffTypeSelectionCode;
     }
 
-    public set stuffTypeSelectionCode(k: number)
+    public set stuffTypeSelectionCode(code: number)
     {
-        this._stuffTypeSelectionCode = k;
+        this._stuffTypeSelectionCode = code;
     }
 
     public get maximumItemSelectionCount(): number

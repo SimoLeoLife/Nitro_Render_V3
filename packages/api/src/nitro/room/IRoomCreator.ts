@@ -9,7 +9,7 @@ export interface IRoomCreator
     getRoomInstance(roomId: number): IRoomInstance;
     updateRoomInstancePlaneVisibility(roomId: number, wallVisible: boolean, floorVisible?: boolean): boolean;
     updateRoomInstancePlaneThickness(roomId: number, wallThickness: number, floorThickness: number): boolean;
-    updateRoomInstancePlaneType(roomId: number, floorType?: string, wallType?: string, landscapeType?: string, _arg_5?: boolean): boolean;
+    updateRoomInstancePlaneType(roomId: number, floorType?: string, wallType?: string, landscapeType?: string, forceUpdate?: boolean): boolean;
     updateAreaHide(roomId: number, furniId: number, on: boolean, rootX: number, rootY: number, width: number, length: number, invert: boolean): boolean;
     removeRoomInstance(roomId: number): void;
     createRoomInstance(roomId: number, roomMap: IRoomMapData): void;
@@ -27,7 +27,7 @@ export interface IRoomCreator
     addFurnitureFloor(roomId: number, id: number, typeId: number, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra?: number, expires?: number, usagePolicy?: number, ownerId?: number, ownerName?: string, synchronized?: boolean, realRoomObject?: boolean, sizeZ?: number, allowStack?: boolean, allowSit?: boolean, allowLay?: boolean, allowWalk?: boolean, dimensionsX?: number, dimensionsY?: number, teleportTargetId?: number): boolean;
     addFurnitureFloorByTypeName(roomId: number, id: number, typeName: string, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra?: number, expires?: number, usagePolicy?: number, ownerId?: number, ownerName?: string, synchronized?: boolean, realRoomObject?: boolean, sizeZ?: number, allowStack?: boolean, allowSit?: boolean, allowLay?: boolean, allowWalk?: boolean, dimensionsX?: number, dimensionsY?: number, teleportTargetId?: number): boolean;
     addFurnitureWall(roomId: number, id: number, typeId: number, location: IVector3D, direction: IVector3D, state: number, extra: string, expires?: number, usagePolicy?: number, ownerId?: number, ownerName?: string, realRoomObject?: boolean, allowStack?: boolean, allowSit?: boolean, allowLay?: boolean, allowWalk?: boolean, dimensionsX?: number, dimensionsY?: number, teleportTargetId?: number): boolean;
-    removeRoomObjectFloor(roomId: number, objectId: number, userId?: number, _arg_4?: boolean): void;
+    removeRoomObjectFloor(roomId: number, objectId: number, userId?: number, dispatchToWiredHandler?: boolean): void;
     removeRoomObjectWall(roomId: number, objectId: number, userId?: number): void;
     updateRoomObjectFloor(roomId: number, objectId: number, location: IVector3D, direction: IVector3D, state: number, data: IObjectData, extra?: number): boolean;
     updateRoomObjectWall(roomId: number, objectId: number, location: IVector3D, direction: IVector3D, state: number, extra?: string): boolean;
@@ -47,6 +47,6 @@ export interface IRoomCreator
     updateRoomObjectUserPosture(roomId: number, objectId: number, type: string, parameter?: string): boolean;
     updateRoomObjectUserOwn(roomId: number, objectId: number): void;
     getPetTypeId(figure: string): number;
-    refreshTileObjectMap(k: number, _arg_2: string): void;
+    refreshTileObjectMap(roomId: number, source: string): void;
     setRoomEngineGameMode(roomId: number, isPlaying: boolean): void;
 }

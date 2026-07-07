@@ -17,8 +17,8 @@ export class QuestDailyMessageParser implements IMessageParser
     {
         if(!wrapper) return false;
 
-        const _local_2 = wrapper.readBoolean();
-        if(_local_2)
+        const hasQuest = wrapper.readBoolean();
+        if(hasQuest)
         {
             this._quest = new QuestMessageData(wrapper);
             this._easyQuestCount = wrapper.readInt();

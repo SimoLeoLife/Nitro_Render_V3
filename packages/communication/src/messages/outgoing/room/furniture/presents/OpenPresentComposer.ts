@@ -4,9 +4,9 @@ export class OpenPresentComposer implements IMessageComposer<ConstructorParamete
 {
     private _data: ConstructorParameters<typeof OpenPresentComposer>;
 
-    constructor(k: number)
+    constructor(objectId: number)
     {
-        this._data = [k];
+        this._data = [objectId];
     }
 
     public getMessageArray()

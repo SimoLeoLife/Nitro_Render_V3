@@ -4,9 +4,9 @@ export class GetForumsListMessageComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof GetForumsListMessageComposer>;
 
-    constructor(k: number, _arg_2: number, _arg_3: number)
+    constructor(listCode: number, startIndex: number, amount: number)
     {
-        this._data = [k, _arg_2, _arg_3];
+        this._data = [listCode, startIndex, amount];
     }
 
     public getMessageArray()

@@ -4,9 +4,9 @@ export class Game2GetWeeklyLeaderboardComposer implements IMessageComposer<Const
 {
     private _data: ConstructorParameters<typeof Game2GetWeeklyLeaderboardComposer>;
 
-    constructor(k:number, _arg_2:number, _arg_3:number, _arg_4:number, _arg_5:number, _arg_6:number)
+    constructor(gameTypeId:number, offset:number, value3:number, value4:number, value5:number, value6:number)
     {
-        this._data = [ k, _arg_2, _arg_3, _arg_4, _arg_5, _arg_6 ];
+        this._data = [ gameTypeId, offset, value3, value4, value5, value6 ];
     }
 
     dispose(): void

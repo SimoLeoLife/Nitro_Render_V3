@@ -4,9 +4,9 @@ export class GetCfhStatusMessageComposer implements IMessageComposer<Constructor
 {
     private _data: ConstructorParameters<typeof GetCfhStatusMessageComposer>;
 
-    constructor(k: boolean)
+    constructor(pendingOnly: boolean)
     {
-        this._data = [k];
+        this._data = [pendingOnly];
     }
 
     public getMessageArray()

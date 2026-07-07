@@ -6,9 +6,9 @@ export class SetPhoneNumberVerificationStatusMessageComposer implements IMessage
 
     private _data: ConstructorParameters<typeof SetPhoneNumberVerificationStatusMessageComposer>;
 
-    constructor(k: number)
+    constructor(issueId: number)
     {
-        this._data = [k];
+        this._data = [issueId];
     }
 
     public getMessageArray()

@@ -1,4 +1,4 @@
-﻿import { AvatarScaleType } from '@nitrots/api';
+﻿import { AvatarScaleType, IAssetAvatarGeometry } from '@nitrots/api';
 import { Point } from 'pixi.js';
 
 export class AvatarCanvas
@@ -9,7 +9,7 @@ export class AvatarCanvas
     private _offset: Point;
     private _regPoint: Point;
 
-    constructor(data: any, scale: string)
+    constructor(data: IAssetAvatarGeometry, scale: string)
     {
         this._id = data.id;
         this._width = data.width;

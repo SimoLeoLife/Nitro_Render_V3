@@ -4,9 +4,9 @@ export class GetCommunityGoalHallOfFameMessageComposer implements IMessageCompos
 {
     private _data: ConstructorParameters<typeof GetCommunityGoalHallOfFameMessageComposer>;
 
-    constructor(k: string)
+    constructor(questCode: string)
     {
-        this._data = [k];
+        this._data = [questCode];
     }
 
     public getMessageArray()

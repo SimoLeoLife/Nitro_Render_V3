@@ -4,9 +4,9 @@ export class GetOfficialSongIdMessageComposer implements IMessageComposer<Constr
 {
     private _data: ConstructorParameters<typeof GetOfficialSongIdMessageComposer>;
 
-    constructor(k: string)
+    constructor(officialSongCode: string)
     {
-        this._data = [k];
+        this._data = [officialSongCode];
     }
 
     public getMessageArray()

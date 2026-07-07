@@ -4,9 +4,9 @@ export class GetCraftableProductsComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof GetCraftableProductsComposer>;
 
-    constructor(k: number)
+    constructor(objectId: number)
     {
-        this._data = [k];
+        this._data = [objectId];
     }
 
     public getMessageArray()

@@ -4,9 +4,9 @@ export class GetYoutubeDisplayStatusMessageComposer implements IMessageComposer<
 {
     private _data: ConstructorParameters<typeof GetYoutubeDisplayStatusMessageComposer>;
 
-    constructor(k: number)
+    constructor(itemId: number)
     {
-        this._data = [k];
+        this._data = [itemId];
     }
 
     public getMessageArray()

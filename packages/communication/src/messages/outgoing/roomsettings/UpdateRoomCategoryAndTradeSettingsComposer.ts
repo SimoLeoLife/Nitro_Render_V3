@@ -4,9 +4,9 @@ export class UpdateRoomCategoryAndTradeSettingsComposer implements IMessageCompo
 {
     private _data: ConstructorParameters<typeof UpdateRoomCategoryAndTradeSettingsComposer>;
 
-    constructor(k: number, _arg_2: number, _arg_3: number)
+    constructor(roomId: number, categoryId: number, tradeType: number)
     {
-        this._data = [k, _arg_2, _arg_3];
+        this._data = [roomId, categoryId, tradeType];
     }
 
     public getMessageArray()

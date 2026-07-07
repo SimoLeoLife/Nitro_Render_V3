@@ -54,7 +54,7 @@ export class PetFigureDataParser implements IPetFigureData
 
         figure = (figure + (' ' + this.customPartCount));
 
-        for(const _local_2 of this.customParts) figure = (figure + (' ' + _local_2.layerId + ' ' + _local_2.partId + ' ' + _local_2.paletteId));
+        for(const part of this.customParts) figure = (figure + (' ' + part.layerId + ' ' + part.partId + ' ' + part.paletteId));
 
         return figure;
     }

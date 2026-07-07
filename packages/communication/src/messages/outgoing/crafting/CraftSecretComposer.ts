@@ -4,9 +4,9 @@ export class CraftSecretComposer implements IMessageComposer<number[]>
 {
     private _data: number[];
 
-    constructor(k: number, _arg_2: number[])
+    constructor(objectId: number, ingredients: number[])
     {
-        this._data = [k, _arg_2.length].concat(_arg_2);
+        this._data = [objectId, ingredients.length].concat(ingredients);
     }
 
     public getMessageArray()

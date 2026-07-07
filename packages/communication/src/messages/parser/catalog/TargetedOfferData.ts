@@ -71,9 +71,9 @@ export class TargetedOfferData
         this._trackingState = offerData.trackingState;
     }
 
-    public purchase(k: number): void
+    public purchase(amount: number): void
     {
-        this._purchaseLimit = (this._purchaseLimit - k);
+        this._purchaseLimit = (this._purchaseLimit - amount);
     }
 
     public get id(): number

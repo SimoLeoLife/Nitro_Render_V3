@@ -23,15 +23,15 @@ export interface IRoomEngine
     initializeRoomInstanceRenderingCanvas(roomId: number, canvasId: number, width: number, height: number): void;
     updateRoomInstancePlaneVisibility(roomId: number, wallVisible: boolean, floorVisible?: boolean): boolean;
     updateRoomInstancePlaneThickness(roomId: number, wallThickness: number, floorThickness: number): boolean;
-    updateRoomInstancePlaneType(roomId: number, floorType?: string, wallType?: string, landscapeType?: string, _arg_5?: boolean): boolean;
+    updateRoomInstancePlaneType(roomId: number, floorType?: string, wallType?: string, landscapeType?: string, forceUpdate?: boolean): boolean;
     updateAreaHide(roomId: number, furniId: number, on: boolean, rootX: number, rootY: number, width: number, length: number, invert: boolean): boolean;
-    updateObjectRoomColor(k: number, _arg_2: number, _arg_3: number, _arg_4: boolean): boolean;
+    updateObjectRoomColor(roomId: number, color: number, light: number, backgroundOnly: boolean): boolean;
     getRoomInstanceGeometry(roomId: number, canvasId?: number): IRoomGeometry;
     getRoomInstanceVariable<T>(roomId: number, key: string): T;
     getTotalObjectsForManager(roomId: number, category: number): number;
     getRoomObject(roomId: number, objectId: number, category: number): IRoomObjectController;
     getRoomObjectByIndex(roomId: number, index: number, category: number): IRoomObjectController;
-    removeRoomObjectFloor(roomId: number, objectId: number, userId?: number, _arg_4?: boolean): void;
+    removeRoomObjectFloor(roomId: number, objectId: number, userId?: number, dispatchToWiredHandler?: boolean): void;
     removeRoomObjectWall(roomId: number, objectId: number, userId?: number): void;
     removeRoomObjectUser(roomId: number, objectId: number): void;
     getRoomObjects(roomId: number, category: number): IRoomObject[];
@@ -49,7 +49,7 @@ export interface IRoomEngine
     addFurnitureFloor(roomId: number, id: number, typeId: number, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra?: number, expires?: number, usagePolicy?: number, ownerId?: number, ownerName?: string, synchronized?: boolean, realRoomObject?: boolean, sizeZ?: number, allowStack?: boolean, allowSit?: boolean, allowLay?: boolean, allowWalk?: boolean, dimensionsX?: number, dimensionsY?: number, teleportTargetId?: number): boolean;
     addFurnitureFloorByTypeName(roomId: number, id: number, typeName: string, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra?: number, expires?: number, usagePolicy?: number, ownerId?: number, ownerName?: string, synchronized?: boolean, realRoomObject?: boolean, sizeZ?: number, allowStack?: boolean, allowSit?: boolean, allowLay?: boolean, allowWalk?: boolean, dimensionsX?: number, dimensionsY?: number, teleportTargetId?: number): boolean;
     addFurnitureWall(roomId: number, id: number, typeId: number, location: IVector3D, direction: IVector3D, state: number, extra: string, expires?: number, usagePolicy?: number, ownerId?: number, ownerName?: string, realRoomObject?: boolean, allowStack?: boolean, allowSit?: boolean, allowLay?: boolean, allowWalk?: boolean, dimensionsX?: number, dimensionsY?: number, teleportTargetId?: number): boolean;
-    initalizeTemporaryObjectsByType(type: string, _arg_2: boolean): void;
+    initalizeTemporaryObjectsByType(type: string, contentLoaded: boolean): void;
     updateRoomObjectFloor(roomId: number, objectId: number, location: IVector3D, direction: IVector3D, state: number, data: IObjectData, extra?: number): boolean;
     updateRoomObjectWall(roomId: number, objectId: number, location: IVector3D, direction: IVector3D, state: number, extra?: string): boolean;
     updateRoomObjectUserAction(roomId: number, objectId: number, action: string, value: number, parameter?: string): boolean;

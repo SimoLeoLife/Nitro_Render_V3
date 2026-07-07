@@ -14,10 +14,10 @@ export class PetReceivedMessageParser implements IMessageParser
         return true;
     }
 
-    public parse(k: IMessageDataWrapper): boolean
+    public parse(wrapper: IMessageDataWrapper): boolean
     {
-        this._boughtAsGift = k.readBoolean();
-        this._pet = new PetData(k);
+        this._boughtAsGift = wrapper.readBoolean();
+        this._pet = new PetData(wrapper);
 
         return true;
     }

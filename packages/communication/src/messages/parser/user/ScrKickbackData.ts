@@ -12,17 +12,17 @@ export class ScrKickbackData
     private _creditRewardForMonthlySpent: number;
     private _timeUntilPayday: number;
 
-    constructor(k: IMessageDataWrapper)
+    constructor(wrapper: IMessageDataWrapper)
     {
-        this._currentHcStreak = k.readInt();
-        this._firstSubscriptionDate = k.readString();
-        this._kickbackPercentage = k.readDouble();
-        this._totalCreditsMissed = k.readInt();
-        this._totalCreditsRewarded = k.readInt();
-        this._totalCreditsSpent = k.readInt();
-        this._creditRewardForStreakBonus = k.readInt();
-        this._creditRewardForMonthlySpent = k.readInt();
-        this._timeUntilPayday = k.readInt();
+        this._currentHcStreak = wrapper.readInt();
+        this._firstSubscriptionDate = wrapper.readString();
+        this._kickbackPercentage = wrapper.readDouble();
+        this._totalCreditsMissed = wrapper.readInt();
+        this._totalCreditsRewarded = wrapper.readInt();
+        this._totalCreditsSpent = wrapper.readInt();
+        this._creditRewardForStreakBonus = wrapper.readInt();
+        this._creditRewardForMonthlySpent = wrapper.readInt();
+        this._timeUntilPayday = wrapper.readInt();
     }
 
     public get currentHcStreak(): number

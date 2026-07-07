@@ -14,8 +14,8 @@ export interface IAvatarRenderManager
     downloadAvatarFigure(container: IAvatarFigureContainer, listener: IAvatarImageListener): void;
     getFigureClubLevel(container: IAvatarFigureContainer, gender: string, searchParts?: string[]): number;
     isValidFigureSetForGender(setId: number, gender: string): boolean;
-    getFigureStringWithFigureIds(k: string, _arg_2: string, _arg_3: number[]): string;
-    getMandatoryAvatarPartSetIds(k: string, _arg_2: number): string[];
+    getFigureStringWithFigureIds(figure: string, gender: string, figureIds: number[]): string;
+    getMandatoryAvatarPartSetIds(gender: string, clubLevel: number): string[];
     getAssetByName(name: string): IGraphicAsset;
     assets: IAssetManager;
     structureData: IStructureData;

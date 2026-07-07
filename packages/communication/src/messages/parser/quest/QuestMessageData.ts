@@ -42,9 +42,9 @@ export class QuestMessageData
         this._easy = wrapper.readBoolean();
     }
 
-    public static getCampaignLocalizationKeyForCode(k: string): string
+    public static getCampaignLocalizationKeyForCode(code: string): string
     {
-        return 'quests.' + k;
+        return 'quests.' + code;
     }
 
     public get campaignCode(): string
@@ -72,9 +72,9 @@ export class QuestMessageData
         return this._activityPointType;
     }
 
-    public set accepted(k: boolean)
+    public set accepted(value: boolean)
     {
-        this._accepted = k;
+        this._accepted = value;
     }
 
     public get accepted(): boolean
@@ -82,9 +82,9 @@ export class QuestMessageData
         return this._accepted;
     }
 
-    public set id(k: number)
+    public set id(value: number)
     {
-        this._id = k;
+        this._id = value;
     }
 
     public get id(): number
@@ -122,9 +122,9 @@ export class QuestMessageData
         return this._completedSteps == this._totalSteps;
     }
 
-    public set waitPeriodSeconds(k: number)
+    public set waitPeriodSeconds(value: number)
     {
-        this._waitPeriodSeconds = k;
+        this._waitPeriodSeconds = value;
     }
 
     public get waitPeriodSeconds(): number
@@ -133,10 +133,10 @@ export class QuestMessageData
         {
             return 0;
         }
-        const k = new Date();
-        const _local_2 = (k.getTime() - this._receiveTime.getTime());
-        const _local_3 = Math.max(0, (this._waitPeriodSeconds - Math.floor((_local_2 / 1000))));
-        return _local_3;
+        const now = new Date();
+        const elapsedMs = (now.getTime() - this._receiveTime.getTime());
+        const remaining = Math.max(0, (this._waitPeriodSeconds - Math.floor((elapsedMs / 1000))));
+        return remaining;
     }
 
     public getCampaignLocalizationKey(): string

@@ -18,11 +18,11 @@ export class AchievementResolutionsMessageParser implements IMessageParser
 
         this._stuffId = wrapper.readInt();
         const count = wrapper.readInt();
-        let _local_3 = 0;
-        while(_local_3 < count)
+        let i = 0;
+        while(i < count)
         {
             this._achievements.push(new AchievementResolutionData(wrapper));
-            _local_3++;
+            i++;
         }
         this._endTime = wrapper.readInt();
 

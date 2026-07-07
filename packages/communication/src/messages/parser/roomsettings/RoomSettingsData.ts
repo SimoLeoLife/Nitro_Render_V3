@@ -71,9 +71,9 @@ export class RoomSettingsData
         return instance;
     }
 
-    public static getDoorModeLocalizationKey(k: number): string
+    public static getDoorModeLocalizationKey(doorMode: number): string
     {
-        switch(k)
+        switch(doorMode)
         {
             case RoomSettingsData.DOORMODE_OPEN:
                 return '${navigator.door.mode.open}';

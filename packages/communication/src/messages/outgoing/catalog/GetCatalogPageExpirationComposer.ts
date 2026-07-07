@@ -4,9 +4,9 @@ export class GetCatalogPageExpirationComposer implements IMessageComposer<Constr
 {
     private _data: ConstructorParameters<typeof GetCatalogPageExpirationComposer>;
 
-    constructor(k: string)
+    constructor(pageName: string)
     {
-        this._data = [k];
+        this._data = [pageName];
     }
 
     public getMessageArray()

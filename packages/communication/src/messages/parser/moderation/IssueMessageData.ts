@@ -136,9 +136,9 @@ export class IssueMessageData
         {
             return;
         }
-        for(const k of this._patterns)
+        for(const pattern of this._patterns)
         {
-            k.dispose();
+            pattern.dispose();
         }
         this._patterns = [];
         this._disposed = true;
@@ -149,14 +149,14 @@ export class IssueMessageData
         return this._disposed;
     }
 
-    public getOpenTime(k: number): string
+    public getOpenTime(currentTimeInMilliseconds: number): string
     {
-        const _local_2: number = (((this._issueAgeInMilliseconds + k) - this._creationTimeInMilliseconds) / 1000);
-        const _local_3: number = (_local_2 / 60);
-        const _local_4: number = (_local_3 % 60);
-        const _local_5: number = (_local_3 / 60);
-        const _local_6: string = (((_local_4 < 10) ? '0' : '') + _local_4);
-        const _local_7: string = (((_local_5 < 10) ? '0' : '') + _local_5);
-        return (_local_7 + ':') + _local_6;
+        const totalSeconds: number = (((this._issueAgeInMilliseconds + currentTimeInMilliseconds) - this._creationTimeInMilliseconds) / 1000);
+        const totalMinutes: number = (totalSeconds / 60);
+        const minutes: number = (totalMinutes % 60);
+        const hours: number = (totalMinutes / 60);
+        const minutesText: string = (((minutes < 10) ? '0' : '') + minutes);
+        const hoursText: string = (((hours < 10) ? '0' : '') + hours);
+        return (hoursText + ':') + minutesText;
     }
 }

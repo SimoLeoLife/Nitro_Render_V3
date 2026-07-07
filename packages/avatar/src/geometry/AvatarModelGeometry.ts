@@ -1,4 +1,4 @@
-﻿import { IAvatarImage } from '@nitrots/api';
+﻿import { IAssetAvatarCanvas, IAvatarImage } from '@nitrots/api';
 import { Vector3d } from '@nitrots/utils';
 import { Matrix4x4 } from '@nitrots/utils/src/Matrix4x4';
 import { AvatarCanvas } from '../structure';
@@ -34,7 +34,7 @@ export class AvatarModelGeometry
 
         if(data.canvases && (data.canvases.length > 0))
         {
-            for(const canvas of data.canvases)
+            for(const canvas of (data.canvases as IAssetAvatarCanvas[]))
             {
                 if(!canvas) continue;
 

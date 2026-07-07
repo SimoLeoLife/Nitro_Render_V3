@@ -4,9 +4,9 @@ export class GetSecondsUntilMessageComposer implements IMessageComposer<Construc
 {
     private _data: ConstructorParameters<typeof GetSecondsUntilMessageComposer>;
 
-    constructor(k: string)
+    constructor(timingCode: string)
     {
-        this._data = [k];
+        this._data = [timingCode];
     }
 
     public getMessageArray()

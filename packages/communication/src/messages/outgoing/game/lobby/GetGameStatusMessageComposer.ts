@@ -4,9 +4,9 @@ export class GetGameStatusMessageComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof GetGameStatusMessageComposer>;
 
-    constructor(k: number)
+    constructor(gameTypeId: number)
     {
-        this._data = [ k ];
+        this._data = [ gameTypeId ];
     }
 
     dispose(): void

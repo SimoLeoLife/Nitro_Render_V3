@@ -4,9 +4,9 @@ export class ChatReviewGuideVoteMessageComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof ChatReviewGuideVoteMessageComposer>;
 
-    constructor(k: number)
+    constructor(vote: number)
     {
-        this._data = [k];
+        this._data = [vote];
     }
 
     public getMessageArray()

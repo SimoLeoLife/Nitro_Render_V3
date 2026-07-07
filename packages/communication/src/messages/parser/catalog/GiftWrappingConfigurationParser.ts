@@ -33,34 +33,34 @@ export class GiftWrappingConfigurationParser implements IMessageParser
         this._price = wrapper.readInt();
 
 
-        let _local_3 = wrapper.readInt();
+        let count = wrapper.readInt();
 
         let i = 0;
-        while(i < _local_3)
+        while(i < count)
         {
             giftWrappers.push(wrapper.readInt());
             i++;
         }
 
-        _local_3 = wrapper.readInt();
+        count = wrapper.readInt();
         i = 0;
-        while(i < _local_3)
+        while(i < count)
         {
             boxTypes.push(wrapper.readInt());
             i++;
         }
 
-        _local_3 = wrapper.readInt();
+        count = wrapper.readInt();
         i = 0;
-        while(i < _local_3)
+        while(i < count)
         {
             ribbonTypes.push(wrapper.readInt());
             i++;
         }
 
-        _local_3 = wrapper.readInt();
+        count = wrapper.readInt();
         i = 0;
-        while(i < _local_3)
+        while(i < count)
         {
             giftFurnis.push(wrapper.readInt());
             i++;

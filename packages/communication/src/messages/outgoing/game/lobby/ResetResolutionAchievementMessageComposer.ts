@@ -4,9 +4,9 @@ export class ResetResolutionAchievementMessageComposer implements IMessageCompos
 {
     private _data: ConstructorParameters<typeof ResetResolutionAchievementMessageComposer>;
 
-    constructor(k: number)
+    constructor(achievementId: number)
     {
-        this._data = [ k ];
+        this._data = [ achievementId ];
     }
 
     dispose(): void

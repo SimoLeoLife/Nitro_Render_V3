@@ -4,9 +4,9 @@ export class GameUnloadedMessageComposer implements IMessageComposer<Constructor
 {
     private _data: ConstructorParameters<typeof GameUnloadedMessageComposer>;
 
-    constructor(k: number)
+    constructor(gameTypeId: number)
     {
-        this._data = [ k ];
+        this._data = [ gameTypeId ];
     }
 
     dispose(): void

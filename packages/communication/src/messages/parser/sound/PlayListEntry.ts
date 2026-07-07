@@ -39,8 +39,8 @@ export class PlayListEntry
         return this._startPlayHead;
     }
 
-    public set startPlayHeadPos(k: number)
+    public set startPlayHeadPos(value: number)
     {
-        this._startPlayHead = k;
+        this._startPlayHead = value;
     }
 }

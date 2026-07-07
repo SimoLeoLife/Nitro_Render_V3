@@ -2,7 +2,7 @@ import { IFigurePart } from './IFigurePart';
 
 export interface IFigurePartSet
 {
-    getPart(_arg_1: string, _arg_2: number): IFigurePart;
+    getPart(type: string, id: number): IFigurePart;
     id: number;
     type: string;
     gender: string;

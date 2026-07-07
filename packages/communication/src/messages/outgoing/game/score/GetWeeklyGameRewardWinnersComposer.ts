@@ -4,9 +4,9 @@ export class GetWeeklyGameRewardWinnersComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof GetWeeklyGameRewardWinnersComposer>;
 
-    constructor(k: number)
+    constructor(gameTypeId: number)
     {
-        this._data = [ k ];
+        this._data = [ gameTypeId ];
     }
 
     dispose(): void

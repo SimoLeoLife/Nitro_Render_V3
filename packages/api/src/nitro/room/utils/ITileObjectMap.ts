@@ -3,9 +3,9 @@ import { IRoomObject } from '../../../room';
 export interface ITileObjectMap
 {
     clear(): void;
-    populate(k: IRoomObject[]): void;
+    populate(objects: IRoomObject[]): void;
     dispose(): void;
-    getObjectIntTile(k: number, _arg_2: number): IRoomObject;
-    setObjectInTile(k: number, _arg_2: number, _arg_3: IRoomObject): void;
-    addRoomObject(k: IRoomObject): void;
+    getObjectIntTile(x: number, y: number): IRoomObject;
+    setObjectInTile(x: number, y: number, object: IRoomObject): void;
+    addRoomObject(object: IRoomObject): void;
 }

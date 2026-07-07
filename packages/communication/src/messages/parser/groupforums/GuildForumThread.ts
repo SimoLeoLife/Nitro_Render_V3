@@ -50,9 +50,9 @@ export class GuildForumThread
         return this._adminOperationTimeAsSecondsAgo;
     }
 
-    public set adminOperationTimeAsSecondsAgo(k: number)
+    public set adminOperationTimeAsSecondsAgo(time: number)
     {
-        this._adminOperationTimeAsSecondsAgo = k;
+        this._adminOperationTimeAsSecondsAgo = time;
     }
 
     public get lastCommentTime(): number
@@ -200,9 +200,9 @@ export class GuildForumThread
         return this._isPinned;
     }
 
-    public set isPinned(k: boolean)
+    public set isPinned(flag: boolean)
     {
-        this._isPinned = k;
+        this._isPinned = flag;
     }
 
     public get isLocked(): boolean

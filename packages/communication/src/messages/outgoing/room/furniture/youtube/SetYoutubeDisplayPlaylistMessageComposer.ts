@@ -4,9 +4,9 @@ export class SetYoutubeDisplayPlaylistMessageComposer implements IMessageCompose
 {
     private _data: ConstructorParameters<typeof SetYoutubeDisplayPlaylistMessageComposer>;
 
-    constructor(k: number, _arg_2: string)
+    constructor(itemId: number, playlistId: string)
     {
-        this._data = [k, _arg_2];
+        this._data = [itemId, playlistId];
     }
 
     public getMessageArray()

@@ -4,9 +4,9 @@ export class JoinQueueMessageComposer implements IMessageComposer<ConstructorPar
 {
     private _data: ConstructorParameters<typeof JoinQueueMessageComposer>;
 
-    constructor(k: number)
+    constructor(gameTypeId: number)
     {
-        this._data = [ k ];
+        this._data = [ gameTypeId ];
     }
 
     dispose(): void

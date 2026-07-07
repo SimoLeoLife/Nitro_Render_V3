@@ -7,6 +7,7 @@ export * from './IGraphicAsset';
 export * from './IGraphicAssetCollection';
 export * from './IGraphicAssetPalette';
 export * from './animation';
+export * from './avatar';
 export * from './logic';
 export * from './logic/model';
 export * from './logic/particlesystem';

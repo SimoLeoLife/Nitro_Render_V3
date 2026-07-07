@@ -4,9 +4,9 @@ export class ForwardToACompetitionRoomMessageComposer implements IMessageCompose
 {
     private _data: ConstructorParameters<typeof ForwardToACompetitionRoomMessageComposer>;
 
-    constructor(k: string, _arg_2: number)
+    constructor(goalCode: string, roomId: number)
     {
-        this._data = [k, _arg_2];
+        this._data = [goalCode, roomId];
     }
 
     public getMessageArray()

@@ -4,9 +4,9 @@ export class ModToolSanctionComposer implements IMessageComposer<ConstructorPara
 {
     private _data: ConstructorParameters<typeof ModToolSanctionComposer>;
 
-    constructor(k: number, _arg_2: number, _arg_3: number)
+    constructor(userId: number, sanctionLevelId: number, categoryId: number)
     {
-        this._data = [k, _arg_2, _arg_3];
+        this._data = [userId, sanctionLevelId, categoryId];
     }
 
     public getMessageArray()

@@ -17,13 +17,13 @@ export class TraxSongInfoMessageParser implements IMessageParser
         for(let i = 0; i < count; i++)
         {
             const id = wrapper.readInt();
-            const _local_3 = wrapper.readString();
+            const code = wrapper.readString();
             const name = wrapper.readString();
             const data = wrapper.readString();
             const length = wrapper.readInt();
             const creator = wrapper.readString();
-            const _local_10 = new SongInfoEntry(id, length, name, creator, data);
-            this._songs.push(_local_10);
+            const song = new SongInfoEntry(id, length, name, creator, data);
+            this._songs.push(song);
         }
         return true;
     }

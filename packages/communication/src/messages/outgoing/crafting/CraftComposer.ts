@@ -4,9 +4,9 @@ export class CraftComposer implements IMessageComposer<ConstructorParameters<typ
 {
     private _data: ConstructorParameters<typeof CraftComposer>;
 
-    constructor(k: number, _arg_2: string)
+    constructor(objectId: number, recipeName: string)
     {
-        this._data = [k, _arg_2];
+        this._data = [objectId, recipeName];
     }
 
     public getMessageArray()

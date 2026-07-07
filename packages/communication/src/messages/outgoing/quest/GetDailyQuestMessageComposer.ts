@@ -4,9 +4,9 @@ export class GetDailyQuestMessageComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof GetDailyQuestMessageComposer>;
 
-    constructor(k: boolean, _arg_2: number)
+    constructor(easyQuest: boolean, questId: number)
     {
-        this._data = [k, _arg_2];
+        this._data = [easyQuest, questId];
     }
 
     public getMessageArray()

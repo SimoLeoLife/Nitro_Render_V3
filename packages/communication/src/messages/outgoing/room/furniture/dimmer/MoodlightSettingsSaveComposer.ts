@@ -4,9 +4,9 @@ export class MoodlightSettingsSaveComposer implements IMessageComposer<Construct
 {
     private _data: ConstructorParameters<typeof MoodlightSettingsSaveComposer>;
 
-    constructor(k: number, arg2: number, arg3: string, arg4: number, arg5: boolean)
+    constructor(presetId: number, effectId: number, color: string, brightness: number, apply: boolean)
     {
-        this._data = [k, arg2, arg3, arg4, arg5];
+        this._data = [presetId, effectId, color, brightness, apply];
     }
 
     public getMessageArray()

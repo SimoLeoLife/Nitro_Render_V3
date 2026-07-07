@@ -4,11 +4,11 @@ export class YoutubeDisplayPlaylist
     private _title: string;
     private _description: string;
 
-    constructor(k: string, _arg_2: string, _arg_3: string)
+    constructor(video: string, title: string, description: string)
     {
-        this._video = k;
-        this._title = _arg_2;
-        this._description = _arg_3;
+        this._video = video;
+        this._title = title;
+        this._description = description;
     }
 
     public get video():string

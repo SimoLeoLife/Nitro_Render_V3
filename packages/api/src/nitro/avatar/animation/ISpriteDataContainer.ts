@@ -8,7 +8,7 @@ export interface ISpriteDataContainer
     member: string;
     hasDirections: boolean;
     hasStaticY: boolean;
-    getDirectionOffsetX(_arg_1: number): number;
-    getDirectionOffsetY(_arg_1: number): number;
-    getDirectionOffsetZ(_arg_1: number): number;
+    getDirectionOffsetX(direction: number): number;
+    getDirectionOffsetY(direction: number): number;
+    getDirectionOffsetZ(direction: number): number;
 }

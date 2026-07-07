@@ -284,9 +284,9 @@ export class RoomDataParser
         return this._canMute;
     }
 
-    public set canMute(k: boolean)
+    public set canMute(value: boolean)
     {
-        this._canMute = k;
+        this._canMute = value;
     }
 
     public get allInRoomMuted(): boolean
@@ -294,8 +294,8 @@ export class RoomDataParser
         return this._allInRoomMuted;
     }
 
-    public set allInRoomMuted(k: boolean)
+    public set allInRoomMuted(value: boolean)
     {
-        this._allInRoomMuted = k;
+        this._allInRoomMuted = value;
     }
 }

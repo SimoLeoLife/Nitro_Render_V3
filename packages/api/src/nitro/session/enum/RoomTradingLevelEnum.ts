@@ -5,9 +5,9 @@
     public static FREE_TRADING: number = 2;
 
 
-    public static getLocalizationKey(k: number): string
+    public static getLocalizationKey(level: number): string
     {
-        switch(k)
+        switch(level)
         {
             case RoomTradingLevelEnum.FREE_TRADING:
                 return '${trading.mode.free}';

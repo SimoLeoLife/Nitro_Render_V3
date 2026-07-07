@@ -6,12 +6,12 @@ export class ModBanMessageComposer implements IMessageComposer<ConstructorParame
 
     private _data: ConstructorParameters<typeof ModBanMessageComposer>;
 
-    constructor(k: number, arg2: string, arg3: number, arg4: number, arg5: boolean, arg6: number = -1)
+    constructor(userId: number, message: string, categoryId: number, banType: number, permanentBan: boolean, issueId: number = -1)
     {
-        this._data = [k, arg2, arg3, arg4, arg5];
-        if(arg6 != ModBanMessageComposer.NO_ISSUE_ID)
+        this._data = [userId, message, categoryId, banType, permanentBan];
+        if(issueId != ModBanMessageComposer.NO_ISSUE_ID)
         {
-            this._data.push(arg6);
+            this._data.push(issueId);
         }
     }
 

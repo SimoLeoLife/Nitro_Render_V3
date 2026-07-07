@@ -4,9 +4,9 @@ export class FurnitureMannequinSaveLookComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof FurnitureMannequinSaveLookComposer>;
 
-    constructor(k: number)
+    constructor(objectId: number)
     {
-        this._data = [k];
+        this._data = [objectId];
     }
 
     public getMessageArray()

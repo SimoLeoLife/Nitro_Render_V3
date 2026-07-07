@@ -4,9 +4,9 @@ export class UpdateForumSettingsMessageComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof UpdateForumSettingsMessageComposer>;
 
-    constructor(k: number, _arg_2: number, _arg_3: number, _arg_4: number, _arg_5: number)
+    constructor(groupId: number, readPermissions: number, postMessagePermissions: number, postThreadPermissions: number, moderatePermissions: number)
     {
-        this._data = [k, _arg_2, _arg_3, _arg_4, _arg_5];
+        this._data = [groupId, readPermissions, postMessagePermissions, postThreadPermissions, moderatePermissions];
     }
 
     public getMessageArray()

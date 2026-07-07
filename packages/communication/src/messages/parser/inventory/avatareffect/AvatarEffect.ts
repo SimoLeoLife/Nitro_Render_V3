@@ -12,9 +12,9 @@
         return this._type;
     }
 
-    public set type(k: number)
+    public set type(value: number)
     {
-        this._type = k;
+        this._type = value;
     }
 
     public get subType(): number
@@ -22,9 +22,9 @@
         return this._subType;
     }
 
-    public set subType(k: number)
+    public set subType(value: number)
     {
-        this._subType = k;
+        this._subType = value;
     }
 
     public get duration(): number
@@ -32,9 +32,9 @@
         return this._duration;
     }
 
-    public set duration(k: number)
+    public set duration(value: number)
     {
-        this._duration = k;
+        this._duration = value;
     }
 
     public get inactiveEffectsInInventory(): number
@@ -42,9 +42,9 @@
         return this._inactiveEffectsInInventory;
     }
 
-    public set inactiveEffectsInInventory(k: number)
+    public set inactiveEffectsInInventory(value: number)
     {
-        this._inactiveEffectsInInventory = k;
+        this._inactiveEffectsInInventory = value;
     }
 
     public get secondsLeftIfActive(): number
@@ -52,9 +52,9 @@
         return this._secondsLeftIfActive;
     }
 
-    public set secondsLeftIfActive(k: number)
+    public set secondsLeftIfActive(value: number)
     {
-        this._secondsLeftIfActive = k;
+        this._secondsLeftIfActive = value;
     }
 
     public get isPermanent(): boolean
@@ -62,8 +62,8 @@
         return this._permanent;
     }
 
-    public set isPermanent(k: boolean)
+    public set isPermanent(value: boolean)
     {
-        this._permanent = k;
+        this._permanent = value;
     }
 }

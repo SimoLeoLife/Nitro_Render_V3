@@ -4,9 +4,9 @@ export class ApplyTonerComposer implements IMessageComposer<ConstructorParameter
 {
     private _data: ConstructorParameters<typeof ApplyTonerComposer>;
 
-    constructor(k: number, arg2: number, arg3: number, arg4: number)
+    constructor(itemId: number, hue: number, saturation: number, lightness: number)
     {
-        this._data = [k, arg2, arg3, arg4];
+        this._data = [itemId, hue, saturation, lightness];
     }
 
     public getMessageArray()

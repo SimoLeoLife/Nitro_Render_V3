@@ -4,9 +4,9 @@ export class OpenCampaignCalendarDoorAsStaffComposer implements IMessageComposer
 {
     private _data: ConstructorParameters<typeof OpenCampaignCalendarDoorAsStaffComposer>;
 
-    constructor(k: string, _arg_2: number)
+    constructor(campaignName: string, doorId: number)
     {
-        this._data = [k, _arg_2];
+        this._data = [campaignName, doorId];
     }
 
     dispose(): void

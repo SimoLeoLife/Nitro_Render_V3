@@ -4,9 +4,9 @@ export class Game2LoadStageReadyMessageComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof Game2LoadStageReadyMessageComposer>;
 
-    constructor(k: number)
+    constructor(gameId: number)
     {
-        this._data = [ k ];
+        this._data = [ gameId ];
     }
 
     dispose(): void

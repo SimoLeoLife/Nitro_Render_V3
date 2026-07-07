@@ -98,9 +98,9 @@ export class ChatRecordData
         return this.getInt('messageId');
     }
 
-    private getInt(k: string): number
+    private getInt(key: string): number
     {
-        const value = this._context.get(k);
+        const value = this._context.get(key);
         if(!value)
         {
             return 0;

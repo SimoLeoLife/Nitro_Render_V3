@@ -4,9 +4,9 @@ export class GetUserGameAchievementsMessageComposer implements IMessageComposer<
 {
     private _data: ConstructorParameters<typeof GetUserGameAchievementsMessageComposer>;
 
-    constructor(k: number)
+    constructor(userId: number)
     {
-        this._data = [ k ];
+        this._data = [ userId ];
     }
 
     dispose(): void

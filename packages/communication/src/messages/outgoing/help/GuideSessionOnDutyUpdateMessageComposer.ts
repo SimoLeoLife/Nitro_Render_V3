@@ -4,9 +4,9 @@ export class GuideSessionOnDutyUpdateMessageComposer implements IMessageComposer
 {
     private _data: ConstructorParameters<typeof GuideSessionOnDutyUpdateMessageComposer>;
 
-    constructor(k: boolean, _arg_2: boolean, _arg_3: boolean, _arg_4: boolean)
+    constructor(isOnDuty: boolean, isHandlingGuideRequests: boolean, isHandlingHelpRequests: boolean, isHandlingBullyReports: boolean)
     {
-        this._data = [k, _arg_2, _arg_3, _arg_4];
+        this._data = [isOnDuty, isHandlingGuideRequests, isHandlingHelpRequests, isHandlingBullyReports];
     }
 
     public getMessageArray()

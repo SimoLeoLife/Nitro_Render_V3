@@ -3,9 +3,9 @@ import { IFigurePartSet } from './IFigurePartSet';
 
 export interface ISetType
 {
-    getPartSet(_arg_1: number): IFigurePartSet;
-    isMandatory(_arg_1: string, _arg_2: number): boolean;
-    optionalFromClubLevel(_arg_1: string): number;
+    getPartSet(id: number): IFigurePartSet;
+    isMandatory(gender: string, clubLevel: number): boolean;
+    optionalFromClubLevel(gender: string): number;
     type: string;
     paletteID: number;
     partSets: IAdvancedMap<string, IFigurePartSet>;

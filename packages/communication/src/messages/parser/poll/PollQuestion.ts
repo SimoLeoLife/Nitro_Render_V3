@@ -84,9 +84,9 @@ export class PollQuestion implements IPollQuestion
         return this._questionAnswerCount;
     }
 
-    public set questionAnswerCount(k: number)
+    public set questionAnswerCount(answerCount: number)
     {
-        this._questionAnswerCount = k;
+        this._questionAnswerCount = answerCount;
     }
 
     public get children(): PollQuestion[]
@@ -104,8 +104,8 @@ export class PollQuestion implements IPollQuestion
         return this._questionChoices;
     }
 
-    public set questionChoices(k: PollChoice[])
+    public set questionChoices(choices: PollChoice[])
     {
-        this._questionChoices = k;
+        this._questionChoices = choices;
     }
 }

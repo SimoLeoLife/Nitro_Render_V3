@@ -14,9 +14,9 @@
         return this._score;
     }
 
-    public set score(k: number)
+    public set score(value: number)
     {
-        this._score = k;
+        this._score = value;
     }
 
     public get users(): string[]
@@ -24,13 +24,13 @@
         return this._users;
     }
 
-    public set users(k: string[])
+    public set users(value: string[])
     {
-        this._users = k;
+        this._users = value;
     }
 
-    public addUsername(k: string): void
+    public addUsername(username: string): void
     {
-        this._users.push(k);
+        this._users.push(username);
     }
 }

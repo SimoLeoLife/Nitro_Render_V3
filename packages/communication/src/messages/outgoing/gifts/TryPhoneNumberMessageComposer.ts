@@ -4,9 +4,9 @@ export class TryPhoneNumberMessageComposer implements IMessageComposer<Construct
 {
     private _data: ConstructorParameters<typeof TryPhoneNumberMessageComposer>;
 
-    constructor(k: string, _arg_2: string)
+    constructor(countryCode: string, phoneNumber: string)
     {
-        this._data = [k, _arg_2];
+        this._data = [countryCode, phoneNumber];
     }
 
     public getMessageArray()

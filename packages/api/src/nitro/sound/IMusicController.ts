@@ -4,20 +4,20 @@ import { ISongInfo } from './ISongInfo';
 
 export interface IMusicController
 {
-    getRoomItemPlaylist(_arg_1?: number): IPlaylistController;
+    getRoomItemPlaylist(priority?: number): IPlaylistController;
     getSongDiskInventorySize(): number;
-    getSongDiskInventoryDiskId(_arg_1: number): number;
-    getSongDiskInventorySongId(_arg_1: number): number;
+    getSongDiskInventoryDiskId(index: number): number;
+    getSongDiskInventorySongId(index: number): number;
     getSongInfo(songId: number): ISongInfo;
-    getSongIdPlayingAtPriority(_arg_1: number): number;
+    getSongIdPlayingAtPriority(priority: number): number;
     playSong(songId: number, priority: number, startPos?: number, playLength?: number, fadeInSeconds?: number, fadeOutSeconds?: number): boolean;
     stop(priority: number): void;
-    addSongInfoRequest(_arg_1: number): void;
-    requestSongInfoWithoutSamples(_arg_1: number): void;
+    addSongInfoRequest(songId: number): void;
+    requestSongInfoWithoutSamples(songId: number): void;
     requestUserSongDisks(): void;
-    onSongLoaded(_arg_1: number): void;
-    updateVolume(_arg_1: number): void;
-    samplesUnloaded(_arg_1: number[]): void;
+    onSongLoaded(songId: number): void;
+    updateVolume(volume: number): void;
+    samplesUnloaded(sampleIds: number[]): void;
     get samplesIdsInUse(): number[];
     get songDiskInventory(): IAdvancedMap<number, number>
     init(): void;

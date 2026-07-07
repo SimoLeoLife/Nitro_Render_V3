@@ -115,9 +115,9 @@ export class ForumData
         return (this._totalMessages - this._unreadMessages);
     }
 
-    public set lastReadMessageId(k: number)
+    public set lastReadMessageId(messageId: number)
     {
-        this._unreadMessages = (this._totalMessages - k);
+        this._unreadMessages = (this._totalMessages - messageId);
 
         if(this._unreadMessages < 0) this._unreadMessages = 0;
     }

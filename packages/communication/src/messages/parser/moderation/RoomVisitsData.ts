@@ -7,17 +7,17 @@ export class RoomVisitsData
     private _userName: string;
     private _rooms: RoomVisitData[];
 
-    constructor(k: IMessageDataWrapper)
+    constructor(wrapper: IMessageDataWrapper)
     {
         this._rooms = [];
-        this._userId = k.readInt();
-        this._userName = k.readString();
-        const _local_2 = k.readInt();
-        let _local_3 = 0;
-        while(_local_3 < _local_2)
+        this._userId = wrapper.readInt();
+        this._userName = wrapper.readString();
+        const roomCount = wrapper.readInt();
+        let i = 0;
+        while(i < roomCount)
         {
-            this._rooms.push(new RoomVisitData(k));
-            _local_3++;
+            this._rooms.push(new RoomVisitData(wrapper));
+            i++;
         }
     }
 

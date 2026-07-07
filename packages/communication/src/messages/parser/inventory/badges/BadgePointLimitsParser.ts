@@ -16,23 +16,23 @@ export class BadgePointLimitsParser implements IMessageParser
     {
         if(!wrapper) return false;
 
-        let _local_2 = wrapper.readInt();
+        let totalGroups = wrapper.readInt();
 
-        while(_local_2 > 0)
+        while(totalGroups > 0)
         {
-            const _local_4 = wrapper.readString();
-            const _local_5 = wrapper.readInt();
+            const badgeCode = wrapper.readString();
+            const limitCount = wrapper.readInt();
 
-            let _local_6 = 0;
+            let i = 0;
 
-            while(_local_6 < _local_5)
+            while(i < limitCount)
             {
-                this._data.push(new BadgeAndPointLimit(_local_4, wrapper));
+                this._data.push(new BadgeAndPointLimit(badgeCode, wrapper));
 
-                _local_6++;
+                i++;
             }
 
-            _local_2--;
+            totalGroups--;
         }
 
         return true;

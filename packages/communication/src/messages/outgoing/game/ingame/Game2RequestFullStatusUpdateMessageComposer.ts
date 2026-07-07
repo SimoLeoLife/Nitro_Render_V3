@@ -4,9 +4,9 @@ export class Game2RequestFullStatusUpdateMessageComposer implements IMessageComp
 {
     private _data: ConstructorParameters<typeof Game2RequestFullStatusUpdateMessageComposer>;
 
-    constructor(k: number)
+    constructor(syncCount: number)
     {
-        this._data = [ k ];
+        this._data = [ syncCount ];
     }
 
     dispose(): void

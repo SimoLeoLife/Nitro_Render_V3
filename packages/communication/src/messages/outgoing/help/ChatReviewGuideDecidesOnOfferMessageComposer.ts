@@ -4,9 +4,9 @@ export class ChatReviewGuideDecidesOnOfferMessageComposer implements IMessageCom
 {
     private _data: ConstructorParameters<typeof ChatReviewGuideDecidesOnOfferMessageComposer>;
 
-    constructor(k: boolean)
+    constructor(accept: boolean)
     {
-        this._data = [k];
+        this._data = [accept];
     }
 
     public getMessageArray()

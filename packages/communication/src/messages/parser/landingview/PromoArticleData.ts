@@ -14,15 +14,15 @@ export class PromoArticleData
     private _linkContent: string;
     private _imageUrl: string;
 
-    constructor(k: IMessageDataWrapper)
+    constructor(wrapper: IMessageDataWrapper)
     {
-        this._id = k.readInt();
-        this._title = k.readString();
-        this._bodyText = k.readString();
-        this._buttonText = k.readString();
-        this._linkType = k.readInt();
-        this._linkContent = k.readString();
-        this._imageUrl = k.readString();
+        this._id = wrapper.readInt();
+        this._title = wrapper.readString();
+        this._bodyText = wrapper.readString();
+        this._buttonText = wrapper.readString();
+        this._linkType = wrapper.readInt();
+        this._linkContent = wrapper.readString();
+        this._imageUrl = wrapper.readString();
     }
 
     public get id(): number

@@ -4,9 +4,9 @@ export class AcceptGameInviteMessageComposer implements IMessageComposer<Constru
 {
     private _data: ConstructorParameters<typeof AcceptGameInviteMessageComposer>;
 
-    constructor(k:number, _arg_2:number)
+    constructor(gameTypeId:number, inviterId:number)
     {
-        this._data = [ k, _arg_2 ];
+        this._data = [ gameTypeId, inviterId ];
     }
 
     dispose(): void

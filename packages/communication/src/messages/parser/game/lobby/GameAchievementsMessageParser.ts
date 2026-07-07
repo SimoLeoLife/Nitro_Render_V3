@@ -16,21 +16,21 @@ export class GameAchievementsMessageParser implements IMessageParser
 
         this._achievements = [];
         const count = wrapper.readInt();
-        let _local_3 = 0;
-        while(_local_3 < count)
+        let i = 0;
+        while(i < count)
         {
             const gameTypeId = wrapper.readInt();
             const achievementCount = wrapper.readInt();
-            let _local_6 = 0;
-            while(_local_6 < achievementCount)
+            let j = 0;
+            while(j < achievementCount)
             {
                 const achievementId = wrapper.readInt();
                 const achievementName = wrapper.readString();
                 const levels = wrapper.readInt();
                 this._achievements.push(new GameAchievementData(gameTypeId, achievementId, achievementName, levels));
-                _local_6++;
+                j++;
             }
-            _local_3++;
+            i++;
         }
 
         return true;

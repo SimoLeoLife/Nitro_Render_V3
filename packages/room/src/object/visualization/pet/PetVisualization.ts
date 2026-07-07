@@ -12,6 +12,7 @@ export class PetVisualization extends FurnitureAnimatedVisualization
     private static HEAD: string = 'head';
     private static SADDLE: string = 'saddle';
     private static HAIR: string = 'hair';
+    private static POSTURE_LAY: string = 'lay';
     private static ADDITIONAL_SPRITE_COUNT: number = 1;
     private static EXPERIENCE_BUBBLE_VISIBLE_IN_MS: number = 1000;
     private static PET_EXPERIENCE_BUBBLE: string = 'avatar_addition_pet_experience_bubble';
@@ -268,20 +269,20 @@ export class PetVisualization extends FurnitureAnimatedVisualization
         }
     }
 
-    private getAnimationStateData(k: number): AnimationStateData
+    private getAnimationStateData(index: number): AnimationStateData
     {
-        if((k >= 0) && (k < this._animationStates.length)) return this._animationStates[k];
+        if((index >= 0) && (index < this._animationStates.length)) return this._animationStates[index];
 
         return null;
     }
 
-    private setAnimationForIndex(k: number, _arg_2: number): void
+    private setAnimationForIndex(index: number, animationId: number): void
     {
-        const animationStateData = this.getAnimationStateData(k);
+        const animationStateData = this.getAnimationStateData(index);
 
         if(animationStateData)
         {
-            if(this.setSubAnimation(animationStateData, _arg_2)) this._animationOver = false;
+            if(this.setSubAnimation(animationStateData, animationId)) this._animationOver = false;
         }
     }
 
@@ -306,7 +307,7 @@ export class PetVisualization extends FurnitureAnimatedVisualization
         if(this._animationOver) return 0;
 
         let animationOver = true;
-        let _local_3 = 0;
+        let updateFlags = 0;
         let index = 0;
 
         while(index < this._animationStates.length)
@@ -317,9 +318,9 @@ export class PetVisualization extends FurnitureAnimatedVisualization
             {
                 if(!stateData.animationOver)
                 {
-                    const _local_6 = this.updateFramesForAnimation(stateData, scale);
+                    const stateUpdate = this.updateFramesForAnimation(stateData, scale);
 
-                    _local_3 = (_local_3 | _local_6);
+                    updateFlags = (updateFlags | stateUpdate);
 
                     if(!stateData.animationOver)
                     {
@@ -342,14 +343,14 @@ export class PetVisualization extends FurnitureAnimatedVisualization
 
         this._animationOver = animationOver;
 
-        return _local_3;
+        return updateFlags;
     }
 
     protected getSpriteAssetName(scale: number, layerId: number): string
     {
         if(this._headOnly && this.isNonHeadSprite(layerId)) return null;
 
-        if(this._isRiding && this._parser3(layerId)) return null;
+        if((this._isRiding || (this._posture === PetVisualization.POSTURE_LAY)) && this._parser3(layerId)) return null;
 
         const totalSprites = this.totalSprites;
 

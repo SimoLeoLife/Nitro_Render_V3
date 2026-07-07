@@ -11,9 +11,9 @@
 
     private _ordinal: number;
 
-    constructor(k: number)
+    constructor(ordinal: number)
     {
-        this._ordinal = k;
+        this._ordinal = ordinal;
     }
 
     public get ordinal(): number
@@ -21,8 +21,8 @@
         return this._ordinal;
     }
 
-    public equals(k: AvatarExpressionEnum): boolean
+    public equals(other: AvatarExpressionEnum): boolean
     {
-        return (k) && (k._ordinal == this._ordinal);
+        return (other) && (other._ordinal == this._ordinal);
     }
 }

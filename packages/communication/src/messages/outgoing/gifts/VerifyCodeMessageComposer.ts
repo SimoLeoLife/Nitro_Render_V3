@@ -4,9 +4,9 @@ export class VerifyCodeMessageComposer implements IMessageComposer<ConstructorPa
 {
     private _data: ConstructorParameters<typeof VerifyCodeMessageComposer>;
 
-    constructor(k: string)
+    constructor(verificationCode: string)
     {
-        this._data = [k];
+        this._data = [verificationCode];
     }
 
     public getMessageArray()

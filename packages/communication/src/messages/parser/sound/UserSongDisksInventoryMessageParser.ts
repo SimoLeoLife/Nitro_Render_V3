@@ -22,20 +22,20 @@ export class UserSongDisksInventoryMessageParser implements IMessageParser
         return true;
     }
 
-    public getDiskId(k: number): number
+    public getDiskId(index: number): number
     {
-        if(((k >= 0) && (k < this._songDiskInventory.length)))
+        if(((index >= 0) && (index < this._songDiskInventory.length)))
         {
-            return this._songDiskInventory.getKey(k);
+            return this._songDiskInventory.getKey(index);
         }
         return -1;
     }
 
-    public getSongId(k: number): number
+    public getSongId(index: number): number
     {
-        if(((k >= 0) && (k < this._songDiskInventory.length)))
+        if(((index >= 0) && (index < this._songDiskInventory.length)))
         {
-            return this._songDiskInventory.getWithIndex(k);
+            return this._songDiskInventory.getWithIndex(index);
         }
         return -1;
     }

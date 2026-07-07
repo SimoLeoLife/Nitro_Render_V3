@@ -4,9 +4,9 @@ export class LeaveQueueMessageComposer implements IMessageComposer<ConstructorPa
 {
     private _data: ConstructorParameters<typeof LeaveQueueMessageComposer>;
 
-    constructor(k: number)
+    constructor(gameTypeId: number)
     {
-        this._data = [ k ];
+        this._data = [ gameTypeId ];
     }
 
     dispose(): void

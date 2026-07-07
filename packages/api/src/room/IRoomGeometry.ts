@@ -3,12 +3,12 @@ import { IVector3D } from '../utils';
 
 export interface IRoomGeometry
 {
-    getCoordinatePosition(_arg_1: IVector3D): IVector3D;
-    getScreenPoint(_arg_1: IVector3D): Point;
-    getScreenPosition(_arg_1: IVector3D): IVector3D;
-    getPlanePosition(_arg_1: Point, _arg_2: IVector3D, _arg_3: IVector3D, _arg_4: IVector3D): Point;
-    setDisplacement(_arg_1: IVector3D, _arg_2: IVector3D): void;
-    adjustLocation(_arg_1: IVector3D, _arg_2: number): void;
+    getCoordinatePosition(location: IVector3D): IVector3D;
+    getScreenPoint(location: IVector3D): Point;
+    getScreenPosition(location: IVector3D): IVector3D;
+    getPlanePosition(screenPoint: Point, origin: IVector3D, leftSide: IVector3D, rightSide: IVector3D): Point;
+    setDisplacement(location: IVector3D, displacement: IVector3D): void;
+    adjustLocation(location: IVector3D, direction: number): void;
     performZoom(): void;
     performZoomOut(): void;
     performZoomIn(): void;

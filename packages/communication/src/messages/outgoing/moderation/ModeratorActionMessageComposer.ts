@@ -9,11 +9,11 @@ export class ModeratorActionMessageComposer implements IMessageComposer<any>
 
     private _data: any[] = [];
 
-    constructor(k: number, arg2: string, arg3: string)
+    constructor(actionType: number, message: string, caption: string)
     {
-        this._data.push(k);
-        this._data.push(arg2);
-        this._data.push(arg3);
+        this._data.push(actionType);
+        this._data.push(message);
+        this._data.push(caption);
     }
 
     public getMessageArray()

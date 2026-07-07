@@ -4,9 +4,9 @@ export class GetRoomVisitsMessageComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof GetRoomVisitsMessageComposer>;
 
-    constructor(k: number)
+    constructor(userId: number)
     {
-        this._data = [k];
+        this._data = [userId];
     }
 
     public getMessageArray()

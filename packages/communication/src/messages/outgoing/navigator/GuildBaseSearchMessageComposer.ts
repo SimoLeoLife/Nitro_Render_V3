@@ -4,9 +4,9 @@ export class GuildBaseSearchMessageComposer implements IMessageComposer<Construc
 {
     private _data: ConstructorParameters<typeof GuildBaseSearchMessageComposer>;
 
-    constructor(k: number)
+    constructor(guildId: number)
     {
-        this._data = [k];
+        this._data = [guildId];
     }
 
     public getMessageArray()

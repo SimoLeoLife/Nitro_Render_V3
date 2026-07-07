@@ -5,12 +5,12 @@ export class BadgeAndPointLimit
     private _badgeId: string;
     private _limit: number;
 
-    constructor(k: string, _arg_2: IMessageDataWrapper)
+    constructor(badgeCode: string, wrapper: IMessageDataWrapper)
     {
-        if(!_arg_2) throw new Error('invalid_parser');
+        if(!wrapper) throw new Error('invalid_parser');
 
-        this._badgeId = (('ACH_' + k) + _arg_2.readInt());
-        this._limit = _arg_2.readInt();
+        this._badgeId = (('ACH_' + badgeCode) + wrapper.readInt());
+        this._limit = wrapper.readInt();
     }
 
     public get badgeId(): string
