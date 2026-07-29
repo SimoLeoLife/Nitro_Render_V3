@@ -9,6 +9,7 @@ export * from './SnowWarGamesLeftParser';
 export * from './SnowWarGenericErrorParser';
 export * from './SnowWarInitArenaParser';
 export * from './SnowWarLevelDataParser';
+export * from './SnowWarLobbyTeamsParser';
 export * from './SnowWarLevelItemData';
 export * from './SnowWarMachineData';
 export * from './SnowWarOnGameEndingParser';

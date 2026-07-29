@@ -8,6 +8,7 @@ export interface ISnowWarEditorItem
     rotation: number;
     imageUrl: string;
     offsetZ: number;
+    state: number;
 }
 
 /**
@@ -15,7 +16,7 @@ export interface ISnowWarEditorItem
  * the server (room_models.public_items + heightmap). Payload:
  *   int    mapId
  *   int    itemCount
- *   repeat { string name, int x, int y, int rotation, string imageUrl, int offsetZ }
+ *   repeat { string name, int x, int y, int rotation, string imageUrl, int offsetZ, int state }
  *   int    spawnCount
  *   repeat { int x, int y }
  *   int    heightmapRowCount
@@ -35,7 +36,7 @@ export class SnowWarSaveEditorComposer implements IMessageComposer<(string | num
 
         for(const item of items)
         {
-            data.push(item.name, item.x, item.y, item.rotation, item.imageUrl ?? '', item.offsetZ ?? 0);
+            data.push(item.name, item.x, item.y, item.rotation, item.imageUrl ?? '', item.offsetZ ?? 0, item.state ?? 0);
         }
 
         data.push(spawns.length);

@@ -11,3 +11,4 @@ export * from './SnowWarGameChatComposer';
 export * from './SnowWarJoinQueueComposer';
 export * from './SnowWarLeaveQueueComposer';
 export * from './SnowWarSaveEditorComposer';
+export * from './SnowWarExitEditorComposer';

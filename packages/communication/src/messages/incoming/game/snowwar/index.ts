@@ -1,6 +1,7 @@
 export * from './SnowWarQueuePositionEvent';
 export * from './SnowWarStartLobbyCounterEvent';
 export * from './SnowWarGameEndedEvent';
+export * from './SnowWarLobbyTeamsEvent';
 export * from './SnowWarGamesLeftEvent';
 export * from './SnowWarGamesInformationEvent';
 export * from './SnowWarGameStatusEvent';
