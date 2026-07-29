@@ -615,6 +615,7 @@ export class OutgoingHeader
     public static SNOWWAR_SAVE_EDITOR = 6011;
     public static SNOWWAR_JOIN_QUEUE = 6012;
     public static SNOWWAR_LEAVE_QUEUE = 6013;
+    public static SNOWWAR_EXIT_EDITOR = 6014;
 
     // Hotel view landing scene (client -> server)
     public static HOTEL_VIEW_LANDING_REQUEST = 9410;

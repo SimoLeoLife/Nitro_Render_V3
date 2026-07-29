@@ -552,6 +552,7 @@ export class IncomingHeader
     public static SNOWWAR_QUEUE_POSITION = 5001;
     public static SNOWWAR_START_LOBBY_COUNTER = 5003;
     public static SNOWWAR_GAME_ENDED = 5006;
+    public static SNOWWAR_LOBBY_TEAMS = 5007;
     public static SNOWWAR_GAMES_LEFT = 5010;
     public static SNOWWAR_GAMES_INFORMATION = 5012;
     public static SNOWWAR_GAME_STATUS = 5015;
