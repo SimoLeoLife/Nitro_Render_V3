@@ -13,6 +13,7 @@ export class SnowWarLevelDataParser implements IMessageParser
     private _items: SnowWarLevelItemData[];
     private _machines: SnowWarMachineData[];
     private _canEditRoom: boolean;
+    private _arenaName: string;
 
     public flush(): boolean
     {
@@ -24,6 +25,7 @@ export class SnowWarLevelDataParser implements IMessageParser
         this._items = [];
         this._machines = [];
         this._canEditRoom = false;
+        this._arenaName = '';
 
         return true;
     }
@@ -69,6 +71,7 @@ export class SnowWarLevelDataParser implements IMessageParser
         if(!wrapper.bytesAvailable) return true;
 
         this._canEditRoom = wrapper.readBoolean();
+        if(wrapper.bytesAvailable) this._arenaName = wrapper.readString();
 
         return true;
     }
@@ -116,5 +119,10 @@ export class SnowWarLevelDataParser implements IMessageParser
     public get canEditRoom(): boolean
     {
         return this._canEditRoom;
+    }
+
+    public get arenaName(): string
+    {
+        return this._arenaName;
     }
 }

@@ -4,9 +4,9 @@ export class SnowWarThrowAtLocationComposer implements IMessageComposer<Construc
 {
     private _data: ConstructorParameters<typeof SnowWarThrowAtLocationComposer>;
 
-    constructor(worldX: number, worldY: number, trajectory: number)
+    constructor(worldX: number, worldY: number, trajectory: number, turn: number = 0, subturn: number = 0)
     {
-        this._data = [ worldX, worldY, trajectory ];
+        this._data = [ worldX, worldY, trajectory, turn, subturn ];
     }
 
     dispose(): void

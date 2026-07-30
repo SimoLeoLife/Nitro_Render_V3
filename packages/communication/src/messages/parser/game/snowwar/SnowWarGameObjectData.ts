@@ -5,6 +5,8 @@ export class SnowWarGameObjectData
     public static OBJECT_TYPE_AVATAR = 1;
     public static OBJECT_TYPE_SNOWBALL = 2;
     public static OBJECT_TYPE_MACHINE = 3;
+    public static OBJECT_TYPE_TREE = 4;
+    public static OBJECT_TYPE_PILE = 5;
 
     private _objectType: number;
     private _objectId: number = -1;
@@ -39,6 +41,9 @@ export class SnowWarGameObjectData
     private _timeToLive: number = 0;
     private _throwerObjectId: number = 0;
     private _parabolaOffset: number = 0;
+    private _maximumHits: number = 0;
+    private _hits: number = 0;
+    private _maxSnowballs: number = 0;
 
     constructor(wrapper: IMessageDataWrapper)
     {
@@ -84,6 +89,23 @@ export class SnowWarGameObjectData
                 this._objectId = wrapper.readInt();
                 this._worldX = wrapper.readInt();
                 this._worldY = wrapper.readInt();
+                this._snowballCount = wrapper.readInt();
+                break;
+            case SnowWarGameObjectData.OBJECT_TYPE_TREE:
+                this._objectId = wrapper.readInt();
+                this._worldX = wrapper.readInt();
+                this._worldY = wrapper.readInt();
+                this._rotation = wrapper.readInt();
+                this._height = wrapper.readInt();
+                wrapper.readInt(); // parent furni id (unused by the web renderer)
+                this._maximumHits = wrapper.readInt();
+                this._hits = wrapper.readInt();
+                break;
+            case SnowWarGameObjectData.OBJECT_TYPE_PILE:
+                this._objectId = wrapper.readInt();
+                this._worldX = wrapper.readInt();
+                this._worldY = wrapper.readInt();
+                this._maxSnowballs = wrapper.readInt();
                 this._snowballCount = wrapper.readInt();
                 break;
         }
@@ -232,5 +254,20 @@ export class SnowWarGameObjectData
     public get parabolaOffset(): number
     {
         return this._parabolaOffset;
+    }
+
+    public get maximumHits(): number
+    {
+        return this._maximumHits;
+    }
+
+    public get hits(): number
+    {
+        return this._hits;
+    }
+
+    public get maxSnowballs(): number
+    {
+        return this._maxSnowballs;
     }
 }

@@ -1,3 +1,6 @@
+const SNOWWAR_PREVENTS = '2,3,6,14,15,17,18,19,20,21,22,33,34,35,36,38,39,45,46,48,54,55,56,57,58,69,71,72,89,90,91,92,94,97,100,104,105,107,108,115,116,117,118,119,120,121,122,123,124,125,127,129,130,131,132,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,164,165,166,167,168,169,170,171,172,173,174,175,176'
+    .split(',').map(id => `fx.${id}`).concat('dance');
+
 export const HabboAvatarActions = {
     'actions': [
         {
@@ -271,54 +274,60 @@ export const HabboAvatarActions = {
         {
             'id': 'SnowWarRun',
             'state': 'swrun',
-            'precedence': 700,
+            'precedence': 104,
             'main': true,
             'geometryType': 'vertical',
-            'activePartSet': 'figure',
-            'assetPartDefinition': 'swm',
-            'prevents': ['sit', 'lay'],
-            'animation': true
+            'activePartSet': 'snowwarrun',
+            'assetPartDefinition': 'swrun',
+            'prevents': SNOWWAR_PREVENTS,
+            'animation': false
         },
         {
             'id': 'SnowWarDieFront',
             'state': 'swdiefront',
-            'precedence': 900,
+            'precedence': 105,
             'main': true,
-            'geometryType': 'vertical',
-            'activePartSet': 'figure',
-            'assetPartDefinition': 'std',
-            'prevents': [],
-            'animation': false
+            'geometryType': 'swhorizontal',
+            'activePartSet': 'snowwardiefront',
+            'assetPartDefinition': 'swdie',
+            'prevents': SNOWWAR_PREVENTS,
+            'animation': false,
+            'startFromFrameZero': true
         },
         {
             'id': 'SnowWarDieBack',
             'state': 'swdieback',
-            'precedence': 900,
+            'precedence': 106,
             'main': true,
-            'geometryType': 'vertical',
-            'activePartSet': 'figure',
-            'assetPartDefinition': 'std',
-            'prevents': [],
-            'animation': false
+            'geometryType': 'swhorizontal',
+            'activePartSet': 'snowwardieback',
+            'assetPartDefinition': 'swdie',
+            'prevents': SNOWWAR_PREVENTS,
+            'animation': false,
+            'startFromFrameZero': true
         },
         {
             'id': 'SnowWarPick',
             'state': 'swpick',
-            'precedence': 500,
-            'activePartSet': 'handRight',
-            'assetPartDefinition': 'crr',
-            'prevents': [],
-            'animation': true,
+            'precedence': 107,
+            'main': true,
+            'geometryType': 'vertical',
+            'activePartSet': 'snowwarpick',
+            'assetPartDefinition': 'swpick',
+            'prevents': SNOWWAR_PREVENTS,
+            'animation': false,
             'startFromFrameZero': true
         },
         {
             'id': 'SnowWarThrow',
             'state': 'swthrow',
-            'precedence': 500,
-            'activePartSet': 'handRight',
-            'assetPartDefinition': 'drk',
-            'prevents': [],
-            'animation': true,
+            'precedence': 108,
+            'main': true,
+            'geometryType': 'vertical',
+            'activePartSet': 'snowwarthrow',
+            'assetPartDefinition': 'swthrow',
+            'prevents': SNOWWAR_PREVENTS,
+            'animation': false,
             'startFromFrameZero': true
         },
         {
