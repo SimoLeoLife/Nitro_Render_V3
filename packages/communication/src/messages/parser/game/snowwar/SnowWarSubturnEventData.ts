@@ -6,10 +6,12 @@ export class SnowWarSubturnEventData
     public static EVENT_TYPE_CREATE_SNOWBALL = 3;
     public static EVENT_TYPE_LAUNCH_SNOWBALL = 4;
     public static EVENT_TYPE_HIT = 5;
-    public static EVENT_TYPE_MACHINE_ADD_SNOWBALL = 6;
-    public static EVENT_TYPE_MACHINE_TRANSFER_SNOWBALL = 7;
+    public static EVENT_TYPE_MACHINE_ADD_SNOWBALL = 11;
+    public static EVENT_TYPE_MACHINE_TRANSFER_SNOWBALL = 12;
     public static EVENT_TYPE_DELETE_OBJECT = 8;
     public static EVENT_TYPE_STUN = 9;
+    public static EVENT_TYPE_RAY_GUN_BURST = 10;
+    public static EVENT_TYPE_TREE_HIT = 13;
 
     private _eventType: number;
     private _objectId: number = -1;
@@ -21,6 +23,8 @@ export class SnowWarSubturnEventData
     private _direction: number = 0;
     private _machineObjectId: number = -1;
     private _avatarObjectId: number = -1;
+    private _height: number = 0;
+    private _state: number = 0;
 
     constructor(wrapper: IMessageDataWrapper)
     {
@@ -37,6 +41,7 @@ export class SnowWarSubturnEventData
                 this._objectId = wrapper.readInt();
                 break;
             case SnowWarSubturnEventData.EVENT_TYPE_LAUNCH_SNOWBALL:
+            case SnowWarSubturnEventData.EVENT_TYPE_RAY_GUN_BURST:
                 this._objectId = wrapper.readInt();
                 this._throwerObjectId = wrapper.readInt();
                 this._targetX = wrapper.readInt();
@@ -57,11 +62,20 @@ export class SnowWarSubturnEventData
                 break;
             case SnowWarSubturnEventData.EVENT_TYPE_DELETE_OBJECT:
                 this._objectId = wrapper.readInt();
+                this._targetX = wrapper.readInt();
+                this._targetY = wrapper.readInt();
+                this._height = wrapper.readInt();
+                this._trajectory = wrapper.readInt();
                 break;
             case SnowWarSubturnEventData.EVENT_TYPE_STUN:
                 this._targetObjectId = wrapper.readInt();
                 this._throwerObjectId = wrapper.readInt();
                 this._direction = wrapper.readInt();
+                break;
+            case SnowWarSubturnEventData.EVENT_TYPE_TREE_HIT:
+                this._targetX = wrapper.readInt();
+                this._targetY = wrapper.readInt();
+                this._state = wrapper.readInt();
                 break;
         }
     }
@@ -114,5 +128,15 @@ export class SnowWarSubturnEventData
     public get avatarObjectId(): number
     {
         return this._avatarObjectId;
+    }
+
+    public get height(): number
+    {
+        return this._height;
+    }
+
+    public get state(): number
+    {
+        return this._state;
     }
 }

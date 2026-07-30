@@ -20,9 +20,22 @@ jobs:
         shell: bash
         env:
           RENDERER_BRANCH: ${{ github.head_ref || github.ref_name }}
+          PR_HEAD_OWNER: ${{ github.event.pull_request.head.repo.owner.login || github.repository_owner }}
         run: |
-          linked_branch="${RENDERER_BRANCH%-renderer}-emulator"
-          if git ls-remote --exit-code --heads https://github.com/simoleo89/Arcturus-Morningstar-Extended.git "$linked_branch" >/dev/null 2>&1; then
+          companion_repo="${PR_HEAD_OWNER}/Polaris-Emulator"
+          if git ls-remote --exit-code --heads "https://github.com/${companion_repo}.git" "$RENDERER_BRANCH" >/dev/null 2>&1; then
+            echo "repository=$companion_repo" >> "$GITHUB_OUTPUT"
+            echo "ref=$RENDERER_BRANCH" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --heads https://github.com/duckietm/Polaris-Emulator.git "$RENDERER_BRANCH" >/dev/null 2>&1; then
+            echo "repository=duckietm/Polaris-Emulator" >> "$GITHUB_OUTPUT"
+            echo "ref=$RENDERER_BRANCH" >> "$GITHUB_OUTPUT"
+          else
+            linked_branch="${RENDERER_BRANCH%-renderer}-emulator"
+          fi
+
+          if [ -z "${linked_branch:-}" ]; then
+            exit 0
+          elif git ls-remote --exit-code --heads https://github.com/simoleo89/Arcturus-Morningstar-Extended.git "$linked_branch" >/dev/null 2>&1; then
             echo "repository=simoleo89/Arcturus-Morningstar-Extended" >> "$GITHUB_OUTPUT"
             echo "ref=$linked_branch" >> "$GITHUB_OUTPUT"
           else

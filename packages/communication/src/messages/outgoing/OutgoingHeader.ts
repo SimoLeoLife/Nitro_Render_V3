@@ -616,6 +616,11 @@ export class OutgoingHeader
     public static SNOWWAR_JOIN_QUEUE = 6012;
     public static SNOWWAR_LEAVE_QUEUE = 6013;
     public static SNOWWAR_EXIT_EDITOR = 6014;
+    public static SNOWWAR_SELECT_ARENA = 6015;
+    public static SNOWWAR_GET_ALL_TIME_LEADERBOARD = 6027;
+    public static SNOWWAR_GET_ALL_TIME_FRIENDS_LEADERBOARD = 6028;
+    public static SNOWWAR_GET_WEEKLY_LEADERBOARD = 6029;
+    public static SNOWWAR_GET_WEEKLY_FRIENDS_LEADERBOARD = 6030;
 
     // Hotel view landing scene (client -> server)
     public static HOTEL_VIEW_LANDING_REQUEST = 9410;

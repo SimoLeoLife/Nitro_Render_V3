@@ -4,9 +4,9 @@ export class SnowWarThrowAtPlayerComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof SnowWarThrowAtPlayerComposer>;
 
-    constructor(targetObjectId: number, trajectory: number)
+    constructor(targetObjectId: number, trajectory: number, turn: number = 0, subturn: number = 0)
     {
-        this._data = [ targetObjectId, trajectory ];
+        this._data = [ targetObjectId, trajectory, turn, subturn ];
     }
 
     dispose(): void
