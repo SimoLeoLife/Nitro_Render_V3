@@ -44,12 +44,8 @@ const tryFetchManifest = async <T = any>(url: string): Promise<T | null> =>
     }
 };
 
-// Pick the manifest extension from the active JSON mode instead of always
-// probing both — that just doubles the failed requests on startup.
-//   json5  -> only <name>.json5
-//   legacy -> only <name>.json
-//   auto   -> try .json5 first, fall back to .json
-// All treated as optional (a clean 404 -> null); anything else bubbles up.
+// Pick manifest extensions from the active mode. A clean 404 advances to the
+// next candidate; network and parse failures remain visible to the caller.
 export const manifestCandidates = (mode: JsonMode, name: string = 'manifest'): readonly string[] =>
 {
     if(mode === 'legacy') return [ `${ name }.json` ];
