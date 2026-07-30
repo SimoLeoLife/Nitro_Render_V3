@@ -1,10 +1,13 @@
-import JSON5 from 'json5';
+import stripJsonComments from 'strip-json-comments';
 
-declare const __NITRO_JSON_MODE__: 'legacy' | 'json5' | 'auto' | undefined;
+declare const __NITRO_JSON_MODE__: 'legacy' | 'jsonc' | 'auto' | undefined;
 
+const JSONC_EXTENSION = /\.jsonc(?:[?#]|$)/i;
+const JSONC_MIME = /(?:application|text)\/(?:jsonc|x-jsonc)/i;
 const JSON5_EXTENSION = /\.json5(?:[?#]|$)/i;
 const JSON5_MIME = /(?:application|text)\/(?:json5|x-json5)/i;
 
+export type JsonMode = 'legacy' | 'jsonc' | 'auto';
 export type ConfigJsonErrorPhase = 'fetch' | 'parse';
 
 export class ConfigJsonError extends Error
@@ -27,13 +30,13 @@ export class ConfigJsonError extends Error
 export const isMissingResource = (err: unknown): boolean =>
     err instanceof ConfigJsonError && err.phase === 'fetch' && err.httpStatus === 404;
 
-export const resolveJsonMode = (): 'legacy' | 'json5' | 'auto' =>
+export const resolveJsonMode = (): JsonMode =>
 {
     try
     {
         if(typeof __NITRO_JSON_MODE__ !== 'undefined' && __NITRO_JSON_MODE__)
         {
-            if(__NITRO_JSON_MODE__ === 'legacy' || __NITRO_JSON_MODE__ === 'json5' || __NITRO_JSON_MODE__ === 'auto') return __NITRO_JSON_MODE__;
+            if(__NITRO_JSON_MODE__ === 'legacy' || __NITRO_JSON_MODE__ === 'jsonc' || __NITRO_JSON_MODE__ === 'auto') return __NITRO_JSON_MODE__;
         }
     }
     catch {}
@@ -41,96 +44,117 @@ export const resolveJsonMode = (): 'legacy' | 'json5' | 'auto' =>
     return 'auto';
 };
 
-const looksLikeJson5Url = (url: string): boolean => !!url && JSON5_EXTENSION.test(url);
+const sourceSuffix = (sourceUrl: string): string => sourceUrl ? ` in "${ sourceUrl }"` : '';
 
-const looksLikeJson5ContentType = (contentType: string): boolean => !!contentType && JSON5_MIME.test(contentType);
+const errorMessage = (error: unknown): string => (error as Error)?.message || String(error);
 
-const formatParseError = (sourceUrl: string, strictError: unknown, json5Error: unknown): string =>
+const rejectJson5Source = (sourceUrl: string): void =>
 {
-    const strictMessage = (strictError as Error)?.message || String(strictError);
-    const json5Message = (json5Error as Error)?.message || String(json5Error);
-    const source = sourceUrl ? ` in "${ sourceUrl }"` : '';
+    if(!sourceUrl || !JSON5_EXTENSION.test(sourceUrl)) return;
 
-    if(strictMessage === json5Message) return `Failed to parse JSON/JSON5${ source } — ${ json5Message }`;
-
-    return `Failed to parse JSON/JSON5${ source } — JSON5: ${ json5Message } (strict JSON: ${ strictMessage })`;
+    throw new ConfigJsonError(
+        `Unsupported JSON5 resource${ sourceSuffix(sourceUrl) } — rename and convert it to JSONC`,
+        'parse',
+        sourceUrl
+    );
 };
 
-const formatStrictError = (sourceUrl: string, err: unknown): string =>
+const parseStrict = <T>(text: string, sourceUrl: string): T =>
 {
-    const message = (err as Error)?.message || String(err);
-    const source = sourceUrl ? ` in "${ sourceUrl }"` : '';
-
-    return `Failed to parse strict JSON${ source } — ${ message } (build is in 'legacy' mode; switch to JSON5 mode via 'yarn configure' to accept comments/trailing commas)`;
+    try
+    {
+        return JSON.parse(text) as T;
+    }
+    catch(error)
+    {
+        throw new ConfigJsonError(
+            `Failed to parse strict JSON${ sourceSuffix(sourceUrl) } — ${ errorMessage(error) } (use JSONC mode for comments or trailing commas)`,
+            'parse',
+            sourceUrl,
+            undefined,
+            error
+        );
+    }
 };
 
-export const parseConfigJson = <T = any>(text: string, sourceUrl: string = ''): T =>
+const parseJsonc = <T>(text: string): T =>
+    JSON.parse(stripJsonComments(text, { trailingCommas: true })) as T;
+
+const parseJsoncWithError = <T>(text: string, sourceUrl: string): T =>
 {
-    const trimmed = text ?? '';
-    const mode = resolveJsonMode();
-
-    if(mode === 'legacy')
+    try
     {
-        try
-        {
-            return JSON.parse(trimmed) as T;
-        }
-        catch(err)
-        {
-            throw new ConfigJsonError(formatStrictError(sourceUrl, err), 'parse', sourceUrl, undefined, err);
-        }
+        return parseJsonc<T>(text);
     }
-
-    if(mode === 'json5' || looksLikeJson5Url(sourceUrl))
+    catch(error)
     {
-        try
-        {
-            return JSON5.parse<T>(trimmed);
-        }
-        catch(err)
-        {
-            throw new ConfigJsonError(formatParseError(sourceUrl, err, err), 'parse', sourceUrl, undefined, err);
-        }
+        throw new ConfigJsonError(
+            `Failed to parse JSONC${ sourceSuffix(sourceUrl) } — ${ errorMessage(error) }`,
+            'parse',
+            sourceUrl,
+            undefined,
+            error
+        );
     }
+};
+
+export const parseConfigJsonWithMode = <T = any>(text: string, mode: JsonMode, sourceUrl: string = ''): T =>
+{
+    rejectJson5Source(sourceUrl);
+
+    if(JSONC_EXTENSION.test(sourceUrl)) return parseJsoncWithError<T>(text, sourceUrl);
+    if(mode === 'legacy') return parseStrict<T>(text, sourceUrl);
+    if(mode === 'jsonc') return parseJsoncWithError<T>(text, sourceUrl);
 
     let strictError: unknown;
 
     try
     {
-        return JSON.parse(trimmed) as T;
+        return JSON.parse(text) as T;
     }
-    catch(err)
+    catch(error)
     {
-        strictError = err;
+        strictError = error;
     }
 
     try
     {
-        return JSON5.parse<T>(trimmed);
+        return parseJsonc<T>(text);
     }
-    catch(json5Error)
+    catch(jsoncError)
     {
-        throw new ConfigJsonError(formatParseError(sourceUrl, strictError, json5Error), 'parse', sourceUrl, undefined, json5Error);
+        throw new ConfigJsonError(
+            `Failed to parse JSON/JSONC${ sourceSuffix(sourceUrl) } — JSONC: ${ errorMessage(jsoncError) } (strict JSON: ${ errorMessage(strictError) })`,
+            'parse',
+            sourceUrl,
+            undefined,
+            jsoncError
+        );
     }
 };
+
+export const parseConfigJson = <T = any>(text: string, sourceUrl: string = ''): T =>
+    parseConfigJsonWithMode<T>(text, resolveJsonMode(), sourceUrl);
 
 export const parseConfigJsonFromResponse = async <T = any>(response: Response, sourceUrl: string = ''): Promise<T> =>
 {
     const contentType = response.headers?.get?.('content-type') || '';
     const text = await response.text();
     const url = sourceUrl || (response as any).url || '';
-    const mode = resolveJsonMode();
 
-    if(mode === 'auto' && looksLikeJson5ContentType(contentType) && !looksLikeJson5Url(url))
+    if(JSON5_MIME.test(contentType))
     {
-        try
-        {
-            return JSON5.parse<T>(text);
-        }
-        catch(err)
-        {
-            throw new ConfigJsonError(formatParseError(url, err, err), 'parse', url, undefined, err);
-        }
+        throw new ConfigJsonError(
+            `Unsupported JSON5 content type for "${ url }" — serve JSON or JSONC instead`,
+            'parse',
+            url
+        );
+    }
+
+    if(JSONC_MIME.test(contentType))
+    {
+        rejectJson5Source(url);
+        return parseJsoncWithError<T>(text, url);
     }
 
     return parseConfigJson<T>(text, url);
@@ -144,16 +168,26 @@ export const fetchConfigJson = async <T = any>(url: string, init?: RequestInit):
     {
         response = await fetch(url, init);
     }
-    catch(networkErr)
+    catch(networkError)
     {
-        const message = (networkErr as Error)?.message || String(networkErr);
-        throw new ConfigJsonError(`Network error fetching "${ url }" — ${ message }`, 'fetch', url, undefined, networkErr);
+        throw new ConfigJsonError(
+            `Network error fetching "${ url }" — ${ errorMessage(networkError) }`,
+            'fetch',
+            url,
+            undefined,
+            networkError
+        );
     }
 
     if(!response || response.status !== 200)
     {
         const status = response?.status;
-        throw new ConfigJsonError(`Failed to fetch "${ url }" — server returned HTTP ${ status ?? 'no response' }`, 'fetch', url, status);
+        throw new ConfigJsonError(
+            `Failed to fetch "${ url }" — server returned HTTP ${ status ?? 'no response' }`,
+            'fetch',
+            url,
+            status
+        );
     }
 
     return parseConfigJsonFromResponse<T>(response, url);
