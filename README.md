@@ -16,7 +16,7 @@ yarn
 yarn add @nitrots/nitro-renderer
 ```
 
-## JSON / JSON5 configuration parser
+## JSON / JSONC configuration parser
 
 Every configuration file and gamedata file loaded by the renderer (figuredata,
 furnidata, productdata, effectmap, avatar actions, etc.) goes through
@@ -26,11 +26,11 @@ the **host build time** through the compile-time constant `__NITRO_JSON_MODE__`:
 | Mode     | Behaviour                                                                 |
 |----------|---------------------------------------------------------------------------|
 | `legacy` | Strict `JSON.parse` only. Comments / trailing commas raise a clear error. |
-| `json5`  | `JSON5.parse` only. Accepts comments, trailing commas, single quotes.     |
-| `auto`   | Try strict JSON first, fall back to JSON5. Default when the flag is unset.|
+| `jsonc`  | Strip comments/trailing commas, then use native `JSON.parse`.             |
+| `auto`   | Try strict JSON first, fall back to JSONC. Default when the flag is unset.|
 
-URL hints are still honoured: files ending in `.json5` (or served with a
-`application/json5` content-type) always go through JSON5, regardless of mode.
+URL hints are still honoured: files ending in `.jsonc` (or served with a
+`application/jsonc` content-type) always go through JSONC, regardless of mode.
 
 ### Wiring the flag into a host
 
@@ -42,14 +42,13 @@ its bundler. Example with Vite:
 // vite.config.mjs in the host
 export default defineConfig({
     define: {
-        __NITRO_JSON_MODE__: JSON.stringify('json5')   // or 'legacy' / 'auto'
+        __NITRO_JSON_MODE__: JSON.stringify('jsonc')   // or 'legacy' / 'auto'
     }
 });
 ```
 
-If the constant is not defined the parser falls back to `auto`, which preserves
-the original behaviour of older releases — so existing hosts keep working
-without any change.
+If the constant is not defined the parser falls back to `auto`. Removed parser
+mode values are not mapped; single-quoted strings and unquoted keys must be converted.
 
 ### Using the parser directly
 
@@ -57,11 +56,11 @@ without any change.
 import { parseConfigJson, fetchConfigJson } from '@nitrots/utils';
 
 const data  = parseConfigJson<MyConfig>(rawText, '/configuration/ui-config.json');
-const data2 = await fetchConfigJson<MyConfig>('/configuration/ui-config.json5');
+const data2 = await fetchConfigJson<MyConfig>('/configuration/ui-config.jsonc');
 ```
 
 Errors carry the source URL and, in `legacy` mode, a hint about switching to
-JSON5 — making misconfigurations easy to diagnose in production logs.
+JSONC — making misconfigurations easy to diagnose in production logs.
 
 ## Split-aware gamedata loader
 
@@ -75,22 +74,22 @@ mode) — detected automatically by the trailing slash.
 
 ```
 <gamedata-dir>/
-  manifest.json5            # OPTIONAL — { "tiers": ["core", "custom", "seasonal"] }
+  manifest.jsonc            # OPTIONAL — { "tiers": ["core", "custom", "seasonal"] }
   core/
-    manifest.json5          # REQUIRED — { "files": ["a.json5", "b.json5", ...] }
-    a.json5
-    b.json5
+    manifest.jsonc          # REQUIRED — { "files": ["a.jsonc", "b.jsonc", ...] }
+    a.jsonc
+    b.jsonc
   custom/                   # OPTIONAL tier
-    manifest.json5
-    overrides.json5
+    manifest.jsonc
+    overrides.jsonc
   seasonal/                 # OPTIONAL tier
-    manifest.json5
-    xmas.json5
+    manifest.jsonc
+    xmas.jsonc
 ```
 
-If the directory `manifest.json5` is absent, the loader falls back to the
+If the directory `manifest.jsonc` is absent, the loader falls back to the
 default tier order `core → custom → seasonal`. Each tier is skipped silently
-if its `manifest.json5` is missing.
+if its `manifest.jsonc` is missing.
 
 ### Merge semantics
 
