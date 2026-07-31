@@ -80,6 +80,7 @@ export class RoomObjectVariable
     public static FURNITURE_BRANDING_OFFSET_Y: string = 'furniture_branding_offset_y';
     public static FURNITURE_BRANDING_OFFSET_Z: string = 'furniture_branding_offset_z';
     public static FURNITURE_BRANDING_SCALE: string = 'furniture_branding_scale';
+    public static FURNITURE_BRANDING_ALPHA: string = 'furniture_branding_alpha';
     public static FURNITURE_BADGE_IMAGE_STATUS: string = 'furniture_badge_image_status';
     public static FURNITURE_BADGE_ASSET_NAME: string = 'furniture_badge_asset_name';
     public static FURNITURE_BADGE_VISIBLE_IN_STATE: string = 'furniture_badge_visible_in_state';
