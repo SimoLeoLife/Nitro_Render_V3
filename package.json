@@ -37,10 +37,10 @@
     "@thumbmarkjs/thumbmarkjs": "^1.9.0",
     "gifuct-js": "^2.1.2",
     "howler": "^2.2.4",
-    "json5": "^2.2.3",
     "pako": "^2.1.0",
     "pixi-filters": "^6.1.5",
-    "pixi.js": "^8.19.0"
+    "pixi.js": "^8.19.0",
+    "strip-json-comments": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

@@ -58,7 +58,7 @@ export class ConfigurationManager implements IConfigurationManager
                 }
                 catch(parseError)
                 {
-                    throw new Error(`Invalid config "${ url }" — JSON/JSON5 parse failed. JSON5 allows comments, trailing commas and unquoted keys (${ parseError.message })`);
+                    throw new Error(`Invalid config "${ url }" — JSON/JSONC parse failed. JSONC allows comments and trailing commas (${ parseError.message })`);
                 }
 
                 this.parseConfiguration(json);
