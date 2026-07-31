@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-    ConfigJsonError,
-    fetchConfigJson,
-    parseConfigJson,
-    parseConfigJsonFromResponse,
-    parseConfigJsonWithMode
-} from '../JsonParser';
+import { fetchConfigJson, parseConfigJson, parseConfigJsonFromResponse } from '../JsonParser';
 
 describe('parseConfigJson', () =>
 {
@@ -15,45 +9,39 @@ describe('parseConfigJson', () =>
         expect(result).toEqual({ a: 1, b: [ 2, 3 ] });
     });
 
-    it('parses comments and trailing commas in auto mode', () =>
+    it('falls back to JSON5 for trailing commas', () =>
     {
-        const result = parseConfigJsonWithMode<{ value: number }>('{ // comment\n "value": 1, }', 'auto', 'config.json');
-        expect(result).toEqual({ value: 1 });
+        const result = parseConfigJson('{"a": 1, "b": [2, 3,],}');
+        expect(result).toEqual({ a: 1, b: [ 2, 3 ] });
     });
 
-    it('parses an explicit jsonc URL even in legacy mode', () =>
+    it('falls back to JSON5 for comments', () =>
     {
-        const result = parseConfigJsonWithMode<{ value: number }>('{ "value": 1, }', 'legacy', 'config.jsonc');
-        expect(result).toEqual({ value: 1 });
+        const result = parseConfigJson(`{
+            // a number
+            "a": 1,
+            /* a list */
+            "b": [2, 3]
+        }`);
+        expect(result).toEqual({ a: 1, b: [ 2, 3 ] });
     });
 
-    it('rejects comments and trailing commas in legacy mode for json URLs', () =>
+    it('falls back to JSON5 for unquoted keys and single quotes', () =>
     {
-        expect(() => parseConfigJsonWithMode('{ "value": 1, }', 'legacy', 'config.json'))
-            .toThrow(ConfigJsonError);
+        const result = parseConfigJson("{ a: 1, b: 'hello' }");
+        expect(result).toEqual({ a: 1, b: 'hello' });
     });
 
-    it.each([
-        "{ 'value': 1 }",
-        '{ value: 1 }',
-        '{ "value": 0x10 }',
-        '{ "value": Infinity }'
-    ])('rejects JSON5-only syntax: %s', source =>
+    it('uses JSON5 directly for .json5 URLs', () =>
     {
-        expect(() => parseConfigJsonWithMode(source, 'jsonc', 'config.jsonc'))
-            .toThrow(ConfigJsonError);
+        const result = parseConfigJson('{ a: 1, /* hi */ b: 2 }', 'https://example.com/cfg.json5');
+        expect(result).toEqual({ a: 1, b: 2 });
     });
 
-    it('does not treat a json5 URL as JSONC', () =>
+    it('throws a helpful error when both strict and JSON5 fail', () =>
     {
-        expect(() => parseConfigJsonWithMode('{ "value": 1, }', 'auto', 'config.json5'))
-            .toThrow(ConfigJsonError);
-    });
-
-    it('throws a helpful error when strict JSON and JSONC fail', () =>
-    {
-        expect(() => parseConfigJsonWithMode('{ this is :: not json ::', 'auto', 'cfg.json'))
-            .toThrowError(/Failed to parse JSON\/JSONC in "cfg\.json"/);
+        expect(() => parseConfigJson('{ this is :: not json ::', 'cfg.json'))
+            .toThrowError(/Failed to parse JSON\/JSON5 in "cfg\.json"/);
     });
 });
 
@@ -71,25 +59,25 @@ describe('parseConfigJsonFromResponse', () =>
         await expect(parseConfigJsonFromResponse(res, 'https://example.com/x.json')).resolves.toEqual({ a: 1 });
     });
 
-    it('parses JSONC response bodies with comments', async () =>
+    it('parses JSON5 response bodies with comments', async () =>
     {
-        const res = buildResponse('{ /* comment */ "a": 1, "b": 2, }');
+        const res = buildResponse('{ /* yo */ a: 1, b: 2, }');
         await expect(parseConfigJsonFromResponse(res, 'https://example.com/x.json')).resolves.toEqual({ a: 1, b: 2 });
     });
 
-    it('respects application/jsonc content-type', async () =>
+    it('respects application/json5 content-type', async () =>
     {
-        const res = buildResponse('{ "a": 1, }', 'application/jsonc');
+        const res = buildResponse('{ a: 1 }', 'application/json5');
         await expect(parseConfigJsonFromResponse(res, 'https://example.com/x.txt')).resolves.toEqual({ a: 1 });
     });
 });
 
 describe('fetchConfigJson', () =>
 {
-    it('fetches and parses JSON or JSONC', async () =>
+    it('fetches and parses JSON or JSON5', async () =>
     {
         const originalFetch = globalThis.fetch;
-        globalThis.fetch = (async () => new Response('{ "a": 1, "b": 2, }', {
+        globalThis.fetch = (async () => new Response('{ a: 1, b: 2, }', {
             status: 200,
             headers: { 'content-type': 'application/json' }
         })) as any;

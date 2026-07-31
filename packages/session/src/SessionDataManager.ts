@@ -232,9 +232,10 @@ export class SessionDataManager implements ISessionDataManager
         ];
     }
 
-    // Merge a runtime furniture-data chunk such as custom/imported.jsonc into
-    // the existing maps without reloading the client. The returned entries let
-    // the caller update RoomContentLoader and expose imported furniture live.
+    // Mergia a runtime un chunk furnidata (es. custom/imported.json5) nelle Map
+    // esistenti, SENZA reload del client. Ritorna gli entry aggiunti cosi il
+    // chiamante puo' aggiornare anche il RoomContentLoader. Fa comparire i furni
+    // appena importati nel catalogo in tempo reale.
     public async mergeFurnitureDataFromUrl(url: string): Promise<IFurnitureData[]>
     {
         if(!url || !url.length) return [];

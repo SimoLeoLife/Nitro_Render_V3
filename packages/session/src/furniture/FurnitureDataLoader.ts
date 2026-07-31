@@ -37,9 +37,9 @@ export class FurnitureDataLoader
         if(responseData.wallitemtypes) this.parseWallItems(responseData.wallitemtypes);
     }
 
-    // Reload a furniture-data chunk such as custom/imported.jsonc and merge it
-    // into the existing maps. Returned entries let RoomContentLoader update
-    // without a full client reload.
+    // Ri-carica un singolo chunk furnidata (es. custom/imported.json5) e
+    // mergia i suoi entry nelle Map esistenti. Ritorna gli entry aggiunti/aggiornati
+    // cosi il chiamante puo' aggiornare anche il RoomContentLoader senza reload.
     public async mergeFromUrl(url: string): Promise<IFurnitureData[]>
     {
         if(!url || !url.length) return [];
