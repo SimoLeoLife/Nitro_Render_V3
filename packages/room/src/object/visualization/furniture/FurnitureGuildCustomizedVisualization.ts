@@ -28,15 +28,12 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureAnimatedVisu
     {
         const flag = super.updateModel(scale);
 
-        if(this._badgeAssetNameNormalScale === '')
-        {
-            const assetName = this.object.model.getValue<string>(RoomObjectVariable.FURNITURE_GUILD_CUSTOMIZED_ASSET_NAME);
+        const assetName = this.object.model.getValue<string>(RoomObjectVariable.FURNITURE_GUILD_CUSTOMIZED_ASSET_NAME);
 
-            if(assetName)
-            {
-                this._badgeAssetNameNormalScale = assetName;
-                this._badgeAssetNameSmallScale = (this._badgeAssetNameNormalScale + '_32');
-            }
+        if(assetName && assetName !== this._badgeAssetNameNormalScale)
+        {
+            this._badgeAssetNameNormalScale = assetName;
+            this._badgeAssetNameSmallScale = (this._badgeAssetNameNormalScale + '_32');
         }
 
         const color1 = this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_GUILD_CUSTOMIZED_COLOR_1);
