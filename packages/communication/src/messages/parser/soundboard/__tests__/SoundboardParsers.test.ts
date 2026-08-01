@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { BinaryReader, BinaryWriter } from '@nitrots/utils';
 import { SoundboardPlayParser } from '../SoundboardPlayParser';
+import { SoundboardCatalogParser } from '../SoundboardCatalogParser';
+import { SoundboardCatalogResultParser } from '../SoundboardCatalogResultParser';
+import { SoundboardPlayDeniedParser } from '../SoundboardPlayDeniedParser';
 import { SoundboardSettingsParser } from '../SoundboardSettingsParser';
 
 class TestWrapper
@@ -88,5 +91,62 @@ describe('SoundboardPlayParser', () =>
         expect(parser.actorUserId).toBe(0);
         expect(parser.actorRoomIndex).toBe(0);
         expect(parser.username).toBe('');
+    });
+});
+
+describe('Soundboard management parsers', () =>
+{
+    it('parses a play denial with its cooldown remainder', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeInt(1);
+        writer.writeInt(13);
+
+        const parser = new SoundboardPlayDeniedParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.reason).toBe(1);
+        expect(parser.remainingSeconds).toBe(13);
+    });
+
+    it('parses enabled and disabled catalog entries in management order', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeInt(1);
+        writer.writeInt(7);
+        writer.writeString('Campanella');
+        writer.writeString('/sounds/bell.mp3');
+        writer.writeByte(0);
+        writer.writeInt(20);
+        writer.writeInt(5);
+
+        const parser = new SoundboardCatalogParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.sounds).toEqual([
+            { id: 7, name: 'Campanella', url: '/sounds/bell.mp3', enabled: false, sortOrder: 20, minRank: 5 }
+        ]);
+    });
+
+    it('rejects an unreasonable catalog size before allocating entries', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeInt(501);
+
+        const parser = new SoundboardCatalogParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(false);
+        expect(parser.sounds).toEqual([]);
+    });
+
+    it('parses stable catalog result codes', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeInt(1);
+        writer.writeInt(3);
+        writer.writeInt(7);
+
+        const parser = new SoundboardCatalogResultParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.operation).toBe(1);
+        expect(parser.resultCode).toBe(3);
+        expect(parser.soundId).toBe(7);
     });
 });
