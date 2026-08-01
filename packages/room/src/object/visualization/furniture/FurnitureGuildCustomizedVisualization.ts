@@ -1,4 +1,5 @@
 import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@nitrots/api';
+import { GetSessionDataManager } from '@nitrots/session';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 
 export class FurnitureGuildCustomizedVisualization extends FurnitureAnimatedVisualization
@@ -32,6 +33,7 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureAnimatedVisu
 
         if(assetName && assetName !== this._badgeAssetNameNormalScale)
         {
+            this.ensureBadgeAsset(assetName);
             this._badgeAssetNameNormalScale = assetName;
             this._badgeAssetNameSmallScale = (this._badgeAssetNameNormalScale + '_32');
         }
@@ -45,6 +47,19 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureAnimatedVisu
         this._color2 = color2 ? color2 : FurnitureGuildCustomizedVisualization.DEFAULT_COLOR_2;
 
         return flag;
+    }
+
+    private ensureBadgeAsset(assetName: string): void
+    {
+        if(!assetName || !this.asset || this.asset.getAsset(assetName)) return;
+
+        const sessionDataManager = GetSessionDataManager();
+
+        if(sessionDataManager.loadGroupBadgeImage(assetName) !== assetName) return;
+
+        const texture = sessionDataManager.getGroupBadgeImage(assetName);
+
+        if(texture) this.asset.addAsset(assetName, texture, false);
     }
 
     protected getLayerColor(scale: number, layerId: number, colorId: number): number

@@ -2,6 +2,11 @@ import { IRoomObjectController, RoomObjectVariable } from '@nitrots/api';
 import { describe, expect, it, vi } from 'vitest';
 import { FurnitureGuildCustomizedVisualization } from './FurnitureGuildCustomizedVisualization';
 
+const { getGroupBadgeImage, loadGroupBadgeImage } = vi.hoisted(() => ({
+    getGroupBadgeImage: vi.fn(),
+    loadGroupBadgeImage: vi.fn()
+}));
+
 vi.mock('@nitrots/utils', () => ({
     ChooserSelectionFilter: class {},
     TextureUtils: {}
@@ -9,6 +14,13 @@ vi.mock('@nitrots/utils', () => ({
 
 vi.mock('../../../utils', () => ({
     RoomGeometry: class {}
+}));
+
+vi.mock('@nitrots/session', () => ({
+    GetSessionDataManager: () => ({
+        getGroupBadgeImage,
+        loadGroupBadgeImage
+    })
 }));
 
 class TestGuildVisualization extends FurnitureGuildCustomizedVisualization
@@ -26,6 +38,35 @@ class TestGuildVisualization extends FurnitureGuildCustomizedVisualization
 
 describe('FurnitureGuildCustomizedVisualization', () =>
 {
+    it('restores the generated badge texture when the furniture asset collection does not contain it', () =>
+    {
+        const badgeTexture = { label: 'badge_first' };
+        const addAsset = vi.fn();
+        const model = {
+            updateCounter: 1,
+            getValue: <T>(key: string): T =>
+            {
+                if(key === RoomObjectVariable.FURNITURE_GUILD_CUSTOMIZED_ASSET_NAME) return 'badge_first' as T;
+
+                return undefined;
+            }
+        };
+        const visualization = new TestGuildVisualization();
+
+        loadGroupBadgeImage.mockReturnValue('badge_first');
+        getGroupBadgeImage.mockReturnValue(badgeTexture);
+        visualization.asset = {
+            addReference: vi.fn(),
+            getAsset: vi.fn().mockReturnValue(null),
+            addAsset
+        } as never;
+        visualization.object = { model } as unknown as IRoomObjectController;
+
+        visualization.updateFromModel(64);
+
+        expect(addAsset).toHaveBeenCalledWith('badge_first', badgeTexture, false);
+    });
+
     it('switches badge assets when the guild badge changes', () =>
     {
         let updateCounter = 1;
