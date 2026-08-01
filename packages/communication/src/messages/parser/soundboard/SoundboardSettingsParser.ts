@@ -28,9 +28,10 @@ export class SoundboardSettingsParser implements IMessageParser
 
         this._enabled = wrapper.readBoolean();
         this._cooldownSeconds = Math.max(0, wrapper.readInt());
-
         const count = wrapper.readInt();
         this._sounds = [];
+
+        if(count < 0 || count > 500) return false;
 
         for(let i = 0; i < count; i++)
         {

@@ -34,7 +34,7 @@ describe('SoundboardSettingsParser', () =>
         writer.writeString('/sounds/soundboard/campanella.mp3');
 
         const parser = new SoundboardSettingsParser();
-        parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any);
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
 
         expect(parser.enabled).toBe(true);
         expect(parser.cooldownSeconds).toBe(60);
@@ -59,6 +59,18 @@ describe('SoundboardSettingsParser', () =>
         parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any);
 
         expect(parser.cooldownSeconds).toBe(0);
+    });
+
+    it('rejects more than 500 sounds before allocating entries', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeByte(1);
+        writer.writeInt(60);
+        writer.writeInt(501);
+
+        const parser = new SoundboardSettingsParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(false);
+        expect(parser.sounds).toEqual([]);
     });
 });
 
