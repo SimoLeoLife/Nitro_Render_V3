@@ -4,9 +4,9 @@ export class CatalogAdminLoadPageComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof CatalogAdminLoadPageComposer>;
 
-    constructor(pageId: number, catalogMode: string = 'NORMAL')
+    constructor(pageId: number, catalogMode: string = 'NORMAL', draftVersionId: number = 0, expectedRevision: number = 0)
     {
-        this._data = [ pageId, catalogMode ];
+        this._data = [ pageId, catalogMode, draftVersionId, expectedRevision ];
     }
 
     dispose(): void

@@ -33,3 +33,4 @@ export * from './TargetedOfferEvent';
 export * from './TargetedOfferNotFoundEvent';
 export * from './VoucherRedeemErrorMessageEvent';
 export * from './VoucherRedeemOkMessageEvent';
+export * from './studio';

@@ -510,6 +510,18 @@ export class IncomingHeader
     public static CATALOG_ADMIN_RESULT = 10059;
     public static CATALOG_ADMIN_OFFER_DETAILS = 10062;
     public static CATALOG_ADMIN_PAGE_DETAILS = 10063;
+    public static CATALOG_STUDIO_OPEN_SESSION = 10067;
+    public static CATALOG_STUDIO_ACQUIRE_LOCK = 10068;
+    public static CATALOG_STUDIO_RENEW_LOCK = 10069;
+    public static CATALOG_STUDIO_RELEASE_LOCK = 10070;
+    public static CATALOG_STUDIO_LOAD_HISTORY = 10071;
+    public static CATALOG_STUDIO_UNDO = 10072;
+    public static CATALOG_STUDIO_VALIDATE = 10073;
+    public static CATALOG_STUDIO_PUBLISH = 10074;
+    public static CATALOG_STUDIO_DISCARD = 10075;
+    public static CATALOG_STUDIO_RESTORE = 10076;
+    public static CATALOG_STUDIO_PREVIEW = 10077;
+    public static CATALOG_STUDIO_DOCUMENT_RESULT = 10078;
 
     // Custom Prefixes
     public static USER_PREFIXES = 7001;

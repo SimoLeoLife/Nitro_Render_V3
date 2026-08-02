@@ -537,6 +537,20 @@ export class OutgoingHeader
     public static CATALOG_ADMIN_SET_PAGE_ENABLED = 10064;
     public static CATALOG_ADMIN_SET_PAGE_VISIBLE = 10065;
     public static CATALOG_ADMIN_REORDER_OFFERS = 10066;
+    public static CATALOG_STUDIO_OPEN_SESSION = 10067;
+    public static CATALOG_STUDIO_ACQUIRE_LOCK = 10068;
+    public static CATALOG_STUDIO_RENEW_LOCK = 10069;
+    public static CATALOG_STUDIO_RELEASE_LOCK = 10070;
+    public static CATALOG_STUDIO_LOAD_HISTORY = 10071;
+    public static CATALOG_STUDIO_UNDO = 10072;
+    public static CATALOG_STUDIO_VALIDATE = 10073;
+    public static CATALOG_STUDIO_PUBLISH = 10074;
+    public static CATALOG_STUDIO_DISCARD = 10075;
+    public static CATALOG_STUDIO_RESTORE = 10076;
+    public static CATALOG_STUDIO_PREVIEW = 10077;
+    public static CATALOG_STUDIO_EXPORT = 10078;
+    public static CATALOG_STUDIO_DOCUMENT_DRY_RUN = 10079;
+    public static CATALOG_STUDIO_DOCUMENT_APPLY = 10080;
 
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;
