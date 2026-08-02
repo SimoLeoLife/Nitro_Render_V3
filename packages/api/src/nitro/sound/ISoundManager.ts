@@ -8,10 +8,13 @@ export interface ISoundManager
     traxVolume: number;
     systemVolume: number;
     furniVolume: number;
+    soundboardVolume: number;
+    playSoundboard(url: string): Promise<boolean>;
+    stopSoundboard(): void;
 
     /**
      * Returns a referentially-stable snapshot of the three volume
-     * levels (system / furni / trax). The same reference is returned
+     * levels (system / furni / trax / soundboard). The same reference is returned
      * across reads until a volume changes; mutations dispatch
      * `NitroEventType.SOUND_VOLUMES_UPDATED` to signal invalidation.
      *

@@ -5,6 +5,7 @@ export class UserSettingsParser implements IMessageParser
     private _volumeSystem: number;
     private _volumeFurni: number;
     private _volumeTrax: number;
+    private _volumeSoundboard: number;
     private _oldChat: boolean;
     private _roomInvites: boolean;
     private _cameraFollow: boolean;
@@ -19,6 +20,7 @@ export class UserSettingsParser implements IMessageParser
         this._volumeSystem = 0;
         this._volumeFurni = 0;
         this._volumeTrax = 0;
+        this._volumeSoundboard = 80;
         this._oldChat = false;
         this._roomInvites = false;
         this._cameraFollow = false;
@@ -46,6 +48,7 @@ export class UserSettingsParser implements IMessageParser
         this._onlineStatusVisible = wrapper.readBoolean();
         this._friendsCanFollow = wrapper.readBoolean();
         this._friendRequestsAllowed = wrapper.readBoolean();
+        this._volumeSoundboard = wrapper.bytesAvailable ? wrapper.readInt() : 80;
 
         return true;
     }
@@ -63,6 +66,11 @@ export class UserSettingsParser implements IMessageParser
     public get volumeTrax(): number
     {
         return this._volumeTrax;
+    }
+
+    public get volumeSoundboard(): number
+    {
+        return this._volumeSoundboard;
     }
 
     public get oldChat(): boolean
