@@ -1,4 +1,5 @@
 import { IGraphicAsset, IRoomObjectSprite, RoomObjectVariable } from '@nitrots/api';
+import { GetSessionDataManager } from '@nitrots/session';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 
 export class FurnitureGuildCustomizedVisualization extends FurnitureAnimatedVisualization
@@ -28,15 +29,13 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureAnimatedVisu
     {
         const flag = super.updateModel(scale);
 
-        if(this._badgeAssetNameNormalScale === '')
-        {
-            const assetName = this.object.model.getValue<string>(RoomObjectVariable.FURNITURE_GUILD_CUSTOMIZED_ASSET_NAME);
+        const assetName = this.object.model.getValue<string>(RoomObjectVariable.FURNITURE_GUILD_CUSTOMIZED_ASSET_NAME);
 
-            if(assetName)
-            {
-                this._badgeAssetNameNormalScale = assetName;
-                this._badgeAssetNameSmallScale = (this._badgeAssetNameNormalScale + '_32');
-            }
+        if(assetName && assetName !== this._badgeAssetNameNormalScale)
+        {
+            this.ensureBadgeAsset(assetName);
+            this._badgeAssetNameNormalScale = assetName;
+            this._badgeAssetNameSmallScale = (this._badgeAssetNameNormalScale + '_32');
         }
 
         const color1 = this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_GUILD_CUSTOMIZED_COLOR_1);
@@ -48,6 +47,19 @@ export class FurnitureGuildCustomizedVisualization extends FurnitureAnimatedVisu
         this._color2 = color2 ? color2 : FurnitureGuildCustomizedVisualization.DEFAULT_COLOR_2;
 
         return flag;
+    }
+
+    private ensureBadgeAsset(assetName: string): void
+    {
+        if(!assetName || !this.asset || this.asset.getAsset(assetName)) return;
+
+        const sessionDataManager = GetSessionDataManager();
+
+        if(sessionDataManager.loadGroupBadgeImage(assetName) !== assetName) return;
+
+        const texture = sessionDataManager.getGroupBadgeImage(assetName);
+
+        if(texture) this.asset.addAsset(assetName, texture, false);
     }
 
     protected getLayerColor(scale: number, layerId: number, colorId: number): number
