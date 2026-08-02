@@ -534,6 +534,9 @@ export class OutgoingHeader
     public static CATALOG_ADMIN_SAVE_PAGE_ICON = 10061;
     public static CATALOG_ADMIN_LOAD_OFFER = 10062;
     public static CATALOG_ADMIN_LOAD_PAGE = 10063;
+    public static CATALOG_ADMIN_SET_PAGE_ENABLED = 10064;
+    public static CATALOG_ADMIN_SET_PAGE_VISIBLE = 10065;
+    public static CATALOG_ADMIN_REORDER_OFFERS = 10066;
 
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;

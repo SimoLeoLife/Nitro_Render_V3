@@ -14,7 +14,7 @@ import { HanditemBlockStateMessageEvent } from './messages';
 import { TranslationLanguagesEvent, TranslationLanguagesRequestComposer, TranslationResultEvent, TranslationTextRequestComposer } from './messages';
 import { YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomSettingsComposer, YouTubeRoomSettingsEvent, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from './messages';
 import { HousekeepingActionLogEvent, HousekeepingActionResultEvent, HousekeepingBanUserComposer, HousekeepingDashboardEvent, HousekeepingDeleteRoomComposer, HousekeepingFindRoomByIdComposer, HousekeepingFindUserByIdComposer, HousekeepingFindUserByNameComposer, HousekeepingForceDisconnectUserComposer, HousekeepingGetDashboardComposer, HousekeepingGiveCreditsComposer, HousekeepingGiveCurrencyComposer, HousekeepingGrantItemComposer, HousekeepingKickAllFromRoomComposer, HousekeepingKickUserComposer, HousekeepingListActionLogComposer, HousekeepingMuteRoomComposer, HousekeepingMuteUserComposer, HousekeepingResetUserPasswordComposer, HousekeepingRoomDetailEvent, HousekeepingRoomListEvent, HousekeepingRoomStateComposer, HousekeepingSearchRoomsComposer, HousekeepingSendHotelAlertComposer, HousekeepingSetHcSubscriptionComposer, HousekeepingSetUserRankComposer, HousekeepingTradeLockUserComposer, HousekeepingTransferRoomOwnershipComposer, HousekeepingUnbanUserComposer, HousekeepingUserDetailEvent } from './messages';
-import { CatalogAdminSavePageIconComposer, CatalogAdminSavePageImagesComposer } from './messages/outgoing/catalog';
+import { CatalogAdminReorderOffersComposer, CatalogAdminSavePageIconComposer, CatalogAdminSavePageImagesComposer, CatalogAdminSetPageEnabledComposer, CatalogAdminSetPageVisibleComposer } from './messages/outgoing/catalog';
 import { RareValuesEvent, RequestRareValuesComposer } from './messages';
 import { WheelBuySpinComposer, WheelDataEvent, WheelOpenComposer, WheelRecentWinsEvent, WheelResultEvent, WheelSpinComposer } from './messages';
 import { WheelAdminGetPrizesComposer, WheelAdminPrizesEvent, WheelAdminSavePrizesComposer } from './messages';
@@ -742,6 +742,9 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_PUBLISH, CatalogAdminPublishComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_LOAD_OFFER, CatalogAdminLoadOfferComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_LOAD_PAGE, CatalogAdminLoadPageComposer);
+        this._composers.set(OutgoingHeader.CATALOG_ADMIN_SET_PAGE_ENABLED, CatalogAdminSetPageEnabledComposer);
+        this._composers.set(OutgoingHeader.CATALOG_ADMIN_SET_PAGE_VISIBLE, CatalogAdminSetPageVisibleComposer);
+        this._composers.set(OutgoingHeader.CATALOG_ADMIN_REORDER_OFFERS, CatalogAdminReorderOffersComposer);
 
 		// Furni Editor
 		this._composers.set(OutgoingHeader.FURNI_EDITOR_SEARCH, FurniEditorSearchComposer);
