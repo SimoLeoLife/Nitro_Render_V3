@@ -3,6 +3,8 @@ import { Assets, Texture } from 'pixi.js';
 import { ArrayBufferToBase64 } from './ArrayBufferToBase64';
 import { BinaryReader } from './BinaryReader';
 
+export type NitroBundleTextureDecoder = (bytes: ArrayBuffer, entryName: string) => Promise<Texture>;
+
 export class NitroBundle
 {
     private static TEXT_DECODER: TextDecoder = new TextDecoder('utf-8');
@@ -10,16 +12,16 @@ export class NitroBundle
     private _jsonFile: Object = null;
     private _texture: Texture = null;
 
-    public static async from(buffer: ArrayBuffer): Promise<NitroBundle>
+    public static async from(buffer: ArrayBuffer, textureDecoder: NitroBundleTextureDecoder = decodePngTexture): Promise<NitroBundle>
     {
         const bundle = new NitroBundle();
 
-        await bundle.parse(buffer);
+        await bundle.parse(buffer, textureDecoder);
 
         return bundle;
     }
 
-    public async parse(arrayBuffer: ArrayBuffer): Promise<void>
+    public async parse(arrayBuffer: ArrayBuffer, textureDecoder: NitroBundleTextureDecoder = decodePngTexture): Promise<void>
     {
         const binaryReader = new BinaryReader(arrayBuffer);
 
@@ -39,7 +41,7 @@ export class NitroBundle
             }
             else
             {
-                this._texture = await Assets.load<Texture>(`data:image/png;base64,${ ArrayBufferToBase64(inflatedBuffer) }`);
+                this._texture = await textureDecoder(Uint8Array.from(inflatedBuffer).buffer, fileName);
             }
 
             fileCount--;
@@ -56,3 +58,6 @@ export class NitroBundle
         return this._texture;
     }
 }
+
+const decodePngTexture: NitroBundleTextureDecoder = bytes =>
+    Assets.load<Texture>(`data:image/png;base64,${ ArrayBufferToBase64(bytes) }`);
