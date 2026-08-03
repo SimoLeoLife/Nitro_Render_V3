@@ -1,4 +1,5 @@
 import { BinaryReader, BinaryWriter } from '@nitrots/utils';
+import { gzip } from 'pako';
 import { describe, expect, it } from 'vitest';
 import { NitroMessages } from '../../../../NitroMessages';
 import { IncomingHeader } from '../../../incoming/IncomingHeader';
@@ -84,11 +85,13 @@ describe('catalog studio packet contract', () =>
         const previewWriter = new BinaryWriter();
         previewWriter.writeString('op-preview'); previewWriter.writeInt(7);
         previewWriter.writeString('[{"catalogType":"NORMAL","pageId":17}]');
-        previewWriter.writeString('[{"offer":{"catalogType":"NORMAL","offerId":42},"eligible":false,"reasons":["RANK"]}]');
+        previewWriter.writeString('[{"offer":{"catalogType":"NORMAL","offerId":42},"eligible":false,"reasons":["RANK"],"products":[{"productType":"S","productClassId":456,"extraParam":"","productCount":1,"uniqueLimitedItem":false,"uniqueLimitedSeriesSize":0,"uniqueLimitedItemsLeft":0}],"giftable":true}]');
         const preview = new CatalogStudioPreviewMessageParser();
         expect(preview.parse(new TestWrapper(new BinaryReader(previewWriter.getBuffer())) as any)).toBe(true);
         expect(preview.pages[0].pageId).toBe(17);
         expect(preview.offers[0].reasons).toEqual([ 'RANK' ]);
+        expect(preview.offers[0].products[0].productClassId).toBe(456);
+        expect(preview.offers[0].giftable).toBe(true);
 
         const resultWriter = new BinaryWriter();
         resultWriter.writeString('op-dry'); resultWriter.writeByte(1); resultWriter.writeString('DRY_RUN_READY');
@@ -101,13 +104,22 @@ describe('catalog studio packet contract', () =>
 
     it('parses a studio session with actors and published versions', () =>
     {
+        const pages = [{
+            catalogType: 'NORMAL', pageId: 17, parentId: -1, captionSave: 'front_page', caption: 'Front Page',
+            pageLayout: 'default_3x3', iconColor: 0, iconImage: 1, minRank: 1, orderNum: 0,
+            visible: true, enabled: true, clubOnly: false, catalogMode: 'NORMAL', vipOnly: false,
+            pageHeadline: '', pageTeaser: '', pageSpecial: '', pageText1: '', pageText2: '',
+            pageTextDetails: '', pageTextTeaser: '', roomId: 0, includes: ''
+        }];
+        const encodedPages = Buffer.from(gzip(JSON.stringify(pages))).toString('base64');
         const writer = new BinaryWriter();
         writer.writeInt(11); writer.writeInt(12); writer.writeInt(7);
         writer.writeString('2026-08-02T10:00:00Z'); writer.writeString('2026-08-02T10:05:00Z');
         writer.writeInt(3); writer.writeInt(1); writer.writeInt(9); writer.writeString('Alice');
         writer.writeByte(1); writer.writeInt(2); writer.writeInt(1);
         writer.writeInt(11); writer.writeString('Summer catalog'); writer.writeString('2026-08-02T10:00:00Z');
-        writer.writeString('[]'); writer.writeString('[]');
+        writer.writeInt(2); writer.writeString('GZIP_BASE64_JSON'); writer.writeInt(2);
+        writer.writeString(encodedPages.slice(0, 40)); writer.writeString(encodedPages.slice(40));
 
         const parser = new CatalogStudioSessionMessageParser();
         expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
@@ -115,7 +127,7 @@ describe('catalog studio packet contract', () =>
         expect(parser.actors).toEqual([ { id: 9, username: 'Alice' } ]);
         expect(parser.validationCurrent).toBe(true);
         expect(parser.publishedVersions[0].label).toBe('Summer catalog');
-        expect(parser.pages).toEqual([]);
+        expect(parser.pages).toEqual(pages);
         expect(parser.offers).toEqual([]);
     });
 
