@@ -60,3 +60,4 @@ export * from './RoomAdPurchaseInitiatedComposer';
 export * from './SelectClubGiftComposer';
 export * from './SetTargetedOfferStateComposer';
 export * from './ShopTargetedOfferViewedComposer';
+export * from './studio';

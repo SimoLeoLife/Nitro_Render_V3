@@ -15,6 +15,8 @@ import { TranslationLanguagesEvent, TranslationLanguagesRequestComposer, Transla
 import { YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomSettingsComposer, YouTubeRoomSettingsEvent, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from './messages';
 import { HousekeepingActionLogEvent, HousekeepingActionResultEvent, HousekeepingBanUserComposer, HousekeepingDashboardEvent, HousekeepingDeleteRoomComposer, HousekeepingFindRoomByIdComposer, HousekeepingFindUserByIdComposer, HousekeepingFindUserByNameComposer, HousekeepingForceDisconnectUserComposer, HousekeepingGetDashboardComposer, HousekeepingGiveCreditsComposer, HousekeepingGiveCurrencyComposer, HousekeepingGrantItemComposer, HousekeepingKickAllFromRoomComposer, HousekeepingKickUserComposer, HousekeepingListActionLogComposer, HousekeepingMuteRoomComposer, HousekeepingMuteUserComposer, HousekeepingResetUserPasswordComposer, HousekeepingRoomDetailEvent, HousekeepingRoomListEvent, HousekeepingRoomStateComposer, HousekeepingSearchRoomsComposer, HousekeepingSendHotelAlertComposer, HousekeepingSetHcSubscriptionComposer, HousekeepingSetUserRankComposer, HousekeepingTradeLockUserComposer, HousekeepingTransferRoomOwnershipComposer, HousekeepingUnbanUserComposer, HousekeepingUserDetailEvent } from './messages';
 import { CatalogAdminReorderOffersComposer, CatalogAdminSavePageIconComposer, CatalogAdminSavePageImagesComposer, CatalogAdminSetPageEnabledComposer, CatalogAdminSetPageVisibleComposer } from './messages/outgoing/catalog';
+import { CatalogStudioAcquireLockComposer, CatalogStudioDiscardComposer, CatalogStudioDocumentApplyComposer, CatalogStudioDocumentDryRunComposer, CatalogStudioExportComposer, CatalogStudioHistoryComposer, CatalogStudioOpenSessionComposer, CatalogStudioPreviewComposer, CatalogStudioPublishComposer, CatalogStudioReleaseLockComposer, CatalogStudioRenewLockComposer, CatalogStudioRestoreComposer, CatalogStudioUndoComposer, CatalogStudioValidateComposer } from './messages/outgoing/catalog/studio';
+import { CatalogStudioAcquireLockEvent, CatalogStudioDiscardEvent, CatalogStudioDocumentResultEvent, CatalogStudioHistoryEvent, CatalogStudioPreviewEvent, CatalogStudioPublishEvent, CatalogStudioReleaseLockEvent, CatalogStudioRenewLockEvent, CatalogStudioRestoreEvent, CatalogStudioSessionEvent, CatalogStudioUndoEvent, CatalogStudioValidationEvent } from './messages/incoming/catalog/studio';
 import { RareValuesEvent, RequestRareValuesComposer } from './messages';
 import { WheelBuySpinComposer, WheelDataEvent, WheelOpenComposer, WheelRecentWinsEvent, WheelResultEvent, WheelSpinComposer } from './messages';
 import { WheelAdminGetPrizesComposer, WheelAdminPrizesEvent, WheelAdminSavePrizesComposer } from './messages';
@@ -93,6 +95,18 @@ export class NitroMessages implements IMessageConfiguration
 		this._events.set(IncomingHeader.CATALOG_ADMIN_RESULT, CatalogAdminResultEvent);
         this._events.set(IncomingHeader.CATALOG_ADMIN_OFFER_DETAILS, CatalogAdminOfferDetailsEvent);
         this._events.set(IncomingHeader.CATALOG_ADMIN_PAGE_DETAILS, CatalogAdminPageDetailsEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_OPEN_SESSION, CatalogStudioSessionEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_ACQUIRE_LOCK, CatalogStudioAcquireLockEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_RENEW_LOCK, CatalogStudioRenewLockEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_RELEASE_LOCK, CatalogStudioReleaseLockEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_LOAD_HISTORY, CatalogStudioHistoryEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_UNDO, CatalogStudioUndoEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_VALIDATE, CatalogStudioValidationEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_PUBLISH, CatalogStudioPublishEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_DISCARD, CatalogStudioDiscardEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_RESTORE, CatalogStudioRestoreEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_PREVIEW, CatalogStudioPreviewEvent);
+        this._events.set(IncomingHeader.CATALOG_STUDIO_DOCUMENT_RESULT, CatalogStudioDocumentResultEvent);
 
 		// Furni Editor
 		this._events.set(IncomingHeader.FURNI_EDITOR_SEARCH_RESULT, FurniEditorSearchResultEvent);
@@ -745,6 +759,20 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_SET_PAGE_ENABLED, CatalogAdminSetPageEnabledComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_SET_PAGE_VISIBLE, CatalogAdminSetPageVisibleComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_REORDER_OFFERS, CatalogAdminReorderOffersComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_OPEN_SESSION, CatalogStudioOpenSessionComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_ACQUIRE_LOCK, CatalogStudioAcquireLockComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_RENEW_LOCK, CatalogStudioRenewLockComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_RELEASE_LOCK, CatalogStudioReleaseLockComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_LOAD_HISTORY, CatalogStudioHistoryComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_UNDO, CatalogStudioUndoComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_VALIDATE, CatalogStudioValidateComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_PUBLISH, CatalogStudioPublishComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_DISCARD, CatalogStudioDiscardComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_RESTORE, CatalogStudioRestoreComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_PREVIEW, CatalogStudioPreviewComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_EXPORT, CatalogStudioExportComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_DOCUMENT_DRY_RUN, CatalogStudioDocumentDryRunComposer);
+        this._composers.set(OutgoingHeader.CATALOG_STUDIO_DOCUMENT_APPLY, CatalogStudioDocumentApplyComposer);
 
 		// Furni Editor
 		this._composers.set(OutgoingHeader.FURNI_EDITOR_SEARCH, FurniEditorSearchComposer);

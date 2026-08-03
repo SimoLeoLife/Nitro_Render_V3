@@ -4,9 +4,9 @@ export class CatalogAdminSetPageEnabledComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof CatalogAdminSetPageEnabledComposer>;
 
-    constructor(pageId: number, enabled: boolean, catalogMode: string = 'NORMAL')
+    constructor(pageId: number, enabled: boolean, catalogMode: string = 'NORMAL', draftVersionId: number = 0, expectedRevision: number = 0, lockToken: string = '', summary: string = '')
     {
-        this._data = [ pageId, enabled, catalogMode ];
+        this._data = [ pageId, enabled, catalogMode, draftVersionId, expectedRevision, lockToken, summary ];
     }
 
     dispose(): void { this._data = null; }
