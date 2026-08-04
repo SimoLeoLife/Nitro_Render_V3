@@ -285,20 +285,21 @@ export class RoomPlane implements IRoomPlane
                     }
                 }
 
-                const pickVisualizationForScale = <T extends { size: number }>(list: T[] | null | undefined): T | null =>
+                const pickVisualizationForScale = <T extends { size?: number }>(list: T[] | null | undefined): T | null =>
                 {
                     if(!list || !list.length) return null;
 
-                    const exact = list.find(visualization => (visualization.size === planeGeometry.scale));
+                    const getVisualizationSize = (visualization: T) => (visualization.size ?? planeGeometry.scale);
+                    const exact = list.find(visualization => (getVisualizationSize(visualization) === planeGeometry.scale));
 
                     if(exact) return exact;
 
                     let nearest = list[0];
-                    let nearestDiff = Math.abs(nearest.size - planeGeometry.scale);
+                    let nearestDiff = Math.abs(getVisualizationSize(nearest) - planeGeometry.scale);
 
                     for(const visualization of list)
                     {
-                        const diff = Math.abs(visualization.size - planeGeometry.scale);
+                        const diff = Math.abs(getVisualizationSize(visualization) - planeGeometry.scale);
 
                         if(diff < nearestDiff)
                         {
