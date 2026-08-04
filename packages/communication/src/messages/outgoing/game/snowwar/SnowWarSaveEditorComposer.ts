@@ -21,6 +21,7 @@ export interface ISnowWarEditorItem
  *   repeat { int x, int y }
  *   int    heightmapRowCount
  *   repeat { string row }
+ *   string arenaName
  */
 export class SnowWarSaveEditorComposer implements IMessageComposer<(string | number)[]>
 {
@@ -30,7 +31,8 @@ export class SnowWarSaveEditorComposer implements IMessageComposer<(string | num
         mapId: number,
         items: ISnowWarEditorItem[],
         spawns: { x: number; y: number }[],
-        heightmap: string[])
+        heightmap: string[],
+        arenaName: string)
     {
         const data: (string | number)[] = [ mapId, items.length ];
 
@@ -52,6 +54,8 @@ export class SnowWarSaveEditorComposer implements IMessageComposer<(string | num
         {
             data.push(row);
         }
+
+        data.push(arenaName);
 
         this._data = data;
     }

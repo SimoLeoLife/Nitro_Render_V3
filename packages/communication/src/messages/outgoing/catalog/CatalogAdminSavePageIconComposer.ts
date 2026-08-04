@@ -4,9 +4,16 @@ export class CatalogAdminSavePageIconComposer implements IMessageComposer<Constr
 {
     private _data: ConstructorParameters<typeof CatalogAdminSavePageIconComposer>;
 
-    constructor(pageId: number, iconId: number)
+    constructor(
+        pageId: number,
+        iconId: number,
+        catalogType: string = 'NORMAL',
+        draftVersionId: number = 0,
+        expectedRevision: number = 0,
+        lockToken: string = '',
+        summary: string = '')
     {
-        this._data = [ pageId, iconId ];
+        this._data = [ pageId, iconId, catalogType, draftVersionId, expectedRevision, lockToken, summary ];
     }
 
     dispose(): void

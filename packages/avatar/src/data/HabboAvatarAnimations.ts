@@ -1,3 +1,20 @@
+const snowWarHeadOffsets = (front: boolean) => [0, 1, 2, 3].map(frame =>
+{
+    const hidden = frame > 1;
+    return {
+        'id': frame,
+        ...(frame === 3 ? { 'repeats': 100 } : {}),
+        'directions': [0, 2, 4, 6].map(direction => ({
+            'id': direction,
+            'bodyParts': [{
+                'id': 'head',
+                'dx': hidden ? -100 : ((direction < 3) === front ? 10 : -10),
+                'dy': (direction === 0 || direction === 6) ? 4 : 5
+            }]
+        }))
+    };
+});
+
 export const HabboAvatarAnimations = {
     'animations': [
         {
@@ -1912,6 +1929,66 @@ export const HabboAvatarAnimations = {
                     ]
                 },
             ]
+        },
+        {
+            'id': 'SnowWarRun',
+            'parts': [{
+                'setType': 'ch',
+                'frames': [3, 2, 1, 0].map(number => ({ 'number': number, 'assetPartDefinition': 'swrun' }))
+            }]
+        },
+        {
+            'id': 'SnowWarDieFront',
+            'parts': [{
+                'setType': 'ch',
+                'frames': [
+                    { 'number': 0, 'assetPartDefinition': 'swdie' },
+                    { 'number': 0, 'assetPartDefinition': 'swdie' },
+                    { 'number': 1, 'assetPartDefinition': 'swdie' },
+                    { 'number': 1, 'assetPartDefinition': 'swdie', 'repeats': 100 }
+                ]
+            }],
+            'offsets': { 'frames': snowWarHeadOffsets(true) }
+        },
+        {
+            'id': 'SnowWarDieBack',
+            'parts': [{
+                'setType': 'ch',
+                'frames': [
+                    { 'number': 2, 'assetPartDefinition': 'swdie' },
+                    { 'number': 2, 'assetPartDefinition': 'swdie' },
+                    { 'number': 3, 'assetPartDefinition': 'swdie' },
+                    { 'number': 3, 'assetPartDefinition': 'swdie', 'repeats': 100 }
+                ]
+            }],
+            'offsets': { 'frames': snowWarHeadOffsets(false) }
+        },
+        {
+            'id': 'SnowWarPick',
+            'parts': [{
+                'setType': 'ch',
+                'frames': [{ 'number': 0, 'assetPartDefinition': 'swpick' }]
+            }],
+            'offsets': {
+                'frames': [{
+                    'id': 0,
+                    'directions': [0, 1, 2, 3, 4, 5, 6, 7].map(direction => ({
+                        'id': direction,
+                        'bodyParts': [{ 'id': 'head', 'dx': 0, 'dy': 3 }]
+                    }))
+                }]
+            }
+        },
+        {
+            'id': 'SnowWarThrow',
+            'parts': [{
+                'setType': 'ch',
+                'frames': [
+                    { 'number': 0, 'assetPartDefinition': 'swthrow', 'repeats': 2 },
+                    { 'number': 1, 'assetPartDefinition': 'swthrow', 'repeats': 6 },
+                    { 'number': 0, 'assetPartDefinition': 'swthrow', 'repeats': 100 }
+                ]
+            }]
         },
     ]
 };

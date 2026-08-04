@@ -4,9 +4,17 @@ export class CatalogAdminSavePageImagesComposer implements IMessageComposer<Cons
 {
     private _data: ConstructorParameters<typeof CatalogAdminSavePageImagesComposer>;
 
-    constructor(pageId: number, headerImage: string, teaserImage: string)
+    constructor(
+        pageId: number,
+        headerImage: string,
+        teaserImage: string,
+        catalogType: string = 'NORMAL',
+        draftVersionId: number = 0,
+        expectedRevision: number = 0,
+        lockToken: string = '',
+        summary: string = '')
     {
-        this._data = [ pageId, headerImage, teaserImage ];
+        this._data = [ pageId, headerImage, teaserImage, catalogType, draftVersionId, expectedRevision, lockToken, summary ];
     }
 
     dispose(): void

@@ -1,4 +1,5 @@
-import { RoomObjectVariable } from '@nitrots/api';
+import { IGraphicAsset, RoomObjectVariable } from '@nitrots/api';
+import { Matrix, RenderTexture, Texture } from 'pixi.js';
 import { FurnitureDynamicThumbnailVisualization } from './FurnitureDynamicThumbnailVisualization';
 
 export class FurnitureExternalImageVisualization extends FurnitureDynamicThumbnailVisualization
@@ -12,6 +13,49 @@ export class FurnitureExternalImageVisualization extends FurnitureDynamicThumbna
 
         this._url = null;
         this._typePrefix = null;
+    }
+
+    protected generateTransformedThumbnail(texture: Texture, asset: IGraphicAsset): Texture
+    {
+        let outlineTexture: RenderTexture = null;
+
+        if(this._hasOutline)
+        {
+            outlineTexture = this.buildOutlinedTexture(texture);
+            texture = outlineTexture;
+        }
+
+        texture.source.scaleMode = 'linear';
+
+        const texW = texture.width;
+        const texH = texture.height;
+        const scale = Math.min(asset.width / texW, asset.height / texH);
+
+        const matrix = new Matrix();
+        matrix.a = scale;
+        matrix.c = 0;
+        matrix.d = scale;
+        matrix.tx = 0;
+        matrix.ty = 0;
+
+        if(this.direction === 2)
+        {
+            matrix.b = -(0.5 * scale);
+        }
+        else if(this.direction === 0 || this.direction === 4)
+        {
+            matrix.b = 0.5 * scale;
+        }
+        else
+        {
+            matrix.b = 0;
+        }
+
+        const renderTexture = this.renderThumbnailWithMatrix(texture, matrix);
+
+        if(outlineTexture) outlineTexture.destroy(true);
+
+        return renderTexture;
     }
 
     protected getThumbnailURL(): string

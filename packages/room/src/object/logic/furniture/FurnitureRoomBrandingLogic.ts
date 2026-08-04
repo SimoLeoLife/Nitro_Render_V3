@@ -13,6 +13,7 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
     public static OFFSETY_KEY: string = 'offsetY';
     public static OFFSETZ_KEY: string = 'offsetZ';
     public static SCALE_KEY: string = 'scale';
+    public static ALPHA_KEY: string = 'alpha';
 
     protected _disableFurnitureSelection: boolean;
     protected _hasClickUrl: boolean;
@@ -98,6 +99,10 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
         const scale = isNaN(scaleRaw) ? 100 : scaleRaw;
         this.object.model.setValue(RoomObjectVariable.FURNITURE_BRANDING_SCALE, scale);
 
+        const alphaRaw = parseInt(objectData.getValue(FurnitureRoomBrandingLogic.ALPHA_KEY));
+        const alpha = isNaN(alphaRaw) ? 100 : alphaRaw;
+        this.object.model.setValue(RoomObjectVariable.FURNITURE_BRANDING_ALPHA, alpha);
+
         let options = (((FurnitureRoomBrandingLogic.IMAGEURL_KEY + '=') + ((imageUrl !== null) ? imageUrl : '')) + '\t');
 
         if(this._hasClickUrl) options = (options + (((FurnitureRoomBrandingLogic.CLICKURL_KEY + '=') + ((clickUrl !== null) ? clickUrl : '')) + '\t'));
@@ -106,6 +111,7 @@ export class FurnitureRoomBrandingLogic extends FurnitureLogic
         options = (options + (((FurnitureRoomBrandingLogic.OFFSETY_KEY + '=') + offsetY) + '\t'));
         options = (options + (((FurnitureRoomBrandingLogic.OFFSETZ_KEY + '=') + offsetZ) + '\t'));
         options = (options + (((FurnitureRoomBrandingLogic.SCALE_KEY + '=') + scale) + '\t'));
+        options = (options + (((FurnitureRoomBrandingLogic.ALPHA_KEY + '=') + alpha) + '\t'));
 
         this.object.model.setValue(RoomWidgetEnumItemExtradataParameter.INFOSTAND_EXTRA_PARAM, (RoomWidgetEnumItemExtradataParameter.BRANDING_OPTIONS + options));
     }

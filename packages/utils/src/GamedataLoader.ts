@@ -1,4 +1,4 @@
-import { ConfigJsonError, fetchConfigJson, isMissingResource, resolveJsonMode } from './JsonParser';
+import { ConfigJsonError, fetchConfigJson, isMissingResource, JsonMode, resolveJsonMode } from './JsonParser';
 import { NitroLogger } from './NitroLogger';
 
 export const DEFAULT_TIERS = [ 'core', 'custom', 'seasonal' ] as const;
@@ -30,8 +30,7 @@ const joinUrl = (base: string, path: string): string =>
 };
 
 // Returns the parsed payload when the manifest exists, null on a clean 404.
-// Re-throws on any other error (network failure, 5xx, parse error) so callers
-// don't silently skip a tier because of a typo in manifest.json5.
+// Re-throws on any other error so malformed JSONC never becomes a missing tier.
 const tryFetchManifest = async <T = any>(url: string): Promise<T | null> =>
 {
     try
@@ -45,24 +44,26 @@ const tryFetchManifest = async <T = any>(url: string): Promise<T | null> =>
     }
 };
 
-// Pick the manifest extension from the active JSON mode instead of always
-// probing both — that just doubles the failed requests on startup.
-//   json5  -> only <name>.json5
-//   legacy -> only <name>.json
-//   auto   -> try .json5 first, fall back to .json
-// All treated as optional (a clean 404 -> null); anything else bubbles up.
-const tryFetchManifestPair = async <T = any>(baseUrl: string, name: string): Promise<T | null> =>
+// Pick manifest extensions from the active mode. A clean 404 advances to the
+// next candidate; network and parse failures remain visible to the caller.
+export const manifestCandidates = (mode: JsonMode, name: string = 'manifest'): readonly string[] =>
 {
-    const mode = resolveJsonMode();
+    if(mode === 'legacy') return [ `${ name }.json` ];
+    if(mode === 'jsonc') return [ `${ name }.jsonc` ];
 
-    if(mode === 'json5') return tryFetchManifest<T>(joinUrl(baseUrl, `${ name }.json5`));
+    return [ `${ name }.jsonc`, `${ name }.json` ];
+};
 
-    if(mode === 'legacy') return tryFetchManifest<T>(joinUrl(baseUrl, `${ name }.json`));
+const tryFetchManifestPair = async <T = any>(baseUrl: string, name: string, mode: JsonMode): Promise<T | null> =>
+{
+    for(const candidate of manifestCandidates(mode, name))
+    {
+        const result = await tryFetchManifest<T>(joinUrl(baseUrl, candidate));
 
-    const json5 = await tryFetchManifest<T>(joinUrl(baseUrl, `${ name }.json5`));
-    if(json5 !== null) return json5;
+        if(result !== null) return result;
+    }
 
-    return await tryFetchManifest<T>(joinUrl(baseUrl, `${ name }.json`));
+    return null;
 };
 
 const isPlainObject = (value: any): value is Record<string, any> => !!value && typeof value === 'object' && !Array.isArray(value);
@@ -164,7 +165,7 @@ interface RootManifest
 const fetchFilesInOrder = async (baseUrl: string, files: readonly string[]): Promise<any[]> =>
     Promise.all(files.map(file => fetchConfigJson(joinUrl(baseUrl, file))));
 
-export const loadGamedata = async <T = any>(url: string, options: GamedataLoadOptions = {}): Promise<T> =>
+export const loadGamedataWithMode = async <T = any>(url: string, mode: JsonMode, options: GamedataLoadOptions = {}): Promise<T> =>
 {
     if(!url) throw new Error('loadGamedata: empty URL');
 
@@ -174,7 +175,7 @@ export const loadGamedata = async <T = any>(url: string, options: GamedataLoadOp
     }
 
     const idKeys = options.mergeArrayIdKeys ?? DEFAULT_ID_KEYS;
-    const rootManifest = await tryFetchManifestPair<RootManifest>(url, 'manifest');
+    const rootManifest = await tryFetchManifestPair<RootManifest>(url, 'manifest', mode);
 
     const tiers = (rootManifest?.tiers && rootManifest.tiers.length)
         ? rootManifest.tiers
@@ -189,7 +190,7 @@ export const loadGamedata = async <T = any>(url: string, options: GamedataLoadOp
         Promise.all(tiers.map(async tier =>
         {
             const tierUrl = joinUrl(url, `${ tier }/`);
-            const manifest = await tryFetchManifestPair<TierManifest>(tierUrl, 'manifest');
+            const manifest = await tryFetchManifestPair<TierManifest>(tierUrl, 'manifest', mode);
 
             return { tier, tierUrl, manifest };
         }))
@@ -214,7 +215,10 @@ export const loadGamedata = async <T = any>(url: string, options: GamedataLoadOp
         }
     }
 
-    if(merged === undefined) throw new ConfigJsonError(`loadGamedata: directory mode at "${ url }" produced no data — make sure at least one tier (core/custom/seasonal) has a manifest.json5 with a 'files' array`, 'fetch', url);
+    if(merged === undefined) throw new ConfigJsonError(`loadGamedata: directory mode at "${ url }" produced no data — make sure at least one tier has a manifest.jsonc or manifest.json with a "files" array`, 'fetch', url);
 
     return merged as T;
 };
+
+export const loadGamedata = async <T = any>(url: string, options: GamedataLoadOptions = {}): Promise<T> =>
+    loadGamedataWithMode<T>(url, resolveJsonMode(), options);

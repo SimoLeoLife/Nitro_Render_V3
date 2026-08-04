@@ -122,30 +122,10 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
     }
 
     protected generateTransformedThumbnail(texture: Texture, asset: IGraphicAsset): Texture {
-        const assetWidth = asset.width;
-        const assetHeight = asset.height;
         let outlineTexture: RenderTexture = null;
 
-        if(this._hasOutline)
-        {
-            const borderSize = 20;
-            const bgWidth = texture.width + borderSize * 2;
-            const bgHeight = texture.height + borderSize * 2;
-
-            const container = new Container();
-            const background = new Sprite(Texture.WHITE);
-            background.tint = 0x000000;
-            background.width = bgWidth;
-            background.height = bgHeight;
-
-            const imageSprite = new Sprite(texture);
-            imageSprite.position.set(borderSize, borderSize);
-
-            container.addChild(background, imageSprite);
-
-            outlineTexture = RenderTexture.create({ width: bgWidth, height: bgHeight, resolution: 1 });
-            GetRenderer().render({ container, target: outlineTexture, clear: true });
-
+        if (this._hasOutline) {
+            outlineTexture = this.buildOutlinedTexture(texture);
             texture = outlineTexture;
         }
 
@@ -153,27 +133,26 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
 
         const texW = texture.width;
         const texH = texture.height;
-        const scaleX = assetWidth / texW;
-        const scaleY = assetHeight / texH;
+        const scaleX = asset.width / texW;
+        const scaleY = asset.height / texH;
 
         const matrix = new Matrix();
 
-        switch(this.direction)
-        {
+        switch (this.direction) {
             case 2:
                 matrix.a = scaleX;
                 matrix.b = -(0.5 * scaleX);
                 matrix.c = 0;
-                matrix.d = (scaleY / 1.6);
+                matrix.d = scaleY / 1.6;
                 matrix.tx = 0;
-                matrix.ty = (0.5 * scaleX * texW);
+                matrix.ty = 0.5 * scaleX * texW;
                 break;
             case 0:
             case 4:
                 matrix.a = scaleX;
-                matrix.b = (0.5 * scaleX);
+                matrix.b = 0.5 * scaleX;
                 matrix.c = 0;
-                matrix.d = (scaleY / 1.6);
+                matrix.d = scaleY / 1.6;
                 matrix.tx = 0;
                 matrix.ty = 0;
                 break;
@@ -186,7 +165,39 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
                 matrix.ty = 0;
         }
 
-        // Calculate transformed corners manually for accurate bounds
+        const renderTexture = this.renderThumbnailWithMatrix(texture, matrix);
+
+        if (outlineTexture) outlineTexture.destroy(true);
+
+        return renderTexture;
+    }
+
+    protected buildOutlinedTexture(texture: Texture): RenderTexture {
+        const borderSize = 20;
+        const bgWidth = texture.width + borderSize * 2;
+        const bgHeight = texture.height + borderSize * 2;
+
+        const container = new Container();
+        const background = new Sprite(Texture.WHITE);
+        background.tint = 0x000000;
+        background.width = bgWidth;
+        background.height = bgHeight;
+
+        const imageSprite = new Sprite(texture);
+        imageSprite.position.set(borderSize, borderSize);
+
+        container.addChild(background, imageSprite);
+
+        const outlineTexture = RenderTexture.create({ width: bgWidth, height: bgHeight, resolution: 1 });
+        GetRenderer().render({ container, target: outlineTexture, clear: true });
+
+        return outlineTexture;
+    }
+
+    protected renderThumbnailWithMatrix(texture: Texture, matrix: Matrix): RenderTexture {
+        const texW = texture.width;
+        const texH = texture.height;
+
         const corners = [
             { x: matrix.tx, y: matrix.ty },
             { x: matrix.a * texW + matrix.tx, y: matrix.b * texW + matrix.ty },
@@ -215,10 +226,6 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
 
         const renderTexture = RenderTexture.create({ width: renderWidth, height: renderHeight, resolution: 1 });
         GetRenderer().render({ container: transformedSprite, target: renderTexture, clear: true });
-
-        if (outlineTexture) {
-            outlineTexture.destroy(true);
-        }
 
         return renderTexture;
     }

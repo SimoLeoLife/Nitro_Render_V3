@@ -4,9 +4,9 @@ export class SnowWarWalkComposer implements IMessageComposer<ConstructorParamete
 {
     private _data: ConstructorParameters<typeof SnowWarWalkComposer>;
 
-    constructor(worldX: number, worldY: number)
+    constructor(worldX: number, worldY: number, turn: number = 0, subturn: number = 0)
     {
-        this._data = [ worldX, worldY ];
+        this._data = [ worldX, worldY, turn, subturn ];
     }
 
     dispose(): void

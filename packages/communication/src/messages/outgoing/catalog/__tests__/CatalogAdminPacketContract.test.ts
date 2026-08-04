@@ -3,6 +3,7 @@ import { NitroMessages } from '../../../../NitroMessages';
 import { OutgoingHeader } from '../../OutgoingHeader';
 import { CatalogAdminSavePageIconComposer } from '../CatalogAdminSavePageIconComposer';
 import { CatalogAdminSavePageImagesComposer } from '../CatalogAdminSavePageImagesComposer';
+import * as CatalogAdminComposers from '..';
 
 describe('catalog admin packet contract', () =>
 {
@@ -18,5 +19,91 @@ describe('catalog admin packet contract', () =>
 
         expect(messages.composers.get(10060)).toBe(CatalogAdminSavePageImagesComposer);
         expect(messages.composers.get(10061)).toBe(CatalogAdminSavePageIconComposer);
+    });
+
+    it('uses dedicated page state packets so root parent id remains available for moves', () =>
+    {
+        const SetEnabled = (CatalogAdminComposers as any).CatalogAdminSetPageEnabledComposer;
+        const SetVisible = (CatalogAdminComposers as any).CatalogAdminSetPageVisibleComposer;
+
+        expect((OutgoingHeader as any).CATALOG_ADMIN_SET_PAGE_ENABLED).toBe(10064);
+        expect((OutgoingHeader as any).CATALOG_ADMIN_SET_PAGE_VISIBLE).toBe(10065);
+        expect(new SetEnabled(42, false, 'NORMAL').getMessageArray()).toEqual([ 42, false, 'NORMAL', 0, 0, '', '' ]);
+        expect(new SetVisible(42, true, 'NORMAL').getMessageArray()).toEqual([ 42, true, 'NORMAL', 0, 0, '', '' ]);
+    });
+
+    it('sends offer ordering as one atomic batch', () =>
+    {
+        const ReorderOffers = (CatalogAdminComposers as any).CatalogAdminReorderOffersComposer;
+
+        expect((OutgoingHeader as any).CATALOG_ADMIN_REORDER_OFFERS).toBe(10066);
+        expect(new ReorderOffers([ { id: 10, orderNumber: 0 }, { id: 11, orderNumber: 1 } ], 'NORMAL').getMessageArray())
+            .toEqual([ 2, 10, 0, 11, 1, 'NORMAL', 0, 0, '', '' ]);
+    });
+
+    it('sends every editable page field when saving', () =>
+    {
+        const SavePage = (CatalogAdminComposers as any).CatalogAdminSavePageComposer;
+        const message = new SavePage(
+            42, 'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
+            'headline', 'teaser', 'details', 'NORMAL', 'BOTH', 'text one',
+            3, true, false, 'special', 'text two', 'teaser text', 123, '1;2;3',
+            12, 7, 'token-123', 'Updated page: Guild shop'
+        ).getMessageArray();
+
+        expect(message).toEqual([
+            42, 'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
+            'headline', 'teaser', 'details', 'NORMAL', 'BOTH', 'text one',
+            3, true, false, 'special', 'text two', 'teaser text', 123, '1;2;3',
+            12, 7, 'token-123', 'Updated page: Guild shop'
+        ]);
+    });
+
+    it('appends the shared draft envelope to legacy edit packets', () =>
+    {
+        const SavePage = (CatalogAdminComposers as any).CatalogAdminSavePageComposer;
+        const message = new SavePage(
+            42, 'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
+            'headline', 'teaser', 'details', 'NORMAL', 'BOTH', 'text one',
+            3, true, false, 'special', 'text two', 'teaser text', 123, '1;2;3',
+            12, 7, 'token-123', 'Updated page: Guild shop'
+        ).getMessageArray();
+
+        expect(message.slice(-4)).toEqual([ 12, 7, 'token-123', 'Updated page: Guild shop' ]);
+    });
+
+    it('uses the shared draft for inspector reads and page asset mutations', () =>
+    {
+        const LoadPage = (CatalogAdminComposers as any).CatalogAdminLoadPageComposer;
+        const LoadOffer = (CatalogAdminComposers as any).CatalogAdminLoadOfferComposer;
+        const MoveOffer = (CatalogAdminComposers as any).CatalogAdminMoveOfferComposer;
+
+        expect(new LoadPage(42, 'NORMAL', 12, 7).getMessageArray())
+            .toEqual([ 42, 'NORMAL', 12, 7 ]);
+        expect(new LoadOffer(99, 'NORMAL', 12, 7).getMessageArray())
+            .toEqual([ 99, 'NORMAL', 12, 7 ]);
+        expect(new MoveOffer(99, 3, 'NORMAL', 12, 7, 'offer-token', 'Moved offer #99').getMessageArray())
+            .toEqual([ 99, 3, 'NORMAL', 12, 7, 'offer-token', 'Moved offer #99' ]);
+        expect(new CatalogAdminSavePageIconComposer(42, 145, 'BUILDER', 12, 7, 'page-token', 'Updated page icon').getMessageArray())
+            .toEqual([ 42, 145, 'BUILDER', 12, 7, 'page-token', 'Updated page icon' ]);
+        expect(new CatalogAdminSavePageImagesComposer(42, 'head', 'teaser', 'NORMAL', 12, 7, 'page-token', 'Updated page images').getMessageArray())
+            .toEqual([ 42, 'head', 'teaser', 'NORMAL', 12, 7, 'page-token', 'Updated page images' ]);
+    });
+
+    it('sends every editable page field when creating', () =>
+    {
+        const CreatePage = (CatalogAdminComposers as any).CatalogAdminCreatePageComposer;
+        const message = new CreatePage(
+            'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
+            'NORMAL', 'BOTH', 3, true, false, 'headline', 'teaser', 'special',
+            'text one', 'text two', 'details', 'teaser text', 123, '1;2;3'
+        ).getMessageArray();
+
+        expect(message).toEqual([
+            'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
+            'NORMAL', 'BOTH', 3, true, false, 'headline', 'teaser', 'special',
+            'text one', 'text two', 'details', 'teaser text', 123, '1;2;3',
+            0, 0, '', ''
+        ]);
     });
 });

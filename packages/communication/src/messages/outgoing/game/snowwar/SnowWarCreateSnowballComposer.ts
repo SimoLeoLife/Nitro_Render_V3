@@ -1,7 +1,21 @@
 import { IMessageComposer } from '@nitrots/api';
 
-export class SnowWarCreateSnowballComposer implements IMessageComposer<[]>
+export class SnowWarCreateSnowballComposer implements IMessageComposer<ConstructorParameters<typeof SnowWarCreateSnowballComposer>>
 {
-    public getMessageArray(): [] { return []; }
-    public dispose(): void { return; }
+    private _data: ConstructorParameters<typeof SnowWarCreateSnowballComposer>;
+
+    constructor(turn: number = 0, subturn: number = 0)
+    {
+        this._data = [ turn, subturn ];
+    }
+
+    public getMessageArray()
+    {
+        return this._data;
+    }
+
+    public dispose(): void
+    {
+        this._data = null;
+    }
 }

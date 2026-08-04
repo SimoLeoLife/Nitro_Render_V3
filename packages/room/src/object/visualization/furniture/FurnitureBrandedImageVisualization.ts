@@ -19,6 +19,7 @@ export class FurnitureBrandedImageVisualization extends FurnitureVisualization
     protected _offsetY: number;
     protected _offsetZ: number;
     protected _imageScale: number;
+    protected _imageAlpha: number;
     protected _currentFrame: number;
     protected _totalFrames: number;
 
@@ -34,6 +35,7 @@ export class FurnitureBrandedImageVisualization extends FurnitureVisualization
         this._offsetY = 0;
         this._offsetZ = 0;
         this._imageScale = 100;
+        this._imageAlpha = 100;
         this._currentFrame = -1;
         this._totalFrames = -1;
     }
@@ -68,6 +70,9 @@ export class FurnitureBrandedImageVisualization extends FurnitureVisualization
             this._offsetY = (this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_BRANDING_OFFSET_Y) || 0);
             this._offsetZ = (this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_BRANDING_OFFSET_Z) || 0);
             this._imageScale = (this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_BRANDING_SCALE) || 100);
+
+            const alpha = this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_BRANDING_ALPHA);
+            this._imageAlpha = ((alpha === undefined) || (alpha === null)) ? 100 : alpha;
         }
 
         if(!this._imageReady)
@@ -251,8 +256,17 @@ export class FurnitureBrandedImageVisualization extends FurnitureVisualization
 
         if(!sprite) return;
 
-        sprite.scale = this.isBrandedImageLayer(scale, layerId)
-            ? Math.max(0.1, (this._imageScale || 100) / 100)
-            : 1;
+        if(this.isBrandedImageLayer(scale, layerId))
+        {
+            sprite.scale = Math.max(0.1, (this._imageScale || 100) / 100);
+            // `alpha` is authored 0-100 (percent); RoomObjectSprite.alpha is 0-255.
+            // 100 (or unset) = fully opaque.
+            const alphaPercent = Math.max(0, Math.min(100, this._imageAlpha ?? 100));
+            sprite.alpha = Math.round((alphaPercent / 100) * 255);
+        }
+        else
+        {
+            sprite.scale = 1;
+        }
     }
 }

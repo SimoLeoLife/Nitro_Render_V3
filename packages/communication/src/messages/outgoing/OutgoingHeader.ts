@@ -534,6 +534,23 @@ export class OutgoingHeader
     public static CATALOG_ADMIN_SAVE_PAGE_ICON = 10061;
     public static CATALOG_ADMIN_LOAD_OFFER = 10062;
     public static CATALOG_ADMIN_LOAD_PAGE = 10063;
+    public static CATALOG_ADMIN_SET_PAGE_ENABLED = 10064;
+    public static CATALOG_ADMIN_SET_PAGE_VISIBLE = 10065;
+    public static CATALOG_ADMIN_REORDER_OFFERS = 10066;
+    public static CATALOG_STUDIO_OPEN_SESSION = 10067;
+    public static CATALOG_STUDIO_ACQUIRE_LOCK = 10068;
+    public static CATALOG_STUDIO_RENEW_LOCK = 10069;
+    public static CATALOG_STUDIO_RELEASE_LOCK = 10070;
+    public static CATALOG_STUDIO_LOAD_HISTORY = 10071;
+    public static CATALOG_STUDIO_UNDO = 10072;
+    public static CATALOG_STUDIO_VALIDATE = 10073;
+    public static CATALOG_STUDIO_PUBLISH = 10074;
+    public static CATALOG_STUDIO_DISCARD = 10075;
+    public static CATALOG_STUDIO_RESTORE = 10076;
+    public static CATALOG_STUDIO_PREVIEW = 10077;
+    public static CATALOG_STUDIO_EXPORT = 10078;
+    public static CATALOG_STUDIO_DOCUMENT_DRY_RUN = 10079;
+    public static CATALOG_STUDIO_DOCUMENT_APPLY = 10080;
 
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;
@@ -598,6 +615,11 @@ export class OutgoingHeader
     public static TRAX_EDITOR_BUY_SONG = 9331;
     public static TRAX_EDITOR_SAVE_SONG = 9332;
     public static TRAX_EDITOR_DELETE_SONG = 9333;
+    public static SOUNDBOARD_REQUEST_SETTINGS = 9340;
+    public static SOUNDBOARD_SAVE_VOLUME = 9341;
+    public static SOUNDBOARD_CATALOG_REQUEST = 9342;
+    public static SOUNDBOARD_CATALOG_UPSERT = 9343;
+    public static SOUNDBOARD_CATALOG_REORDER = 9344;
     public static REQUEST_MESSENGER_CONVERSATIONS = 4900;
     public static REQUEST_MESSENGER_HISTORY = 4901;
     public static SEND_MESSENGER_MESSAGE = 4902;
@@ -616,6 +638,11 @@ export class OutgoingHeader
     public static SNOWWAR_JOIN_QUEUE = 6012;
     public static SNOWWAR_LEAVE_QUEUE = 6013;
     public static SNOWWAR_EXIT_EDITOR = 6014;
+    public static SNOWWAR_SELECT_ARENA = 6015;
+    public static SNOWWAR_GET_ALL_TIME_LEADERBOARD = 6027;
+    public static SNOWWAR_GET_ALL_TIME_FRIENDS_LEADERBOARD = 6028;
+    public static SNOWWAR_GET_WEEKLY_LEADERBOARD = 6029;
+    public static SNOWWAR_GET_WEEKLY_FRIENDS_LEADERBOARD = 6030;
 
     // Hotel view landing scene (client -> server)
     public static HOTEL_VIEW_LANDING_REQUEST = 9410;
