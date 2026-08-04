@@ -118,7 +118,7 @@ describe('catalog studio packet contract', () =>
         writer.writeInt(3); writer.writeInt(1); writer.writeInt(9); writer.writeString('Alice');
         writer.writeByte(1); writer.writeInt(2); writer.writeInt(1);
         writer.writeInt(11); writer.writeString('Summer catalog'); writer.writeString('2026-08-02T10:00:00Z');
-        writer.writeInt(2); writer.writeString('GZIP_BASE64_JSON'); writer.writeInt(2);
+        writer.writeString('GZIP_BASE64_JSON'); writer.writeInt(2);
         writer.writeString(encodedPages.slice(0, 40)); writer.writeString(encodedPages.slice(40));
 
         const parser = new CatalogStudioSessionMessageParser();

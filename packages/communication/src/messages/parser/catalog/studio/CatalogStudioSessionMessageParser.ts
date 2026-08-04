@@ -1,7 +1,6 @@
 import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
 import { ungzip } from 'pako';
 
-const SNAPSHOT_PAYLOAD_VERSION = 2;
 const SNAPSHOT_ENCODING = 'GZIP_BASE64_JSON';
 const MAX_PAGE_CHUNKS = 10_000;
 
@@ -127,7 +126,6 @@ export class CatalogStudioSessionMessageParser implements IMessageParser
         this.publishedVersions = Array.from({ length: wrapper.readInt() }, () => ({
             id: wrapper.readInt(), label: wrapper.readString(), publishedAt: wrapper.readString()
         }));
-        if(wrapper.readInt() !== SNAPSHOT_PAYLOAD_VERSION) return false;
         if(wrapper.readString() !== SNAPSHOT_ENCODING) return false;
 
         const pageChunkCount = wrapper.readInt();
