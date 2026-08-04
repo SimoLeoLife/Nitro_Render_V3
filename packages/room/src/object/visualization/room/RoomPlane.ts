@@ -285,19 +285,39 @@ export class RoomPlane implements IRoomPlane
                     }
                 }
 
+                const pickVisualizationForScale = <T extends { size: number }>(list: T[] | null | undefined): T | null =>
+                {
+                    if(!list || !list.length) return null;
+
+                    const exact = list.find(visualization => (visualization.size === planeGeometry.scale));
+
+                    if(exact) return exact;
+
+                    let nearest = list[0];
+                    let nearestDiff = Math.abs(nearest.size - planeGeometry.scale);
+
+                    for(const visualization of list)
+                    {
+                        const diff = Math.abs(visualization.size - planeGeometry.scale);
+
+                        if(diff < nearestDiff)
+                        {
+                            nearest = visualization;
+                            nearestDiff = diff;
+                        }
+                    }
+
+                    return nearest;
+                };
+
                 let planeVisualization = null;
                 if(dataType === 'landscapeData')
                 {
-                    planeVisualization = plane?.animatedVisualization?.find(visualization => (visualization.size === planeGeometry.scale)) ?? null;
-
-                    if(!planeVisualization)
-                    {
-                        planeVisualization = plane?.visualizations?.find(visualization => (visualization.size === planeGeometry.scale)) ?? null;
-                    }
+                    planeVisualization = (pickVisualizationForScale(plane?.animatedVisualization) ?? pickVisualizationForScale(plane?.visualizations));
                 }
                 else
                 {
-                    planeVisualization = plane?.visualizations?.find(visualization => (visualization.size === planeGeometry.scale)) ?? null;
+                    planeVisualization = pickVisualizationForScale(plane?.visualizations);
                 }
 
                 const layers = planeVisualization?.allLayers ?? [];
@@ -327,7 +347,7 @@ export class RoomPlane implements IRoomPlane
 
                             for(const candidateVisualization of candidateVisualizations)
                             {
-                                if(candidateVisualization?.size !== planeGeometry.scale) continue;
+                                if(candidateVisualization?.size !== (planeVisualization?.size ?? planeGeometry.scale)) continue;
 
                                 const candidateMaterialLayers = (candidateVisualization.allLayers ?? []).filter(layer => (layer as IAssetPlaneVisualizationLayer)?.materialId) as IAssetPlaneVisualizationLayer[];
                                 const candidateBackgroundLayer = candidateMaterialLayers[0];
@@ -437,11 +457,13 @@ export class RoomPlane implements IRoomPlane
                     }
                 }
 
-                return { texture, foregroundTexture, color: planeColor, baseAlignBottom, foregroundAlignBottom, animationLayers, backgroundColor, backgroundColorSource };
+                return { texture, foregroundTexture, color: planeColor, baseAlignBottom, foregroundAlignBottom, animationLayers, backgroundColor, backgroundColorSource, visualizationSize: (planeVisualization?.size ?? planeGeometry.scale) };
             };
 
             const planeData = getTextureAndColorForPlane(this._id, this._type, normal);
             const texture = this._hasTexture ? planeData.texture ?? Texture.WHITE : Texture.WHITE;
+
+            const planeTileScale = ((planeData.visualizationSize > 0) ? (planeGeometry.scale / planeData.visualizationSize) : 1);
 
             switch(this._type)
             {
@@ -482,6 +504,8 @@ export class RoomPlane implements IRoomPlane
                         }
                     });
 
+                    this._planeSprite.tileScale.set(planeTileScale, planeTileScale);
+
                     break;
                 }
                 case RoomPlane.TYPE_WALL: {
@@ -505,6 +529,8 @@ export class RoomPlane implements IRoomPlane
                             y: (this._textureOffsetY * texture.height)
                         }
                     });
+
+                    this._planeSprite.tileScale.set(planeTileScale, planeTileScale);
 
                     break;
                 }

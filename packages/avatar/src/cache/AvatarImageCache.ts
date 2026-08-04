@@ -1,6 +1,7 @@
-import { AvatarDirectionAngle, AvatarFigurePartType, AvatarScaleType, GeometryType, IActiveActionData, IAvatarImage } from '@nitrots/api';
-import { GetTickerTime } from '@nitrots/utils';
-import { Container, Matrix, Point, Rectangle, Sprite, Texture } from 'pixi.js';
+import { AvatarDirectionAngle, AvatarFigurePartType, AvatarScaleType, GeometryType, IActiveActionData, IAvatarImage, IGraphicAsset } from '@nitrots/api';
+import { GraphicAsset } from '@nitrots/assets';
+import { GetRenderer, GetTickerTime } from '@nitrots/utils';
+import { Container, Matrix, Point, Rectangle, RenderTexture, Sprite, Texture } from 'pixi.js';
 import { AvatarImageBodyPartContainer } from '../AvatarImageBodyPartContainer';
 import { AvatarImagePartContainer } from '../AvatarImagePartContainer';
 import { AvatarStructure } from '../AvatarStructure';
@@ -27,6 +28,7 @@ export class AvatarImageCache
 	private _defaultAction: string = 'std';
     private _unionImages: ImageData[];
     private _matrix: Matrix;
+    private _fallbackAssets: Map<string, IGraphicAsset>;
 
     constructor(structure: AvatarStructure, avatar: IAvatarImage, assets: AssetAliasCollection, scale: string)
     {
@@ -39,6 +41,7 @@ export class AvatarImageCache
         this._disposed = false;
         this._unionImages = [];
         this._matrix = new Matrix();
+        this._fallbackAssets = new Map();
     }
 
     public dispose(): void
@@ -50,6 +53,21 @@ export class AvatarImageCache
         this._assets = null;
         this._canvas = null;
         this._disposed = true;
+
+        if(this._fallbackAssets)
+        {
+            for(const asset of this._fallbackAssets.values())
+            {
+                if(!asset) continue;
+
+                if(asset.texture instanceof RenderTexture) asset.texture.destroy(true);
+
+                asset.recycle();
+            }
+
+            this._fallbackAssets.clear();
+            this._fallbackAssets = null;
+        }
 
         if(this._cache)
         {
@@ -351,6 +369,11 @@ export class AvatarImageCache
                         asset = this._assets.getAsset(assetName);
                     }
 
+                    if(!asset && (this._scale !== AvatarScaleType.LARGE))
+                    {
+                        asset = this.getSmallScaleFallbackAsset(assetPartDefinition, partType, partId, assetDirection, frameNumber);
+                    }
+
                     if(asset)
                     {
                         const texture = asset.texture;
@@ -396,6 +419,65 @@ export class AvatarImageCache
         }
 
         return new AvatarImageBodyPartContainer(imageData.container, offset, isCacheable);
+    }
+
+    private getSmallScaleFallbackAsset(assetPartDefinition: string, partType: string, partId: string, assetDirection: number, frameNumber: number): IGraphicAsset
+    {
+        const large = AvatarScaleType.LARGE;
+
+        let largeName = (large + '_' + assetPartDefinition + '_' + partType + '_' + partId + '_' + assetDirection + '_' + frameNumber);
+        let largeAsset = this._assets.getAsset(largeName);
+
+        if(!largeAsset)
+        {
+            largeName = (large + '_' + assetPartDefinition + '_' + partType + '_' + partId + '_' + assetDirection + '_0');
+            largeAsset = this._assets.getAsset(largeName);
+        }
+
+        if(!largeAsset)
+        {
+            largeName = (large + '_' + this._defaultAction + '_' + partType + '_' + partId + '_' + assetDirection + '_' + frameNumber);
+            largeAsset = this._assets.getAsset(largeName);
+        }
+
+        if(!largeAsset)
+        {
+            largeName = (large + '_' + this._defaultAction + '_' + partType + '_' + partId + '_' + assetDirection + '_0');
+            largeAsset = this._assets.getAsset(largeName);
+        }
+
+        if(!largeAsset) return null;
+
+        const existing = this._fallbackAssets.get(largeName);
+
+        if(existing) return existing;
+
+        const source = largeAsset.texture;
+
+        if(!source || !source.source) return null;
+
+        const renderer = GetRenderer();
+
+        if(!renderer) return null;
+
+        const halfWidth = Math.max(1, Math.round(largeAsset.width / 2));
+        const halfHeight = Math.max(1, Math.round(largeAsset.height / 2));
+
+        const renderTexture = RenderTexture.create({ width: halfWidth, height: halfHeight, resolution: 1 });
+        const sprite = new Sprite(source);
+
+        sprite.width = halfWidth;
+        sprite.height = halfHeight;
+
+        renderer.render({ container: sprite, target: renderTexture, clear: true });
+
+        sprite.destroy();
+
+        const fallback = GraphicAsset.createAsset((largeName + '_shfallback'), null, renderTexture, Math.round(largeAsset.x / 2), Math.round(largeAsset.y / 2), largeAsset.flipH, largeAsset.flipV, largeAsset.usesPalette);
+
+        this._fallbackAssets.set(largeName, fallback);
+
+        return fallback;
     }
 
     private convertColorToHex(color: number): string

@@ -8,6 +8,7 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
 
     private _thumbnailImageNormal: Texture;
     private _thumbnailDirection: number;
+    private _thumbnailSize: number;
     private _thumbnailChanged: boolean;
     private _thumbnailLayerId: number;
     private _thumbnailTexture: Texture;
@@ -20,6 +21,7 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
 
         this._thumbnailImageNormal = null;
         this._thumbnailDirection = -1;
+        this._thumbnailSize = -1;
         this._thumbnailChanged = false;
         this._thumbnailLayerId = -1;
         this._thumbnailTexture = null;
@@ -55,22 +57,24 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
     protected updateModel(scale: number): boolean {
         const flag = super.updateModel(scale);
 
-        if (!this._thumbnailChanged && (this._thumbnailDirection === this.direction)) {
+        const size = this.getValidSize(scale);
+
+        if (!this._thumbnailChanged && (this._thumbnailDirection === this.direction) && (this._thumbnailSize === size)) {
             return flag;
         }
 
-        this.refreshThumbnail();
+        this.refreshThumbnail(size);
 
         return true;
     }
 
-    private refreshThumbnail(): void {
+    private refreshThumbnail(size: number): void {
         if (this.asset == null) {
             return;
         }
 
         if (this._thumbnailImageNormal) {
-            this.addThumbnailAsset(this._thumbnailImageNormal, 64);
+            this.addThumbnailAsset(this._thumbnailImageNormal, size);
         } else {
             if (this._thumbnailTexture instanceof RenderTexture) {
                 this._thumbnailTexture.destroy(true);
@@ -81,6 +85,7 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
 
         this._thumbnailChanged = false;
         this._thumbnailDirection = this.direction;
+        this._thumbnailSize = size;
     }
 
     private addThumbnailAsset(texture: Texture, scale: number): void {

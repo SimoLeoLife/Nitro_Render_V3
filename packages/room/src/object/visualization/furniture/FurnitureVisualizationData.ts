@@ -113,7 +113,7 @@ export class FurnitureVisualizationData implements IObjectVisualizationData
         return true;
     }
 
-    private removeInvalidSizes(): void
+    protected removeInvalidSizes(): void
     {
         if(!this._sizes || !this._sizes.length) return;
 
@@ -122,14 +122,26 @@ export class FurnitureVisualizationData implements IObjectVisualizationData
 
         if(zoomedIn && zoomedOut)
         {
-            if(zoomedIn.layerCount !== zoomedOut.layerCount)
-            {
-                this._sizeDatas.delete(RoomGeometry.SCALE_ZOOMED_OUT);
+            if(zoomedIn.layerCount !== zoomedOut.layerCount) this.removeSize(RoomGeometry.SCALE_ZOOMED_OUT);
+        }
+    }
 
-                const index = this._sizes.indexOf(RoomGeometry.SCALE_ZOOMED_OUT);
+    protected getSizeDataAt(size: number): SizeData
+    {
+        if(!this._sizeDatas) return null;
 
-                if(index >= 0) this._sizes.splice(index, 1);
-            }
+        return (this._sizeDatas.get(size) || null);
+    }
+
+    protected removeSize(size: number): void
+    {
+        if(this._sizeDatas) this._sizeDatas.delete(size);
+
+        if(this._sizes)
+        {
+            const index = this._sizes.indexOf(size);
+
+            if(index >= 0) this._sizes.splice(index, 1);
         }
     }
 
