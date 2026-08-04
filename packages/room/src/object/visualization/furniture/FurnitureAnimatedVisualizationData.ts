@@ -1,4 +1,5 @@
 import { AnimationFrame, AnimationSizeData, SizeData } from '../data';
+import { RoomGeometry } from '../../../utils';
 import { FurnitureVisualizationData } from './FurnitureVisualizationData';
 
 export class FurnitureAnimatedVisualizationData extends FurnitureVisualizationData
@@ -6,6 +7,22 @@ export class FurnitureAnimatedVisualizationData extends FurnitureVisualizationDa
     protected createSizeData(scale: number, layerCount: number, angle: number): SizeData
     {
         return new AnimationSizeData(layerCount, angle);
+    }
+
+    protected removeInvalidSizes(): void
+    {
+        super.removeInvalidSizes();
+
+        const zoomedIn = this.getSizeDataAt(RoomGeometry.SCALE_ZOOMED_IN);
+        const zoomedOut = this.getSizeDataAt(RoomGeometry.SCALE_ZOOMED_OUT);
+
+        if((zoomedIn instanceof AnimationSizeData) && (zoomedOut instanceof AnimationSizeData))
+        {
+            if((zoomedIn.getAnimationCount() > 0) && (zoomedOut.getAnimationCount() < zoomedIn.getAnimationCount()))
+            {
+                this.removeSize(RoomGeometry.SCALE_ZOOMED_OUT);
+            }
+        }
     }
 
     protected processVisualElement(sizeData: SizeData, key: string, data: any): boolean

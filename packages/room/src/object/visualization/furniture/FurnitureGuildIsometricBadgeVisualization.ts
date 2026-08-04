@@ -57,25 +57,23 @@ export class FurnitureGuildIsometricBadgeVisualization extends IsometricImageFur
         const dScale = (renderHeight - 0.5 * renderWidth) / texture.height;
         const matrix = new Matrix();
 
-        switch(this.direction)
+        if(asset.flipH)
         {
-            case 0:
-            case 2:
-            case 4:
-                matrix.a = difference;
-                matrix.b = (0.5 * difference);
-                matrix.c = 0;
-                matrix.d = dScale;
-                matrix.tx = 0;
-                matrix.ty = 0;
-                break;
-            default:
-                matrix.a = difference;
-                matrix.b = 0;
-                matrix.c = 0;
-                matrix.d = difference;
-                matrix.tx = 0;
-                matrix.ty = 0;
+            matrix.a = -difference;
+            matrix.b = -(0.5 * difference);
+            matrix.c = 0;
+            matrix.d = dScale;
+            matrix.tx = renderWidth;
+            matrix.ty = (0.5 * renderWidth);
+        }
+        else
+        {
+            matrix.a = difference;
+            matrix.b = (0.5 * difference);
+            matrix.c = 0;
+            matrix.d = dScale;
+            matrix.tx = 0;
+            matrix.ty = 0;
         }
 
         return TextureUtils.createAndWriteRenderTexture(renderWidth, renderHeight, new Sprite(texture), matrix);
