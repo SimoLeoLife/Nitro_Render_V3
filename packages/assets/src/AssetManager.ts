@@ -1,16 +1,35 @@
 import { IAssetData, IAssetManager, IGraphicAsset, IGraphicAssetCollection } from '@nitrots/api';
-import { NitroBundle, NitroLogger, parseConfigJsonFromResponse } from '@nitrots/utils';
-import { AnimatedGIF } from '@pixi/gif';
-import { Assets, Spritesheet, SpritesheetData, Texture } from 'pixi.js';
+import { NitroBundle, NitroBundleTextureDecoder, parseConfigJsonFromResponse } from '@nitrots/utils';
+import { Spritesheet, SpritesheetData, Texture } from 'pixi.js';
 import { assetImageFallbackUrl, isAssetJsonUrl } from './AssetJsonUrl';
 import { GraphicAssetCollection } from './GraphicAssetCollection';
+import { detectImageFormat, ImageLoadRequest, LoadedImageResource, loadImageResource, normalizedSourceExtension } from './image';
 
+export interface AssetManagerDependencies
+{
+    fetch(url: string): Promise<Response>;
+    parseAssetData(response: Response, source: string): Promise<IAssetData>;
+    loadImageResource(request: ImageLoadRequest): Promise<LoadedImageResource>;
+    loadNitroBundle(buffer: ArrayBuffer, textureDecoder: NitroBundleTextureDecoder): Promise<NitroBundle>;
+}
+
+const DEFAULT_DEPENDENCIES: AssetManagerDependencies = {
+    fetch: url => globalThis.fetch(url),
+    parseAssetData: (response, source) => parseConfigJsonFromResponse<IAssetData>(response, source),
+    loadImageResource,
+    loadNitroBundle: (buffer, textureDecoder) => NitroBundle.from(buffer, textureDecoder)
+};
 
 export class AssetManager implements IAssetManager
 {
     private _textures: Map<string, Texture> = new Map();
     private _collections: Map<string, IGraphicAssetCollection> = new Map();
     private _missingAssetNames: Set<string> = new Set();
+    private _imageResources: Map<string, LoadedImageResource> = new Map();
+
+    constructor(private readonly _dependencies: AssetManagerDependencies = DEFAULT_DEPENDENCIES)
+    {
+    }
 
     public getTexture(name: string): Texture
     {
@@ -94,167 +113,149 @@ export class AssetManager implements IAssetManager
     {
         try
         {
-            if(!url || !url.length) return false;
+            if(!url?.length) return false;
 
-            if(url.startsWith('local://'))
+            if(url.startsWith('local://')) return this.downloadLocalAsset(url);
+
+            if(normalizedSourceExtension(url) === 'nitro')
             {
-                const key = url.substring('local://'.length);
-
-                switch(key)
-                {
-                    case 'room':
-                        await this.loadLocalRoom();
-                        return true;
-                    case 'place_holder':
-                    case 'place_holder_wall':
-                    case 'place_holder_pet':
-                    case 'tile_cursor':
-                    case 'selection_arrow':
-                    case 'avatar_additions':
-                    case 'floor_editor':
-                    case 'group_badge':
-                        await this.loadLocalAsset(key);
-                        return true;
-                }
-
-                return false;
-            }
-
-            if(url.endsWith('.nitro') || url.endsWith('.gif'))
-            {
-                let response: Response;
+                const response = await this.fetchAsset(url);
+                const decodedResources: LoadedImageResource[] = [];
 
                 try
                 {
-                    response = await fetch(url);
-                }
-                catch(fetchErr)
-                {
-                    throw new Error(`Could not fetch "${ url }" — is the URL correct and the server reachable? (${ fetchErr.message })`);
-                }
+                    const nitroBundle = await this._dependencies.loadNitroBundle(
+                        await response.arrayBuffer(),
+                        async (bytes, entryName) =>
+                        {
+                            const detected = detectImageFormat(new Uint8Array(bytes), undefined, entryName);
 
-                if(!response || response.status !== 200) throw new Error(`Failed to load "${ url }" — server returned HTTP ${ response?.status ?? 'no response' }`);
+                            if(detected.format === 'svg')
+                                throw new Error(`SVG texture entry "${ entryName }" is not supported inside a Nitro bundle`);
 
-                const arrayBuffer = await response.arrayBuffer();
+                            const resource = await this._dependencies.loadImageResource({
+                                source: entryName,
+                                bytes,
+                                allowAnimation: false
+                            });
 
-                if(url.endsWith('.nitro'))
-                {
-                    const nitroBundle = await NitroBundle.from(arrayBuffer);
+                            decodedResources.push(resource);
+
+                            return resource.texture;
+                        });
 
                     await this.processAsset(nitroBundle.texture, nitroBundle.jsonFile as IAssetData);
+
+                    const retainedResource = decodedResources.pop();
+
+                    for(const resource of decodedResources) resource.dispose();
+                    if(retainedResource) this.setImageResource(url, retainedResource);
                 }
-                else
+                catch(error)
                 {
-                    try
-                    {
-                        const animatedGif = AnimatedGIF.fromBuffer(arrayBuffer);
-                        const texture = animatedGif.texture;
-
-                        if(texture) this.setTexture(url, texture);
-                    }
-                    catch(gifErr)
-                    {
-                        const texture = await Assets.load<Texture>(url);
-
-                        if(texture) this.setTexture(url, texture);
-                    }
+                    for(const resource of decodedResources) resource.dispose();
+                    throw error;
                 }
             }
             else if(isAssetJsonUrl(url))
             {
-                let response: Response;
-
-                try
-                {
-                    response = await fetch(url);
-                }
-                catch(fetchErr)
-                {
-                    throw new Error(`Could not fetch "${ url }" — is the URL correct and the server reachable? (${ fetchErr.message })`);
-                }
-
-                if(!response || response.status !== 200) throw new Error(`Failed to load "${ url }" — server returned HTTP ${ response?.status ?? 'no response' }`);
-
+                const response = await this.fetchAsset(url);
                 let data: IAssetData;
 
                 try
                 {
-                    data = await parseConfigJsonFromResponse<IAssetData>(response, url);
+                    data = await this._dependencies.parseAssetData(response, url);
                 }
-                catch(parseErr)
+                catch(error)
                 {
-                    throw new Error(`Invalid asset data "${ url }" — JSON/JSONC parse failed (${ parseErr.message })`);
+                    throw new Error(`Invalid asset data "${ url }" - JSON/JSONC parse failed (${ errorMessage(error) })`);
                 }
 
-                let texture: Texture = null;
                 const imagePath = data?.spritesheet?.meta?.image;
-                const fallbackImagePath = assetImageFallbackUrl(url, data?.name);
-                const resolvedImageUrl = (imagePath
+                const resolvedImageUrl = imagePath
                     ? new URL(imagePath, url).toString()
-                    : fallbackImagePath);
+                    : assetImageFallbackUrl(url, data?.name);
+                const resource = await this._dependencies.loadImageResource({
+                    source: resolvedImageUrl,
+                    allowAnimation: false
+                });
 
-                texture = await Assets.load<Texture>(resolvedImageUrl);
-
-                await this.processAsset(texture, data);
+                try
+                {
+                    await this.processAsset(resource.texture, data);
+                    this.setImageResource(url, resource);
+                }
+                catch(error)
+                {
+                    resource.dispose();
+                    throw error;
+                }
             }
             else
             {
-                // External raster images (png/jpg/webp/…). Pixi's Assets.load does
-                // not reliably load arbitrary cross-origin images in this setup, so
-                // load them through a CORS-enabled <img> + Texture.from — the same
-                // approach the badge / dynamic-thumbnail visualizations use.
-                const texture = await this.loadExternalImageTexture(url);
+                const resource = await this._dependencies.loadImageResource({ source: url });
 
-                if(texture) this.setTexture(url, texture);
+                this.setImageResource(url, resource);
             }
 
             return true;
         }
-        catch (err)
+        catch(error)
         {
-            throw new Error(`Asset loading failed for "${ url }": ${ err.message || err }`);
+            throw new Error(`Asset loading failed for "${ url }": ${ errorMessage(error) }`);
         }
     }
 
-    private loadExternalImageTexture(url: string): Promise<Texture>
+    private async downloadLocalAsset(url: string): Promise<boolean>
     {
-        return new Promise<Texture>((resolve, reject) =>
+        const key = url.substring('local://'.length);
+
+        switch(key)
         {
-            const image = new Image();
+            case 'room':
+                await this.loadLocalRoom();
+                return true;
+            case 'place_holder':
+            case 'place_holder_wall':
+            case 'place_holder_pet':
+            case 'tile_cursor':
+            case 'selection_arrow':
+            case 'avatar_additions':
+            case 'floor_editor':
+            case 'group_badge':
+                await this.loadLocalAsset(key);
+                return true;
+            default:
+                return false;
+        }
+    }
 
-            // crossOrigin must be set BEFORE src so the request is made with CORS
-            // and the resulting texture isn't tainted (WebGL would refuse it).
-            image.crossOrigin = 'anonymous';
+    private async fetchAsset(url: string): Promise<Response>
+    {
+        let response: Response;
 
-            image.onload = () =>
-            {
-                image.onload = null;
-                image.onerror = null;
+        try
+        {
+            response = await this._dependencies.fetch(url);
+        }
+        catch(error)
+        {
+            throw new Error(`Could not fetch "${ url }" - is the URL correct and the server reachable? (${ errorMessage(error) })`);
+        }
 
-                if(image.complete && (image.width > 0) && (image.height > 0))
-                {
-                    const texture = Texture.from(image);
+        if(!response?.ok) throw new Error(`Failed to load "${ url }" - server returned HTTP ${ response?.status ?? 'no response' }`);
 
-                    if(texture.source) texture.source.scaleMode = 'linear';
+        return response;
+    }
 
-                    resolve(texture);
-                }
-                else
-                {
-                    reject(new Error(`image had no dimensions`));
-                }
-            };
+    private setImageResource(key: string, resource: LoadedImageResource): void
+    {
+        const existing = this._imageResources.get(key);
 
-            image.onerror = () =>
-            {
-                image.onload = null;
-                image.onerror = null;
+        if(existing && existing !== resource) existing.dispose();
 
-                reject(new Error(`image element failed to load (CORS / network / 404)`));
-            };
-
-            image.src = url;
-        });
+        this._imageResources.set(key, resource);
+        this.setTexture(key, resource.texture);
     }
 
     private async loadLocalRoom(): Promise<void>
@@ -264,23 +265,26 @@ export class AssetManager implements IAssetManager
         const collection = this.createCollection(roomData, null) as GraphicAssetCollection;
         if(!collection) return;
 
-        const roomImages = import.meta.glob('./assets/room/*.png', { eager: true });
-        const roomImagesSub = import.meta.glob('./assets/room/images/*.png', { eager: true });
+        const roomImages = import.meta.glob('./assets/room/*.{png,jpg,jpeg,gif,webp,avif,svg,bmp}', { eager: true });
+        const roomImagesSub = import.meta.glob('./assets/room/images/*.{png,jpg,jpeg,gif,webp,avif,svg,bmp}', { eager: true });
         const merged = { ...roomImages, ...roomImagesSub };
 
         for(const path in merged)
         {
             const mod = merged[path];
             const imageUrl = ((mod as { default?: string }).default ?? mod) as string;
+            const rawName = imageNameFromPath(path);
+            const resource = await this._dependencies.loadImageResource({ source: imageUrl, allowAnimation: false });
+            const texture = resource.texture;
 
-            const file = path.split('/').pop()!;
-            const rawName = file.replace(/\.png$/i, '');
+            if(!texture)
+            {
+                resource.dispose();
+                continue;
+            }
 
-            const texture = await Assets.load<Texture>(imageUrl);
-            if(!texture) continue;
-
+            this.setImageResource(imageUrl, resource);
             this.setTexture(rawName, texture);
-
             collection.textures.set(rawName, texture);
 
             if(rawName.startsWith('room_'))
@@ -296,7 +300,7 @@ export class AssetManager implements IAssetManager
 
     private async loadLocalAsset(name: string): Promise<void>
     {
-        let dataModule: any;
+        let dataModule: { default?: IAssetData } | IAssetData;
 
         switch(name)
         {
@@ -328,12 +332,12 @@ export class AssetManager implements IAssetManager
                 return;
         }
 
-        const data = (dataModule.default ?? dataModule) as IAssetData;
+        const data = ('default' in dataModule ? dataModule.default : dataModule) as IAssetData;
         const collection = this.createCollection(data, null) as GraphicAssetCollection;
         if(!collection) return;
 
-        const allImages = import.meta.glob('./assets/*/images/*.png', { eager: true });
-        const prefix = `./assets/${name}/images/`;
+        const allImages = import.meta.glob('./assets/*/images/*.{png,jpg,jpeg,gif,webp,avif,svg,bmp}', { eager: true });
+        const prefix = `./assets/${ name }/images/`;
 
         for(const path in allImages)
         {
@@ -341,15 +345,18 @@ export class AssetManager implements IAssetManager
 
             const mod = allImages[path];
             const imageUrl = ((mod as { default?: string }).default ?? mod) as string;
+            const rawName = imageNameFromPath(path);
+            const resource = await this._dependencies.loadImageResource({ source: imageUrl, allowAnimation: false });
+            const texture = resource.texture;
 
-            const file = path.split('/').pop()!;
-            const rawName = file.replace(/\.png$/i, '');
+            if(!texture)
+            {
+                resource.dispose();
+                continue;
+            }
 
-            const texture = await Assets.load<Texture>(imageUrl);
-            if(!texture) continue;
-
+            this.setImageResource(imageUrl, resource);
             this.setTexture(rawName, texture);
-
             collection.textures.set(name + '_' + rawName, texture);
             collection.textures.set(rawName, texture);
         }
@@ -378,3 +385,12 @@ export class AssetManager implements IAssetManager
         return this._collections;
     }
 }
+
+const imageNameFromPath = (path: string): string =>
+{
+    const fileName = path.split('/').pop() ?? path;
+
+    return fileName.replace(/\.(?:png|jpe?g|gif|webp|avif|svg|bmp)$/i, '');
+};
+
+const errorMessage = (error: unknown): string => error instanceof Error ? error.message : String(error);
