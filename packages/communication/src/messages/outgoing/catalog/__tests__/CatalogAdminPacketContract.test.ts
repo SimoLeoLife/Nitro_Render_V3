@@ -106,4 +106,26 @@ describe('catalog admin packet contract', () =>
             0, 0, '', ''
         ]);
     });
+
+    it('sends every editable offer field including the song id', () =>
+    {
+        const SaveOffer = (CatalogAdminComposers as any).CatalogAdminSaveOfferComposer;
+        const CreateOffer = (CatalogAdminComposers as any).CatalogAdminCreateOfferComposer;
+
+        expect(new SaveOffer(
+            99, 42, '100:2', 'sound_offer', 5, 0, 0, 1, 0, '', true, 77, 0, -1, 321,
+            'NORMAL', 12, 7, 'offer-token', 'Updated offer'
+        ).getMessageArray()).toEqual([
+            99, 42, '100:2', 'sound_offer', 5, 0, 0, 1, 0, '', true, 77, 0, -1, 321,
+            'NORMAL', 12, 7, 'offer-token', 'Updated offer'
+        ]);
+
+        expect(new CreateOffer(
+            42, '100:2', 'sound_offer', 5, 0, 0, 1, 0, '', true, 77, 0, -1, 321,
+            'NORMAL', 12, 7, 'page-token', 'Created offer'
+        ).getMessageArray()).toEqual([
+            42, '100:2', 'sound_offer', 5, 0, 0, 1, 0, '', true, 77, 0, -1, 321,
+            'NORMAL', 12, 7, 'page-token', 'Created offer'
+        ]);
+    });
 });

@@ -1,4 +1,19 @@
 import { IMessageDataWrapper, IMessageParser } from '@nitrots/api';
+import { ungzip } from 'pako';
+
+const SNAPSHOT_ENCODING = 'GZIP_BASE64_JSON';
+const MAX_PAGE_CHUNKS = 10_000;
+
+const decodePageChunks = (chunks: string[]): CatalogStudioPageSnapshot[] =>
+{
+    if(!chunks.length) return [];
+
+    const binary = atob(chunks.join(''));
+    const bytes = new Uint8Array(binary.length);
+    for(let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+
+    return JSON.parse(new TextDecoder().decode(ungzip(bytes))) as CatalogStudioPageSnapshot[];
+};
 
 export interface CatalogStudioActor
 {
@@ -111,8 +126,14 @@ export class CatalogStudioSessionMessageParser implements IMessageParser
         this.publishedVersions = Array.from({ length: wrapper.readInt() }, () => ({
             id: wrapper.readInt(), label: wrapper.readString(), publishedAt: wrapper.readString()
         }));
-        this.pages = JSON.parse(wrapper.readString()) as CatalogStudioPageSnapshot[];
-        this.offers = JSON.parse(wrapper.readString()) as CatalogStudioOfferSnapshot[];
+        if(wrapper.readString() !== SNAPSHOT_ENCODING) return false;
+
+        const pageChunkCount = wrapper.readInt();
+        if(pageChunkCount < 0 || pageChunkCount > MAX_PAGE_CHUNKS) return false;
+
+        const pageChunks = Array.from({ length: pageChunkCount }, () => wrapper.readString());
+        this.pages = decodePageChunks(pageChunks);
+        this.offers = [];
         return true;
     }
 }
