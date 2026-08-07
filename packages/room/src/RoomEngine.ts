@@ -2345,7 +2345,27 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         const badgeName = (groupBadge) ? this._sessionDataManager.loadGroupBadgeImage(badgeId) : this._sessionDataManager.loadBadgeImage(badgeId);
         const badgeImage = (groupBadge) ? this._sessionDataManager.getGroupBadgeImage(badgeId) : this._sessionDataManager.getBadgeImage(badgeId);
 
-        if(badgeImage) this._roomContentLoader.addAssetToCollection(object.type, badgeName, badgeImage, false);
+        if(!badgeImage) return;
+
+        this._roomContentLoader.addAssetToCollection(object.type, badgeName, badgeImage, false);
+
+        const smallBadge = this.createHalfScaleBadge(badgeImage);
+
+        if(smallBadge) this._roomContentLoader.addAssetToCollection(object.type, (badgeName + '_32'), smallBadge, false);
+    }
+
+    private createHalfScaleBadge(texture: Texture): Texture
+    {
+        if(!texture || !texture.source) return null;
+
+        const halfWidth = Math.max(1, Math.round(texture.width / 2));
+        const halfHeight = Math.max(1, Math.round(texture.height / 2));
+
+        const matrix = new Matrix();
+
+        matrix.scale((halfWidth / texture.width), (halfHeight / texture.height));
+
+        return TextureUtils.createAndWriteRenderTexture(halfWidth, halfHeight, new Sprite(texture), matrix);
     }
 
     public dispatchMouseEvent(canvasId: number, x: number, y: number, type: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean, buttonDown: boolean): void

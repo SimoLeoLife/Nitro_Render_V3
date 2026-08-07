@@ -1,3 +1,4 @@
+export * from './BuildHeightAvailableEvent';
 export * from './AreaHideMessageEvent';
 export * from './ConfInvisStateMessageEvent';
 export * from './CustomUserNotificationMessageEvent';

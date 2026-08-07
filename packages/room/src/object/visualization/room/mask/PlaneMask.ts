@@ -103,6 +103,17 @@ export class PlaneMask
         return visualization.getAsset(normal);
     }
 
+    public getVisualizationSize(size: number): number
+    {
+        if(!this._sizes || !this._sizes.length) return -1;
+
+        const sizeIndex = this.getSizeIndex(size);
+
+        if(sizeIndex < this._sizes.length) return this._sizes[sizeIndex];
+
+        return -1;
+    }
+
     public getAssetName(size: number): string
     {
         if(!this._assetNames) return null;

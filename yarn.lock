@@ -241,6 +241,13 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@jsquash/avif@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@jsquash/avif/-/avif-2.1.1.tgz#600c77158363220e2f0dc4f6f72ece7e604231bf"
+  integrity sha512-LMRxd0fMgfCLtobDh0/sFYJMMiRJTNYSEEWvRDKXlAeZ08t3gI5V+1thIT0XjXJ+SVG7Zug9B0XPyx0Ti5VRNA==
+  dependencies:
+    wasm-feature-detect "^1.2.11"
+
 "@napi-rs/wasm-runtime@^1.1.6":
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-1.1.6.tgz#ed33806d0f9be98dc76d0c3d4fd872fda701b5d5"
@@ -692,6 +699,11 @@ ansi-styles@^4.1.0:
   integrity sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==
   dependencies:
     color-convert "^2.0.1"
+
+apng-js@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/apng-js/-/apng-js-1.1.5.tgz#0b053db76380166c43efe5d447b97a4a245af27b"
+  integrity sha512-ENBjy3HAyu7slaOgWRvVtFUdSGFWIHZvz8bGKSEM6/OWQm6NgwFquqY8R7YPgm4vnDISEczhZE2NoLAtKlnUfw==
 
 argparse@^2.0.1:
   version "2.0.1"
@@ -1791,6 +1803,16 @@ w3c-xmlserializer@^5.0.0:
   integrity sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==
   dependencies:
     xml-name-validator "^5.0.0"
+
+wasm-feature-detect@^1.2.11:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/wasm-feature-detect/-/wasm-feature-detect-1.8.0.tgz#4e9f55b0a64d801f372fbb0324ed11ad3abd0c78"
+  integrity sha512-zksaLKM2fVlnB5jQQDqKXXwYHLQUVH9es+5TOOHwGOVJOCeRBCiPjwSg+3tN2AdTCzjgli4jijCH290kXb/zWQ==
+
+wasm-webp@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/wasm-webp/-/wasm-webp-0.1.0.tgz#89fa4a9dfdffe681367c92926b69e37683beb187"
+  integrity sha512-Z1Sop+mLKogzDK3vJzSPfSxRF1yj/zbmn+XJuU9+7fvarxcuGhGkeLBqJr5H8LdgWuAwEKuZelCzx7ujztfhVQ==
 
 webidl-conversions@^8.0.0:
   version "8.0.1"

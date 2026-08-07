@@ -12,7 +12,6 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
     private _badgeId = '';
     private _badgeAssetNameNormalScale = '';
-    private _badgeAssetNameSmallScale = '';
     private _badgeVisibleInState = -1;
     private _frameTextures: Texture[] = null;
     private _animatedSprite: AnimatedSprite = null;
@@ -116,7 +115,6 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
         {
             this._badgeId = '';
             this._badgeAssetNameNormalScale = '';
-            this._badgeAssetNameSmallScale = '';
             this._badgeVisibleInState = -1;
             this.disposeAnimatedSprite();
 
@@ -127,7 +125,6 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
         {
             this._badgeId = badgeId;
             this._badgeAssetNameNormalScale = badgeId;
-            this._badgeAssetNameSmallScale = `${badgeId}_32`;
 
             const visibleInState = this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_BADGE_VISIBLE_IN_STATE);
             this._badgeVisibleInState = isNaN(visibleInState) ? -1 : visibleInState;
@@ -161,7 +158,7 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
             return super.getSpriteAssetName(scale, layerId);
         }
 
-        const assetName = (scale === 32) ? this._badgeAssetNameSmallScale : this._badgeAssetNameNormalScale;
+        const assetName = this._badgeAssetNameNormalScale;
         if(!assetName) return super.getSpriteAssetName(scale, layerId);
 
         const a = this.getAsset(assetName, layerId);
@@ -185,6 +182,8 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
             sprite.visible = true;
             sprite.alpha = 255;
             sprite.color = 0xFFFFFF;
+
+            if(scale === 32) sprite.scale = ((sprite.scale || 1) * 0.5);
         }
     }
 
@@ -194,14 +193,12 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
         if(this.getLayerTag(scale, direction, layerId) === FurnitureBadgeDisplayVisualization.BADGE_TAG)
         {
-            const assetName = (scale === 32) ? this._badgeAssetNameSmallScale : this._badgeAssetNameNormalScale;
-            if(!assetName) return offset;
-
-            const a = this.getAsset(assetName, layerId);
+            const a = this.getAsset(this._badgeAssetNameNormalScale, layerId);
             if(!a) return offset;
 
+            const renderedW = (scale === 32) ? (a.width * 0.5) : a.width;
             const targetW = (scale === 64) ? 40 : 20;
-            offset += ((targetW - a.width) / 2);
+            offset += ((targetW - renderedW) / 2);
         }
 
         return offset;
@@ -213,14 +210,12 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
         if(this.getLayerTag(scale, direction, layerId) === FurnitureBadgeDisplayVisualization.BADGE_TAG)
         {
-            const assetName = (scale === 32) ? this._badgeAssetNameSmallScale : this._badgeAssetNameNormalScale;
-            if(!assetName) return offset;
-
-            const a = this.getAsset(assetName, layerId);
+            const a = this.getAsset(this._badgeAssetNameNormalScale, layerId);
             if(!a) return offset;
 
+            const renderedH = (scale === 32) ? (a.height * 0.5) : a.height;
             const targetH = (scale === 64) ? 40 : 20;
-            offset += ((targetH - a.height) / 2);
+            offset += ((targetH - renderedH) / 2);
         }
 
         return offset;

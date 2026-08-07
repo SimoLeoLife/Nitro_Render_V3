@@ -1,3 +1,4 @@
+export * from './buildheight';
 export * from './AddSpamWallPostItMessageComposer';
 export * from './chest';
 export * from './dimmer';

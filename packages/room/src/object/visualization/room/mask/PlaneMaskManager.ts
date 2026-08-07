@@ -155,12 +155,15 @@ export class PlaneMaskManager
 
         if(!texture) return true;
 
-        const point = new Point((posX + asset.offsetX), (posY + asset.offsetY));
+        const maskSize = mask.getVisualizationSize(scale);
+        const ratio = ((maskSize > 0) ? (scale / maskSize) : 1);
+
+        const point = new Point((posX + (asset.offsetX * ratio)), (posY + (asset.offsetY * ratio)));
 
         const matrix = new Matrix();
 
-        let xScale = 1;
-        let ySkew = 1;
+        let xScale = ratio;
+        let ySkew = ratio;
         let xSkew = 0;
         let yScale = 0;
         let tx = (point.x + xSkew);
@@ -168,18 +171,18 @@ export class PlaneMaskManager
 
         if(asset.flipH)
         {
-            xScale = -1;
-            xSkew = texture.width;
+            xScale = -ratio;
+            xSkew = (texture.width * ratio);
 
-            tx = ((point.x + xSkew) - texture.width);
+            tx = ((point.x + xSkew) - (texture.width * ratio));
         }
 
         if(asset.flipV)
         {
-            ySkew = -1;
-            yScale = texture.height;
+            ySkew = -ratio;
+            yScale = (texture.height * ratio);
 
-            ty = ((point.y + yScale) - texture.height);
+            ty = ((point.y + yScale) - (texture.height * ratio));
         }
 
         matrix.scale(xScale, ySkew);
@@ -208,12 +211,15 @@ export class PlaneMaskManager
 
         if(!texture) return true;
 
-        const point = new Point((posX + asset.offsetX), (posY + asset.offsetY));
+        const maskSize = mask.getVisualizationSize(scale);
+        const ratio = ((maskSize > 0) ? (scale / maskSize) : 1);
+
+        const point = new Point((posX + (asset.offsetX * ratio)), (posY + (asset.offsetY * ratio)));
 
         const matrix = new Matrix();
 
-        let xScale = 1;
-        let ySkew = 1;
+        let xScale = ratio;
+        let ySkew = ratio;
         let xSkew = 0;
         let yScale = 0;
         let tx = (point.x + xSkew);
@@ -221,18 +227,18 @@ export class PlaneMaskManager
 
         if(asset.flipH)
         {
-            xScale = -1;
-            xSkew = texture.width;
+            xScale = -ratio;
+            xSkew = (texture.width * ratio);
 
-            tx = ((point.x + xSkew) - texture.width);
+            tx = ((point.x + xSkew) - (texture.width * ratio));
         }
 
         if(asset.flipV)
         {
-            ySkew = -1;
-            yScale = texture.height;
+            ySkew = -ratio;
+            yScale = (texture.height * ratio);
 
-            ty = ((point.y + yScale) - texture.height);
+            ty = ((point.y + yScale) - (texture.height * ratio));
         }
 
         matrix.scale(xScale, ySkew);

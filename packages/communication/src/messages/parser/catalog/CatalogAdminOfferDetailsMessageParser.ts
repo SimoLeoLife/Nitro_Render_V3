@@ -17,6 +17,7 @@ export class CatalogAdminOfferDetailsMessageParser implements IMessageParser
     private _limitedStack: number;
     private _limitedSells: number;
     private _orderNumber: number;
+    private _songId: number;
     private _catalogMode: string;
 
     public flush(): boolean
@@ -36,6 +37,7 @@ export class CatalogAdminOfferDetailsMessageParser implements IMessageParser
         this._limitedStack = 0;
         this._limitedSells = 0;
         this._orderNumber = 0;
+        this._songId = 0;
         this._catalogMode = 'NORMAL';
 
         return true;
@@ -60,6 +62,7 @@ export class CatalogAdminOfferDetailsMessageParser implements IMessageParser
         this._limitedStack = wrapper.readInt();
         this._limitedSells = wrapper.readInt();
         this._orderNumber = wrapper.readInt();
+        this._songId = wrapper.readInt();
         this._catalogMode = wrapper.readString();
 
         return true;
@@ -80,5 +83,6 @@ export class CatalogAdminOfferDetailsMessageParser implements IMessageParser
     public get limitedStack(): number { return this._limitedStack; }
     public get limitedSells(): number { return this._limitedSells; }
     public get orderNumber(): number { return this._orderNumber; }
+    public get songId(): number { return this._songId; }
     public get catalogMode(): string { return this._catalogMode; }
 }

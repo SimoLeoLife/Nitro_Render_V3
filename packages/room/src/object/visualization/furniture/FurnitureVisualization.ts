@@ -155,6 +155,12 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         this._cacheScale = scale;
         this._cacheSize = this.getValidSize(scale);
 
+        if (typeof window !== 'undefined' && (window as unknown as { NitroFurniSizeDebug?: boolean }).NitroFurniSizeDebug)
+        {
+            const note = scale === 32 ? (this._cacheSize === 32 ? ' ✓ size-32' : ' fallback -> size-' + this._cacheSize) : '';
+            console.log(`[FurniSize] ${this._type}: geometry ${scale} -> sprite size ${this._cacheSize}${note}`);
+        }
+
         this.setLayerCount(((this._data && this._data.getLayerCount(scale)) || 0) + this.getAdditionalLayerCount());
     }
 
@@ -309,6 +315,10 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                 sprite.flipV = assetData.flipV;
                 sprite.direction = this._direction;
 
+                const sizeScale = ((this._cacheSize >= 32) && (scale > 0)) ? (scale / this._cacheSize) : 1;
+
+                sprite.scale = sizeScale;
+
                 let relativeDepth = 0;
 
                 if(layerId !== this._shadowLayerIndex)
@@ -316,8 +326,8 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                     sprite.tag = this.getLayerTag(scale, this._direction, layerId);
                     sprite.alpha = this.getLayerAlpha(scale, this._direction, layerId);
                     sprite.color = this.getLayerColor(scale, layerId, this._selectedColor);
-                    sprite.offsetX = (assetData.offsetX + this.getLayerXOffset(scale, this._direction, layerId));
-                    sprite.offsetY = (assetData.offsetY + this.getLayerYOffset(scale, this._direction, layerId));
+                    sprite.offsetX = ((assetData.offsetX + this.getLayerXOffset(scale, this._direction, layerId)) * sizeScale);
+                    sprite.offsetY = ((assetData.offsetY + this.getLayerYOffset(scale, this._direction, layerId)) * sizeScale);
                     sprite.blendMode = this.getLayerBlendMode(scale, this._direction, layerId);
                     sprite.alphaTolerance = furnitureAlphaTolerance(this.getLayerIgnoreMouse(scale, this._direction, layerId), this._wiredClickThrough);
 
@@ -326,8 +336,8 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                 }
                 else
                 {
-                    sprite.offsetX = assetData.offsetX;
-                    sprite.offsetY = (assetData.offsetY + this.getLayerYOffset(scale, this._direction, layerId));
+                    sprite.offsetX = (assetData.offsetX * sizeScale);
+                    sprite.offsetY = ((assetData.offsetY + this.getLayerYOffset(scale, this._direction, layerId)) * sizeScale);
                     sprite.alpha = (48 * this._alphaMultiplier);
 
                     sprite.alphaTolerance = AlphaTolerance.MATCH_NOTHING;

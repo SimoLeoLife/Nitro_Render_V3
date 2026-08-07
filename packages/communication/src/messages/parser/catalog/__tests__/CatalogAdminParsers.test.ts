@@ -90,6 +90,7 @@ describe('CatalogAdminOfferDetailsMessageParser', () =>
         writer.writeInt(100);
         writer.writeInt(12);
         writer.writeInt(4);
+        writer.writeInt(321);
         writer.writeString('NORMAL');
 
         const parser = new CatalogAdminOfferDetailsMessageParser();
@@ -110,6 +111,7 @@ describe('CatalogAdminOfferDetailsMessageParser', () =>
         expect(parser.limitedStack).toBe(100);
         expect((parser as any).limitedSells).toBe(12);
         expect(parser.orderNumber).toBe(4);
+        expect((parser as any).songId).toBe(321);
         expect((parser as any).catalogMode).toBe('NORMAL');
     });
 });

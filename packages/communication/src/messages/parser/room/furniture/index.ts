@@ -1,3 +1,4 @@
+export * from './BuildHeightAvailableParser';
 export * from './AreaHideMessageParser';
 export * from './ConfInvisStateMessageParser';
 export * from './CustomUserNotificationMessageParser';
