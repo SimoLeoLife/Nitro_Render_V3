@@ -108,6 +108,7 @@ export class OutgoingHeader
     public static ITEM_DICE_CLOSE = 1533;
     public static ITEM_DIMMER_SAVE = 1648;
     public static ITEM_DIMMER_SETTINGS = 2813;
+    public static SET_BUILD_HEIGHT = 9351;
     public static CHEST_DEPOSIT = 9313;
     public static CHEST_WITHDRAW = 9314;
     public static CHEST_SAVE_SETTINGS = 9315;
