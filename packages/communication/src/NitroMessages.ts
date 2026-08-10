@@ -1,4 +1,5 @@
 import { IMessageConfiguration } from '@nitrots/api';
+import { UnsupportedOutgoingHeader } from './messages/outgoing/UnsupportedOutgoingHeader';
 import { UserSettingsPrivacyComposer } from './messages/outgoing/user/settings/UserSettingsPrivacyComposer';
 import { RequestOfflineMessagesComposer } from './messages/outgoing/friendlist/RequestOfflineMessagesComposer';
 import { HotelViewLandingEvent, HotelViewLandingRequestComposer, HotelViewLandingSaveComposer, HotelViewLandingSaveSceneComposer, HotelViewLandingVoteComposer, HotelViewLandingResetVotesComposer } from './messages';
@@ -716,7 +717,7 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.CLICK_USER, ClickUserMessageComposer);
 
         // AUTHENTICATION
-        this._composers.set(OutgoingHeader.AUTHENTICATION, AuthenticationMessageComposer);
+        this._composers.set(UnsupportedOutgoingHeader.AUTHENTICATION, AuthenticationMessageComposer);
 
         // ADVERTISEMENT
         this._composers.set(OutgoingHeader.INTERSTITIAL_SHOWN, InterstitialShownMessageComposer);

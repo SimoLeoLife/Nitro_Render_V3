@@ -10,7 +10,6 @@ export class IncomingHeader
     // Original packets
     public static ACHIEVEMENT_LIST = 305;
     public static AUTHENTICATED = 2491;
-    public static AUTHENTICATION = -1;
 	public static AVAILABLE_COMMANDS = 4050;
     public static AVAILABILITY_STATUS = 2033;
     public static BUILDERS_CLUB_EXPIRED = 1452;
@@ -119,7 +118,7 @@ export class IncomingHeader
     public static MESSENGER_MINIMAIL_NEW = 1911;
     public static MESSENGER_RELATIONSHIPS = 2016;
     public static MESSENGER_REQUEST = 2219;
-    public static MESSENGER_REQUEST_ERROR = 892;
+    public static MESSENGER_REQUEST_ERROR = IncomingHeader.MESSENGER_MESSAGE_ERROR;
     public static MESSENGER_REQUESTS = 280;
     public static MESSENGER_SEARCH = 973;
     public static MESSENGER_UPDATE = 2800;
@@ -275,7 +274,7 @@ export class IncomingHeader
     public static USER_SANCTION_STATUS = 3679;
     public static USER_SETTINGS = 513;
     public static USER_SUBSCRIPTION = 954;
-    public static USER_WARDROBE_PAGE = 3315;
+    public static USER_WARDROBE_PAGE = IncomingHeader.USER_OUTFITS;
     public static USER_CLASSIFICATION = 966;
     public static GET_USER_TAGS = 1255;
     public static WIRED_ACTION = 1434;
@@ -297,7 +296,7 @@ export class IncomingHeader
     public static WIRED_TRIGGER = 383;
     public static PLAYING_GAME = 448;
     public static FURNITURE_STATE_2 = 3431;
-    public static REMOVE_BOT_FROM_INVENTORY = 233;
+    public static REMOVE_BOT_FROM_INVENTORY = IncomingHeader.USER_BOT_REMOVE;
     public static ADD_BOT_TO_INVENTORY = 1352;
     public static ACHIEVEMENT_PROGRESSED = 2107;
     public static MODTOOL_ROOM_INFO = 1333;
@@ -316,8 +315,8 @@ export class IncomingHeader
     public static GIFT_RECEIVER_NOT_FOUND = 1517;
     public static GIFT_OPENED = 56;
     public static FLOOD_CONTROL = 566;
-    public static REMAINING_MUTE = 826;
-    public static USER_EFFECT_LIST = 340;
+    public static REMAINING_MUTE = IncomingHeader.ROOM_MUTE_USER;
+    public static USER_EFFECT_LIST = IncomingHeader.USER_EFFECTS;
     public static USER_EFFECT_LIST_ADD = 2867;
     public static USER_EFFECT_LIST_REMOVE = 2228;
     public static USER_EFFECT_ACTIVATE = 1959;
@@ -344,7 +343,7 @@ export class IncomingHeader
     public static OBJECTS_DATA_UPDATE = 1453;
     public static PET_EXPERIENCE = 2156;
     public static COMMUNITY_GOAL_VOTE_EVENT = 1435;
-    public static PROMO_ARTICLES = 286;
+    public static PROMO_ARTICLES = IncomingHeader.DESKTOP_NEWS;
     public static COMMUNITY_GOAL_EARNED_PRIZES = 3319;
     public static COMMUNITY_GOAL_PROGRESS = 2525;
     public static CONCURRENT_USERS_GOAL_PROGRESS = 2737;
@@ -392,7 +391,7 @@ export class IncomingHeader
     public static CAMPAIGN_CALENDAR_DATA = 2531;
     public static CAMPAIGN_CALENDAR_DOOR_OPENED = 2551;
     public static BUILDERS_CLUB_FURNI_COUNT = 3828;
-    public static BUILDERS_CLUB_SUBSCRIPTION = 1452;
+    public static BUILDERS_CLUB_SUBSCRIPTION = IncomingHeader.BUILDERS_CLUB_EXPIRED;
     public static CATALOG_PAGE_EXPIRATION = 2668;
     public static CATALOG_EARLIEST_EXPIRY = 2515;
     public static CLUB_GIFT_SELECTED = 659;
@@ -407,9 +406,9 @@ export class IncomingHeader
     public static SEASONAL_CALENDAR_OFFER = 1889;
     public static COMPETITION_ENTRY_SUBMIT = 1177;
     public static COMPETITION_VOTING_INFO = 3506;
-    public static COMPETITION_TIMING_CODE = 1745;
+    public static COMPETITION_TIMING_CODE = IncomingHeader.DESKTOP_CAMPAIGN;
     public static COMPETITION_USER_PART_OF = 3841;
-    public static COMPETITION_NO_OWNED_ROOMS = 2064;
+    public static COMPETITION_NO_OWNED_ROOMS = IncomingHeader.NAVIGATOR_OPEN_ROOM_CREATOR;
     public static COMPETITION_SECONDS_UNTIL = 3926;
     public static BADGE_POINT_LIMITS = 2501;
     public static BADGE_REQUEST_FULFILLED = 2998;
@@ -424,7 +423,7 @@ export class IncomingHeader
     public static YOUTUBE_CONTROL_VIDEO = 1554;
     public static YOUTUBE_DISPLAY_PLAYLISTS = 1112;
     public static YOUTUBE_DISPLAY_VIDEO = 1411;
-    public static CFH_DISABLED_NOTIFY = 1651;
+    public static CFH_DISABLED_NOTIFY = IncomingHeader.MODERATION_REPORT_DISABLED;
     public static QUESTION = 2665;
     public static POLL_CONTENTS = 2997;
     public static POLL_ERROR = 662;

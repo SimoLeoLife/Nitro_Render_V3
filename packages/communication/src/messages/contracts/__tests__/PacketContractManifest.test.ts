@@ -2,7 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { loadPacketContractManifest, parsePacketContractManifest } from '../PacketContractManifest';
 
 const validManifest = () => ({
-    schemaVersion: 1,
+    schemaVersion: 2,
+    registry: {
+        defaults: { origin: 'official', stability: 'stable' },
+        ranges: [{
+            name: 'catalog_tools', direction: 'client_to_server', start: 10000, end: 10099,
+            origin: 'custom', feature: 'catalog_studio', stability: 'stable'
+        }],
+        aliases: [] as unknown[],
+        unsupported: [] as unknown[]
+    },
     contracts: [{
         name: 'SEND_FIXTURE',
         direction: 'client_to_server',
@@ -24,7 +33,7 @@ describe('packet contract manifest', () =>
 {
     it('loads the repository manifest from disk', () =>
     {
-        expect(loadPacketContractManifest('protocol/packet-field-contracts.json').schemaVersion).toBe(1);
+        expect(loadPacketContractManifest('protocol/packet-field-contracts.json').schemaVersion).toBe(2);
     });
 
     it('loads and deeply freezes valid structured schemas', () =>
@@ -41,9 +50,46 @@ describe('packet contract manifest', () =>
     it('rejects unsupported schema versions', () =>
     {
         const input = validManifest();
-        input.schemaVersion = 2;
+        input.schemaVersion = 3;
 
-        expect(() => parsePacketContractManifest(input)).toThrow('schemaVersion 1');
+        expect(() => parsePacketContractManifest(input)).toThrow('schemaVersion 2');
+    });
+
+    it('resolves official defaults and custom range metadata', () =>
+    {
+        const manifest = parsePacketContractManifest(validManifest());
+
+        expect(manifest.registry.metadataFor('server_to_client', 400)).toEqual({
+            range: '', origin: 'official', feature: '', stability: 'stable'
+        });
+        expect(manifest.registry.metadataFor('client_to_server', 10050)).toEqual({
+            range: 'catalog_tools', origin: 'custom', feature: 'catalog_studio', stability: 'stable'
+        });
+    });
+
+    it('rejects overlapping ranges in the same direction', () =>
+    {
+        const input = validManifest();
+        input.registry.ranges.push({
+            name: 'overlap', direction: 'client_to_server', start: 10050, end: 10150,
+            origin: 'custom', feature: 'other', stability: 'experimental'
+        });
+
+        expect(() => parsePacketContractManifest(input))
+            .toThrow('overlapping client_to_server registry ranges');
+    });
+
+    it('rejects aliases whose header is not classified', () =>
+    {
+        const input = validManifest();
+        input.registry.aliases.push({
+            side: 'typescript', direction: 'server_to_client', header: 9999,
+            canonical: 'CANONICAL', aliases: ['COMPATIBILITY'],
+            reason: 'Compatibility name retained for existing renderer integrations'
+        });
+
+        expect(() => parsePacketContractManifest(input))
+            .toThrow('alias header server_to_client:9999 is not classified');
     });
 
     it('rejects duplicate direction and header classifications', () =>
