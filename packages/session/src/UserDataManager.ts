@@ -99,6 +99,10 @@ export class UserDataManager implements IUserDataManager
             this._userDataByType.set(data.type, existingType);
         }
 
+        const previous = existingType.get(data.webID);
+
+        if(previous && (previous.roomIndex !== data.roomIndex)) this._userDataByRoomIndex.delete(previous.roomIndex);
+
         existingType.set(data.webID, data);
 
         this._userDataByRoomIndex.set(data.roomIndex, data);

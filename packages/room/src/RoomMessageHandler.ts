@@ -38,6 +38,7 @@ export class RoomMessageHandler
     private _activeWiredUserMovements = new Map<number, { expiresAt: number, sourceX: number, sourceY: number, sourceZ: number, targetX: number, targetY: number, targetZ: number }>();
     private _activeRoomUserWalks = new Map<number, { startedAt: number, targetX: number, targetY: number, targetZ: number, duration: number }>();
     private _jumpingUnitIds = new Set<number>();
+    private _roomUnitIndexByIdentity = new Map<string, number>();
     private _activeConfInvisHiddenItemIds = new Set<number>();
     private _confInvisReapplyTimeouts: ReturnType<typeof setTimeout>[] = [];
     private _activeAreaHideControllers = new Map<number, AreaHideControllerState>();
@@ -130,6 +131,7 @@ export class RoomMessageHandler
         this._activeWiredUserMovements.clear();
         this._activeRoomUserWalks.clear();
         this._jumpingUnitIds.clear();
+        this._roomUnitIndexByIdentity.clear();
         if(this._planeParser)
         {
             this._planeParser.dispose();
@@ -154,6 +156,7 @@ export class RoomMessageHandler
         this._activeWiredUserMovements.clear();
         this._activeRoomUserWalks.clear();
         this._jumpingUnitIds.clear();
+        this._roomUnitIndexByIdentity.clear();
         this._activeConfInvisHiddenItemIds.clear();
         this.clearConfInvisReapplyTimeouts();
         this._activeAreaHideControllers.clear();
@@ -168,6 +171,7 @@ export class RoomMessageHandler
         this._activeWiredUserMovements.clear();
         this._activeRoomUserWalks.clear();
         this._jumpingUnitIds.clear();
+        this._roomUnitIndexByIdentity.clear();
         this._activeConfInvisHiddenItemIds.clear();
         this.clearConfInvisReapplyTimeouts();
         this._activeAreaHideControllers.clear();
@@ -1378,6 +1382,21 @@ export class RoomMessageHandler
             const location = new Vector3d(user.x, user.y, user.z);
             const direction = new Vector3d(user.dir);
 
+            if(user.webID > 0)
+            {
+                const identity = `${ user.userType }_${ user.webID }`;
+                const previousRoomIndex = this._roomUnitIndexByIdentity.get(identity);
+
+                if((previousRoomIndex !== undefined) && (previousRoomIndex !== user.roomIndex))
+                {
+                    this._activeRoomUserWalks.delete(previousRoomIndex);
+                    this._jumpingUnitIds.delete(previousRoomIndex);
+                    this._roomEngine.removeRoomObjectUser(this._currentRoomId, previousRoomIndex);
+                }
+
+                this._roomUnitIndexByIdentity.set(identity, user.roomIndex);
+            }
+
             this._roomEngine.addRoomObjectUser(this._currentRoomId, user.roomIndex, location, direction, user.dir, user.userType, user.figure);
 
             if(user.webID === this._ownUserId)
@@ -1453,9 +1472,22 @@ export class RoomMessageHandler
     {
         if(!(event instanceof RoomUnitRemoveEvent) || !event.connection || !this._roomEngine) return;
 
-        this._activeRoomUserWalks.delete(event.getParser().unitId);
-        this._jumpingUnitIds.delete(event.getParser().unitId);
-        this._roomEngine.removeRoomObjectUser(this._currentRoomId, event.getParser().unitId);
+        const unitId = event.getParser().unitId;
+
+        this._activeRoomUserWalks.delete(unitId);
+        this._jumpingUnitIds.delete(unitId);
+
+        for(const [identity, roomIndex] of this._roomUnitIndexByIdentity)
+        {
+            if(roomIndex === unitId)
+            {
+                this._roomUnitIndexByIdentity.delete(identity);
+
+                break;
+            }
+        }
+
+        this._roomEngine.removeRoomObjectUser(this._currentRoomId, unitId);
 
         this.updateGuideMarker();
     }
