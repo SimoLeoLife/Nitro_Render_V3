@@ -2,6 +2,7 @@ import { BinaryReader, BinaryWriter } from '@nitrots/utils';
 import { describe, expect, it } from 'vitest';
 import { CatalogAdminPageDetailsMessageParser } from '../CatalogAdminPageDetailsMessageParser';
 import { CatalogAdminOfferDetailsMessageParser } from '../CatalogAdminOfferDetailsMessageParser';
+import { CatalogAdminResultMessageParser } from '../CatalogAdminResultMessageParser';
 
 class TestWrapper
 {
@@ -115,3 +116,94 @@ describe('CatalogAdminOfferDetailsMessageParser', () =>
         expect((parser as any).catalogMode).toBe('NORMAL');
     });
 });
+
+describe('CatalogAdminResultMessageParser', () =>
+{
+    it('keeps legacy two-field results valid', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeByte(1);
+        writer.writeString('Saved');
+
+        const parser = new CatalogAdminResultMessageParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.success).toBe(true);
+        expect(parser.message).toBe('Saved');
+        expect(parser.smartSaveResult).toBeNull();
+    });
+
+    it('parses a correlated version-one page result', () =>
+    {
+        const writer = smartSaveWriter(
+            true,
+            '{"catalogType":"NORMAL","pageId":42,"parentId":-1,"caption":"Guild shop"}',
+            '{"id":91,"revision":8,"actorId":9,"actorName":"Alice","summary":"Edit page","source":"UI","createdAt":"2026-08-02T10:05:30Z","entries":[{"entityType":"PAGE","catalogType":"NORMAL","entityId":42,"operation":"UPDATE"}]}',
+            '{}');
+
+        const parser = new CatalogAdminResultMessageParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.smartSaveResult).toMatchObject({
+            protocolVersion: 1,
+            operationId: 'save-page-1',
+            action: 'savePage',
+            code: 'SAVED',
+            draftVersionId: 12,
+            revision: 8,
+            entityType: 'PAGE',
+            catalogType: 'NORMAL',
+            entityId: 42,
+            serverDurationMs: 17
+        });
+        expect(parser.smartSaveResult?.entity).toMatchObject({ pageId: 42, caption: 'Guild shop' });
+        expect(parser.smartSaveResult?.historyGroup?.entries[0].operation).toBe('UPDATE');
+    });
+
+    it('parses field errors on a result without an entity or history group', () =>
+    {
+        const writer = smartSaveWriter(false, '', 'null', '{"caption":"Page caption is required"}', 0);
+        const parser = new CatalogAdminResultMessageParser();
+
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.success).toBe(false);
+        expect(parser.smartSaveResult?.entity).toBeNull();
+        expect(parser.smartSaveResult?.historyGroup).toBeNull();
+        expect(parser.smartSaveResult?.fieldErrors.caption).toBe('Page caption is required');
+    });
+
+    it('preserves the legacy result when the optional extension is malformed', () =>
+    {
+        const writer = smartSaveWriter(true, '{bad json', 'null', '{}');
+        const parser = new CatalogAdminResultMessageParser();
+
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.success).toBe(true);
+        expect(parser.message).toBe('Saved');
+        expect(parser.smartSaveResult).toBeNull();
+    });
+});
+
+const smartSaveWriter = (
+    success: boolean,
+    entityJson: string,
+    historyJson: string,
+    fieldErrorsJson: string,
+    entityId = 42) =>
+{
+    const writer = new BinaryWriter();
+    writer.writeByte(success ? 1 : 0);
+    writer.writeString(success ? 'Saved' : 'Page caption is required');
+    writer.writeInt(1);
+    writer.writeString('save-page-1');
+    writer.writeString('savePage');
+    writer.writeString(success ? 'SAVED' : 'VALIDATION_FAILED');
+    writer.writeInt(12);
+    writer.writeInt(8);
+    writer.writeString('PAGE');
+    writer.writeString('NORMAL');
+    writer.writeInt(entityId);
+    writer.writeString(entityJson);
+    writer.writeString(historyJson);
+    writer.writeString(fieldErrorsJson);
+    writer.writeInt(17);
+    return writer;
+};

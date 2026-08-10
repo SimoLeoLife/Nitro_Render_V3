@@ -6,6 +6,7 @@ export * from './BundleDiscountRulesetMessageParser';
 export * from './CatalogAdminOfferDetailsMessageParser';
 export * from './CatalogAdminPageDetailsMessageParser';
 export * from './CatalogAdminResultMessageParser';
+export * from './CatalogAdminSmartSaveResult';
 export * from './CatalogIndexMessageParser';
 export * from './CatalogLocalizationData';
 export * from './CatalogPageExpirationParser';

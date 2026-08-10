@@ -48,14 +48,14 @@ describe('catalog admin packet contract', () =>
             42, 'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
             'headline', 'teaser', 'details', 'NORMAL', 'BOTH', 'text one',
             3, true, false, 'special', 'text two', 'teaser text', 123, '1;2;3',
-            12, 7, 'token-123', 'Updated page: Guild shop'
+            12, 7, 'token-123', 'Updated page: Guild shop', 'save-page-1'
         ).getMessageArray();
 
         expect(message).toEqual([
             42, 'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
             'headline', 'teaser', 'details', 'NORMAL', 'BOTH', 'text one',
             3, true, false, 'special', 'text two', 'teaser text', 123, '1;2;3',
-            12, 7, 'token-123', 'Updated page: Guild shop'
+            12, 7, 'token-123', 'Updated page: Guild shop', 'save-page-1'
         ]);
     });
 
@@ -66,10 +66,10 @@ describe('catalog admin packet contract', () =>
             42, 'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
             'headline', 'teaser', 'details', 'NORMAL', 'BOTH', 'text one',
             3, true, false, 'special', 'text two', 'teaser text', 123, '1;2;3',
-            12, 7, 'token-123', 'Updated page: Guild shop'
+            12, 7, 'token-123', 'Updated page: Guild shop', 'save-page-1'
         ).getMessageArray();
 
-        expect(message.slice(-4)).toEqual([ 12, 7, 'token-123', 'Updated page: Guild shop' ]);
+        expect(message.slice(-5)).toEqual([ 12, 7, 'token-123', 'Updated page: Guild shop', 'save-page-1' ]);
     });
 
     it('uses the shared draft for inspector reads and page asset mutations', () =>
@@ -103,7 +103,7 @@ describe('catalog admin packet contract', () =>
             'Guild shop', 'guild_shop', 'guild_furni', 145, 5, true, false, 9, 7,
             'NORMAL', 'BOTH', 3, true, false, 'headline', 'teaser', 'special',
             'text one', 'text two', 'details', 'teaser text', 123, '1;2;3',
-            0, 0, '', ''
+            0, 0, '', '', ''
         ]);
     });
 
@@ -114,18 +114,18 @@ describe('catalog admin packet contract', () =>
 
         expect(new SaveOffer(
             99, 42, '100:2', 'sound_offer', 5, 0, 0, 1, 0, '', true, 77, 0, -1, 321,
-            'NORMAL', 12, 7, 'offer-token', 'Updated offer'
+            'NORMAL', 12, 7, 'offer-token', 'Updated offer', 'save-offer-1'
         ).getMessageArray()).toEqual([
             99, 42, '100:2', 'sound_offer', 5, 0, 0, 1, 0, '', true, 77, 0, -1, 321,
-            'NORMAL', 12, 7, 'offer-token', 'Updated offer'
+            'NORMAL', 12, 7, 'offer-token', 'Updated offer', 'save-offer-1'
         ]);
 
         expect(new CreateOffer(
             42, '100:2', 'sound_offer', 5, 0, 0, 1, 0, '', true, 77, 0, -1, 321,
-            'NORMAL', 12, 7, 'page-token', 'Created offer'
+            'NORMAL', 12, 7, 'page-token', 'Created offer', 'create-offer-1'
         ).getMessageArray()).toEqual([
             42, '100:2', 'sound_offer', 5, 0, 0, 1, 0, '', true, 77, 0, -1, 321,
-            'NORMAL', 12, 7, 'page-token', 'Created offer'
+            'NORMAL', 12, 7, 'page-token', 'Created offer', 'create-offer-1'
         ]);
     });
 });
