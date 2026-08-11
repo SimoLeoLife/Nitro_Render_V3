@@ -402,8 +402,32 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         if(!roomCanvas) return;
 
         roomCanvas.setScale(level, point, offsetPoint, isFlipForced);
+        this.syncRoomCameraLocationToCanvasOffset(roomId, roomCanvas);
 
         GetEventDispatcher().dispatchEvent(new RoomEngineEvent(RoomEngineEvent.ROOM_ZOOMED, roomId));
+    }
+
+    private normalizeScreenOffsetForScale(offset: number, size: number, scale: number): number
+    {
+        if((scale === 0) || (scale === 1)) return offset;
+
+        const unscaledSize = (size / scale);
+        const unscaledCenter = (unscaledSize / 2);
+
+        return (unscaledCenter - ((unscaledCenter - offset) / scale));
+    }
+
+    private syncRoomCameraLocationToCanvasOffset(roomId: number, canvas: IRoomRenderingCanvas): void
+    {
+        if(!this.useOffsetScrolling || !canvas || (canvas.scale <= 0)) return;
+
+        const instanceData = this.getRoomInstanceData(roomId);
+
+        if(!instanceData || !instanceData.roomCamera) return;
+
+        instanceData.roomCamera.resetLocation(new Vector3d(
+            -this.normalizeScreenOffsetForScale(canvas.screenOffsetX, canvas.width, canvas.scale),
+            -this.normalizeScreenOffsetForScale(canvas.screenOffsetY, canvas.height, canvas.scale)));
     }
 
     public getRoomInstanceRenderingCanvas(roomId: number, canvasId: number = -1): IRoomRenderingCanvas
