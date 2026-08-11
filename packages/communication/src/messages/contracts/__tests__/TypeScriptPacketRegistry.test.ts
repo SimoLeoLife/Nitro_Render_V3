@@ -68,6 +68,54 @@ describe('TypeScript packet registry', () =>
             .toThrow('duplicate active server_to_client header 100: FIRST and SECOND');
     });
 
+    it('rejects duplicate declared headers that are not explicit aliases', () =>
+    {
+        const root = join(tmpdir(), `packet-registry-declared-duplicate-${ Date.now() }`);
+        write(root, 'messages/incoming/IncomingHeader.ts', `export class IncomingHeader {
+            static ACTIVE = 100; static STALE = 100;
+        }`);
+        write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
+        write(root, 'NitroMessages.ts', `class NitroMessages { register() {
+            this._events.set(IncomingHeader.ACTIVE, ActiveEvent);
+        }}`);
+        write(root, 'messages/incoming/test/ActiveEvent.ts',
+            'class ActiveEvent { constructor() { super(null, ActiveParser); } }');
+        write(root, 'messages/parser/test/ActiveParser.ts', 'class ActiveParser {}');
+
+        expect(() => TypeScriptPacketRegistry.discover(root))
+            .toThrow('duplicate declared server_to_client header 100: ACTIVE and STALE');
+    });
+
+    it('accepts explicit aliases for the same header', () =>
+    {
+        const root = join(tmpdir(), `packet-registry-alias-${ Date.now() }`);
+        write(root, 'messages/incoming/IncomingHeader.ts', `export class IncomingHeader {
+            static ACTIVE = 100; static COMPATIBILITY = IncomingHeader.ACTIVE;
+        }`);
+        write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
+        write(root, 'NitroMessages.ts', `class NitroMessages { register() {
+            this._events.set(IncomingHeader.COMPATIBILITY, ActiveEvent);
+        }}`);
+        write(root, 'messages/incoming/test/ActiveEvent.ts',
+            'class ActiveEvent { constructor() { super(null, ActiveParser); } }');
+        write(root, 'messages/parser/test/ActiveParser.ts', 'class ActiveParser {}');
+
+        expect(TypeScriptPacketRegistry.discover(root).require('server_to_client', 100).symbol)
+            .toBe('COMPATIBILITY');
+    });
+
+    it('rejects non-positive headers in active registry files', () =>
+    {
+        const root = join(tmpdir(), `packet-registry-negative-${ Date.now() }`);
+        write(root, 'messages/incoming/IncomingHeader.ts',
+            'export class IncomingHeader { static UNSUPPORTED = -1; }');
+        write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
+        write(root, 'NitroMessages.ts', 'class NitroMessages {}');
+
+        expect(() => TypeScriptPacketRegistry.discover(root))
+            .toThrow('non-positive server_to_client header UNSUPPORTED=-1');
+    });
+
     it('rejects registrations whose parser source is missing', () =>
     {
         const root = join(tmpdir(), `packet-registry-missing-${ Date.now() }`);

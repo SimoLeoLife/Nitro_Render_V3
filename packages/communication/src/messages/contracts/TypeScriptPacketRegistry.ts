@@ -20,6 +20,14 @@ export interface DeclaredTypeScriptPacket
     symbol: string;
 }
 
+export interface DeclaredTypeScriptAlias
+{
+    direction: PacketDirection;
+    header: number;
+    canonical: string;
+    symbol: string;
+}
+
 interface HeaderTable
 {
     values: ReadonlyMap<string, number>;
@@ -30,20 +38,25 @@ export class TypeScriptPacketRegistry
 {
     public readonly active: readonly RegisteredTypeScriptPacket[];
     public readonly declaredOnly: readonly DeclaredTypeScriptPacket[];
+    public readonly aliases: readonly DeclaredTypeScriptAlias[];
     private readonly byKey: ReadonlyMap<string, RegisteredTypeScriptPacket>;
 
-    private constructor(active: RegisteredTypeScriptPacket[], declaredOnly: DeclaredTypeScriptPacket[])
+    private constructor(
+        active: RegisteredTypeScriptPacket[],
+        declaredOnly: DeclaredTypeScriptPacket[],
+        aliases: DeclaredTypeScriptAlias[])
     {
         this.active = Object.freeze([...active]);
         this.declaredOnly = Object.freeze([...declaredOnly]);
+        this.aliases = Object.freeze([...aliases]);
         this.byKey = new Map(active.map(packet => [key(packet.direction, packet.header), packet]));
         Object.freeze(this);
     }
 
     public static discover(root: string): TypeScriptPacketRegistry
     {
-        const incoming = parseHeaders(join(root, 'messages/incoming/IncomingHeader.ts'));
-        const outgoing = parseHeaders(join(root, 'messages/outgoing/OutgoingHeader.ts'));
+        const incoming = parseHeaders(join(root, 'messages/incoming/IncomingHeader.ts'), 'IncomingHeader');
+        const outgoing = parseHeaders(join(root, 'messages/outgoing/OutgoingHeader.ts'), 'OutgoingHeader');
         const eventSources = indexClasses(join(root, 'messages/incoming'));
         const parserSources = indexClasses(join(root, 'messages/parser'));
         const composerSources = indexClasses(join(root, 'messages/outgoing'));
@@ -96,13 +109,20 @@ export class TypeScriptPacketRegistry
             }
             else byHeader.set(packetKey, packet);
         }
+        validateDeclarations(incoming, 'server_to_client');
+        validateDeclarations(outgoing, 'client_to_server');
 
         const active = [...byHeader.values()];
         const declaredOnly = [
             ...findDeclaredOnly('server_to_client', incoming, byHeader),
             ...findDeclaredOnly('client_to_server', outgoing, byHeader)
         ];
-        return new TypeScriptPacketRegistry(active, declaredOnly);
+        const aliases = [
+            ...findAliases('server_to_client', incoming),
+            ...findAliases('client_to_server', outgoing)
+        ].sort((left, right) => left.direction.localeCompare(right.direction)
+            || left.header - right.header || left.symbol.localeCompare(right.symbol));
+        return new TypeScriptPacketRegistry(active, declaredOnly, aliases);
     }
 
     public require(direction: PacketDirection, header: number): RegisteredTypeScriptPacket
@@ -113,7 +133,7 @@ export class TypeScriptPacketRegistry
     }
 }
 
-const parseHeaders = (path: string): HeaderTable =>
+const parseHeaders = (path: string, owner: string): HeaderTable =>
 {
     const source = parse(path);
     const expressions = new Map<string, ts.Expression>();
@@ -130,7 +150,8 @@ const parseHeaders = (path: string): HeaderTable =>
         for(const [symbol, expression] of expressions)
         {
             if(values.has(symbol)) continue;
-            const value = integer(expression) ?? (ts.isIdentifier(expression) ? values.get(expression.text) : undefined);
+            const reference = aliasReference(expression, owner);
+            const value = integer(expression) ?? (reference ? values.get(reference) : undefined);
             if(value !== undefined)
             {
                 values.set(symbol, value);
@@ -148,15 +169,41 @@ const parseHeaders = (path: string): HeaderTable =>
         let root = symbol;
         let expression: ts.Expression | undefined = original;
         const visited = new Set<string>();
-        while(expression && ts.isIdentifier(expression) && !visited.has(expression.text))
+        let reference = expression ? aliasReference(expression, owner) : undefined;
+        while(reference && !visited.has(reference))
         {
-            visited.add(expression.text);
-            root = expression.text;
+            visited.add(reference);
+            root = reference;
             expression = expressions.get(root);
+            reference = expression ? aliasReference(expression, owner) : undefined;
         }
         canonicalSymbols.set(symbol, root);
     }
     return { values, canonicalSymbols };
+};
+
+const findAliases = (direction: PacketDirection, table: HeaderTable): DeclaredTypeScriptAlias[] =>
+    [...table.values]
+        .filter(([symbol]) => canonical(table, symbol) !== symbol)
+        .map(([symbol, header]) => ({ direction, header, canonical: canonical(table, symbol), symbol }));
+
+const validateDeclarations = (table: HeaderTable, direction: PacketDirection): void =>
+{
+    const symbolsByHeader = new Map<number, string[]>();
+    for(const [symbol, header] of table.values)
+    {
+        if(header <= 0) throw new TypeError(`non-positive ${ direction } header ${ symbol }=${ header }`);
+        const symbols = symbolsByHeader.get(header) ?? [];
+        symbols.push(symbol);
+        symbolsByHeader.set(header, symbols);
+    }
+    for(const [header, symbols] of symbolsByHeader)
+    {
+        if(symbols.length < 2) continue;
+        const roots = new Set(symbols.map(symbol => canonical(table, symbol)));
+        if(roots.size > 1)
+            throw new TypeError(`duplicate declared ${ direction } header ${ header }: ${ symbols.join(' and ') }`);
+    }
 };
 
 const eventParser = (eventSource: string): string =>
@@ -259,6 +306,14 @@ const integer = (expression: ts.Expression): number | undefined =>
     if(ts.isNumericLiteral(expression)) return Number(expression.text);
     if(ts.isPrefixUnaryExpression(expression) && expression.operator === ts.SyntaxKind.MinusToken
         && ts.isNumericLiteral(expression.operand)) return -Number(expression.operand.text);
+    return undefined;
+};
+
+const aliasReference = (expression: ts.Expression, owner: string): string | undefined =>
+{
+    if(ts.isIdentifier(expression)) return expression.text;
+    if(ts.isPropertyAccessExpression(expression) && ts.isIdentifier(expression.expression)
+        && expression.expression.text === owner) return expression.name.text;
     return undefined;
 };
 
