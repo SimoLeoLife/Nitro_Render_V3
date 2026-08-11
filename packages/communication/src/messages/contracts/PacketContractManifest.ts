@@ -5,6 +5,12 @@ import {
     PacketDirection,
     PacketEndpoint,
     PacketExemption,
+    PacketHeaderRange,
+    PacketMetadata,
+    PacketOrigin,
+    PacketRegistryPolicy,
+    PacketSide,
+    PacketStability,
     ScalarType,
     UnpairedPacket,
     WireSchema
@@ -13,6 +19,8 @@ import {
 const DIRECTIONS = new Set<PacketDirection>(['client_to_server', 'server_to_client']);
 const SCALAR_TYPES = new Set<ScalarType>(['byte', 'short', 'int', 'long', 'boolean', 'string', 'bytes']);
 const SIDES = new Set(['java', 'typescript']);
+const ORIGINS = new Set<PacketOrigin>(['official', 'custom']);
+const STABILITIES = new Set<PacketStability>(['stable', 'experimental', 'deprecated']);
 const GENERIC_REASONS = new Set(['complex packet', 'dynamic packet', 'unsupported packet', 'todo']);
 
 export const loadPacketContractManifest = (path: string): PacketContractManifest =>
@@ -21,8 +29,9 @@ export const loadPacketContractManifest = (path: string): PacketContractManifest
 export const parsePacketContractManifest = (input: unknown): PacketContractManifest =>
 {
     const root = object(input, 'manifest');
-    if(root.schemaVersion !== 1) throw new TypeError('packet contract manifest requires schemaVersion 1');
+    if(root.schemaVersion !== 2) throw new TypeError('packet contract manifest requires schemaVersion 2');
 
+    const registry = packetRegistry(root.registry);
     const contracts = array(root.contracts, 'contracts').map((value, index) => contract(value, `contracts[${ index }]`));
     const unpaired = array(root.unpaired, 'unpaired').map((value, index) => unpairedPacket(value, `unpaired[${ index }]`));
     const exemptions = array(root.exemptions, 'exemptions').map((value, index) => exemption(value, `exemptions[${ index }]`));
@@ -33,8 +42,134 @@ export const parsePacketContractManifest = (input: unknown): PacketContractManif
         if(classified.has(key)) throw new TypeError(`${ key } is classified more than once`);
         classified.add(key);
     }
+    for(const alias of registry.aliases)
+    {
+        const key = `${ alias.direction }:${ alias.header }`;
+        if(!classified.has(key)) throw new TypeError(`alias header ${ key } is not classified`);
+    }
 
-    return deepFreeze({ schemaVersion: 1, contracts, unpaired, exemptions });
+    return deepFreeze({ schemaVersion: 2, registry, contracts, unpaired, exemptions });
+};
+
+const packetRegistry = (input: unknown): PacketRegistryPolicy =>
+{
+    const value = object(input, 'registry');
+    const defaultsValue = object(value.defaults, 'registry.defaults');
+    const defaults = {
+        origin: origin(defaultsValue.origin, 'registry.defaults.origin'),
+        stability: stability(defaultsValue.stability, 'registry.defaults.stability')
+    };
+    const ranges = array(value.ranges, 'registry.ranges').map((entry, index) =>
+        packetRange(entry, `registry.ranges[${ index }]`));
+    validateRanges(ranges);
+    const aliases = array(value.aliases, 'registry.aliases').map((entry, index) =>
+    {
+        const context = `registry.aliases[${ index }]`;
+        const alias = object(entry, context);
+        const canonical = nonEmptyString(alias.canonical, `${ context }.canonical`);
+        const symbols = array(alias.aliases, `${ context }.aliases`).map((symbol, aliasIndex) =>
+            nonEmptyString(symbol, `${ context }.aliases[${ aliasIndex }]`));
+        if(!symbols.length) throw new TypeError(`${ context } requires aliases`);
+        if(symbols.includes(canonical) || new Set(symbols).size !== symbols.length)
+            throw new TypeError(`${ context } contains duplicate symbols`);
+        return {
+            side: side(alias.side, `${ context }.side`),
+            direction: direction(alias.direction, context),
+            header: positiveInteger(alias.header, `${ context }.header`),
+            canonical,
+            aliases: symbols,
+            reason: concreteReason(alias.reason, context)
+        };
+    });
+    const unsupportedKeys = new Set<string>();
+    const unsupported = array(value.unsupported, 'registry.unsupported').map((entry, index) =>
+    {
+        const context = `registry.unsupported[${ index }]`;
+        const packet = object(entry, context);
+        const result = {
+            side: side(packet.side, `${ context }.side`),
+            direction: direction(packet.direction, context),
+            symbol: nonEmptyString(packet.symbol, `${ context }.symbol`),
+            reason: concreteReason(packet.reason, context)
+        };
+        const key = `${ result.side }:${ result.direction }:${ result.symbol }`;
+        if(unsupportedKeys.has(key)) throw new TypeError(`duplicate unsupported packet ${ key }`);
+        unsupportedKeys.add(key);
+        return result;
+    });
+    return {
+        defaults,
+        ranges,
+        aliases,
+        unsupported,
+        metadataFor: (packetDirection: PacketDirection, header: number): PacketMetadata =>
+        {
+            const range = ranges.find(candidate => candidate.direction === packetDirection
+                && header >= candidate.start && header <= candidate.end);
+            return range
+                ? { range: range.name, origin: range.origin, feature: range.feature, stability: range.stability }
+                : { range: '', origin: defaults.origin, feature: '', stability: defaults.stability };
+        }
+    };
+};
+
+const packetRange = (input: unknown, context: string): PacketHeaderRange =>
+{
+    const value = object(input, context);
+    const start = positiveInteger(value.start, `${ context }.start`);
+    const end = positiveInteger(value.end, `${ context }.end`);
+    if(end < start) throw new TypeError(`${ context } ends before it starts`);
+    return {
+        name: nonEmptyString(value.name, `${ context }.name`),
+        direction: direction(value.direction, context),
+        start,
+        end,
+        origin: origin(value.origin, `${ context }.origin`),
+        feature: nonEmptyString(value.feature, `${ context }.feature`),
+        stability: stability(value.stability, `${ context }.stability`)
+    };
+};
+
+const validateRanges = (ranges: readonly PacketHeaderRange[]): void =>
+{
+    const names = new Set<string>();
+    for(const range of ranges)
+    {
+        if(names.has(range.name)) throw new TypeError(`duplicate registry range ${ range.name }`);
+        names.add(range.name);
+    }
+    for(let left = 0; left < ranges.length; left++)
+    {
+        for(let right = left + 1; right < ranges.length; right++)
+        {
+            const first = ranges[left];
+            const second = ranges[right];
+            if(first.direction !== second.direction) continue;
+            if(first.start <= second.end && second.start <= first.end)
+                throw new TypeError(`overlapping ${ first.direction } registry ranges ${ first.name } and ${ second.name }`);
+        }
+    }
+};
+
+const origin = (input: unknown, context: string): PacketOrigin =>
+{
+    const value = nonEmptyString(input, context);
+    if(!ORIGINS.has(value as PacketOrigin)) throw new TypeError(`${ context } has unknown origin ${ value }`);
+    return value as PacketOrigin;
+};
+
+const stability = (input: unknown, context: string): PacketStability =>
+{
+    const value = nonEmptyString(input, context);
+    if(!STABILITIES.has(value as PacketStability)) throw new TypeError(`${ context } has unknown stability ${ value }`);
+    return value as PacketStability;
+};
+
+const side = (input: unknown, context: string): PacketSide =>
+{
+    const value = nonEmptyString(input, context);
+    if(!SIDES.has(value)) throw new TypeError(`${ context } has invalid side ${ value }`);
+    return value as PacketSide;
 };
 
 const contract = (input: unknown, context: string): PacketContract =>

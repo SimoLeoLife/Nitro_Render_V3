@@ -1,4 +1,5 @@
 export * from './IncomingHeader';
+export * from './UnsupportedIncomingHeader';
 export * from './advertisement';
 export * from './availability';
 export * from './avatar';

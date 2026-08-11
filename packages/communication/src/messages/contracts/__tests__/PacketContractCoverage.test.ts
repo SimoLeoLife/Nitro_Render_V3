@@ -3,6 +3,8 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadPacketContractManifest } from '../PacketContractManifest';
 import { TypeScriptPacketRegistry } from '../TypeScriptPacketRegistry';
+import { UnsupportedIncomingHeader } from '../../incoming/UnsupportedIncomingHeader';
+import { UnsupportedOutgoingHeader } from '../../outgoing/UnsupportedOutgoingHeader';
 
 const key = (direction: string, header: number) => `${ direction }:${ header }`;
 
@@ -35,4 +37,42 @@ describe('packet contract coverage', () =>
 
         expect(paths.filter(path => !existsSync(resolve(path)))).toEqual([]);
     });
+
+    it('keeps every renderer alias synchronized with the shared registry policy', () =>
+    {
+        const manifest = loadPacketContractManifest('protocol/packet-field-contracts.json');
+        const registry = TypeScriptPacketRegistry.discover(resolve('packages/communication/src'));
+        const expected = manifest.registry.aliases
+            .filter(alias => alias.side === 'typescript')
+            .flatMap(alias => alias.aliases.map(symbol => ({
+                direction: alias.direction,
+                header: alias.header,
+                canonical: alias.canonical,
+                symbol
+            })))
+            .sort((left, right) => left.direction.localeCompare(right.direction)
+                || left.header - right.header || left.symbol.localeCompare(right.symbol));
+
+        expect(registry.aliases).toEqual(expected);
+    });
+
+    it('keeps unsupported renderer headers outside active registries and synchronized with policy', () =>
+    {
+        const manifest = loadPacketContractManifest('protocol/packet-field-contracts.json');
+        const expected = manifest.registry.unsupported
+            .filter(packet => packet.side === 'typescript')
+            .map(packet => `${ packet.direction }:${ packet.symbol }`)
+            .sort();
+        const actual = [
+            ...unsupportedSymbols('server_to_client', UnsupportedIncomingHeader),
+            ...unsupportedSymbols('client_to_server', UnsupportedOutgoingHeader)
+        ].sort();
+
+        expect(actual).toEqual(expected);
+    });
 });
+
+const unsupportedSymbols = (direction: string, registry: object): string[] =>
+    Object.entries(registry)
+        .filter(([, header]) => header === -1)
+        .map(([symbol]) => `${ direction }:${ symbol }`);
