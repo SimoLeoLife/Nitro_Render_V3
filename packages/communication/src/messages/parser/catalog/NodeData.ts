@@ -11,12 +11,12 @@ export class NodeData
     private _children: NodeData[];
     private _offerIds: number[];
 
-    constructor(wrapper: IMessageDataWrapper)
+    constructor(wrapper: IMessageDataWrapper, depth: number = 0)
     {
         if(!wrapper) throw new Error('invalid_wrapper');
 
         this.flush();
-        this.parse(wrapper);
+        this.parse(wrapper, depth);
     }
 
     public flush(): boolean
@@ -35,47 +35,92 @@ export class NodeData
 
     private static readonly MAX_OFFERS: number = 1000;
     private static readonly MAX_CHILDREN: number = 500;
-    private static _parseDepth: number = 0;
     private static readonly MAX_DEPTH: number = 20;
 
-    public parse(wrapper: IMessageDataWrapper): boolean
+    private static requireBytes(wrapper: IMessageDataWrapper, amount: number, field: string): void
+    {
+        const remaining = wrapper.remainingBytes;
+
+        if((typeof remaining === 'number') && (remaining < amount))
+        {
+            throw new Error(`Catalog index packet truncated while reading ${ field }`);
+        }
+    }
+
+    private static readBoolean(wrapper: IMessageDataWrapper, field: string): boolean
+    {
+        NodeData.requireBytes(wrapper, 1, field);
+
+        return wrapper.readBoolean();
+    }
+
+    private static readInt(wrapper: IMessageDataWrapper, field: string): number
+    {
+        NodeData.requireBytes(wrapper, 4, field);
+
+        return wrapper.readInt();
+    }
+
+    private static readString(wrapper: IMessageDataWrapper, field: string): string
+    {
+        NodeData.requireBytes(wrapper, 2, field);
+
+        const value = wrapper.readString();
+        const remaining = wrapper.remainingBytes;
+
+        if((typeof remaining === 'number') && (remaining < 0))
+        {
+            throw new Error(`Catalog index packet truncated while reading ${ field }`);
+        }
+
+        return value;
+    }
+
+    public parse(wrapper: IMessageDataWrapper, depth: number = 0): boolean
     {
         if(!wrapper) return false;
 
-        this._visible = wrapper.readBoolean();
-        this._icon = wrapper.readInt();
-        this._pageId = wrapper.readInt();
-        this._parentId = wrapper.readInt();
-        this._pageName = wrapper.readString();
-        this._localization = wrapper.readString();
+        this._visible = NodeData.readBoolean(wrapper, 'node visibility');
+        this._icon = NodeData.readInt(wrapper, 'node icon');
+        this._pageId = NodeData.readInt(wrapper, 'page id');
+        this._parentId = NodeData.readInt(wrapper, 'parent id');
+        this._pageName = NodeData.readString(wrapper, 'page name');
+        this._localization = NodeData.readString(wrapper, 'page localization');
 
-        let totalOffers = Math.min(wrapper.readInt(), NodeData.MAX_OFFERS);
+        const totalOffers = NodeData.readInt(wrapper, 'offer count');
 
-        while(totalOffers > 0)
+        if(totalOffers < 0) throw new Error(`Catalog index offer count ${ totalOffers } is invalid`);
+
+        if(totalOffers > NodeData.MAX_OFFERS)
         {
-            this._offerIds.push(wrapper.readInt());
-
-            totalOffers--;
+            throw new Error(`Catalog index offer count ${ totalOffers } exceeds limit ${ NodeData.MAX_OFFERS }`);
         }
 
-        let totalChildren = Math.min(wrapper.readInt(), NodeData.MAX_CHILDREN);
+        NodeData.requireBytes(wrapper, (totalOffers * 4) + 4, 'offer id');
 
-        NodeData._parseDepth++;
-
-        if(NodeData._parseDepth > NodeData.MAX_DEPTH)
+        for(let index = 0; index < totalOffers; index++)
         {
-            NodeData._parseDepth--;
-            return true;
+            this._offerIds.push(NodeData.readInt(wrapper, 'offer id'));
         }
 
-        while(totalChildren > 0)
-        {
-            this._children.push(new NodeData(wrapper));
+        const totalChildren = NodeData.readInt(wrapper, 'child count');
 
-            totalChildren--;
+        if(totalChildren < 0) throw new Error(`Catalog index child count ${ totalChildren } is invalid`);
+
+        if(totalChildren > NodeData.MAX_CHILDREN)
+        {
+            throw new Error(`Catalog index child count ${ totalChildren } exceeds limit ${ NodeData.MAX_CHILDREN }`);
         }
 
-        NodeData._parseDepth--;
+        if((totalChildren > 0) && (depth >= NodeData.MAX_DEPTH))
+        {
+            throw new Error(`Catalog index depth exceeds limit ${ NodeData.MAX_DEPTH }`);
+        }
+
+        for(let index = 0; index < totalChildren; index++)
+        {
+            this._children.push(new NodeData(wrapper, depth + 1));
+        }
 
         return true;
     }
