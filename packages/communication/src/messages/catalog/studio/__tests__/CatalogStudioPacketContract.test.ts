@@ -70,12 +70,12 @@ describe('catalog studio packet contract', () =>
             .toEqual([ 'op-publish', 12, 7 ]);
         expect(new CatalogStudioRestoreComposer('op-restore', 12, 7, 11).getMessageArray())
             .toEqual([ 'op-restore', 12, 7, 11 ]);
-        expect(new CatalogStudioExportComposer('op-export', 12, 7, 'JSONC').getMessageArray())
-            .toEqual([ 'op-export', 12, 7, 'JSONC' ]);
-        expect(new CatalogStudioDocumentDryRunComposer('op-dry', 12, 7, 'SQL', 'UPDATE x').getMessageArray())
-            .toEqual([ 'op-dry', 12, 7, 'SQL', 'UPDATE x' ]);
-        expect(new CatalogStudioDocumentApplyComposer('op-apply', 12, 7, 'root-token', 'BULK', '{}', 'abc', 'Apply bulk').getMessageArray())
-            .toEqual([ 'op-apply', 12, 7, 'root-token', 'BULK', '{}', 'abc', 'Apply bulk' ]);
+        expect(new CatalogStudioExportComposer('op-export', 12, 7, 'SQL').getMessageArray())
+            .toEqual([ 'op-export', 12, 7, 'SQL' ]);
+        expect(new CatalogStudioDocumentDryRunComposer('op-dry', 12, 7, 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;").getMessageArray())
+            .toEqual([ 'op-dry', 12, 7, 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;" ]);
+        expect(new CatalogStudioDocumentApplyComposer('op-apply', 12, 7, 'root-token', 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;", 'abc', 'Import catalog').getMessageArray())
+            .toEqual([ 'op-apply', 12, 7, 'root-token', 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;", 'abc', 'Import catalog' ]);
         expect(new CatalogStudioPreviewComposer('op-preview', 12, 7, 4, true, false, true, false, 500, { 5: 25 }).getMessageArray())
             .toEqual([ 'op-preview', 12, 7, 4, true, false, true, false, 500, 1, 5, 25 ]);
     });
@@ -95,11 +95,11 @@ describe('catalog studio packet contract', () =>
 
         const resultWriter = new BinaryWriter();
         resultWriter.writeString('op-dry'); resultWriter.writeByte(1); resultWriter.writeString('DRY_RUN_READY');
-        resultWriter.writeString('Dry-run ready'); resultWriter.writeInt(7); resultWriter.writeString('JSONC');
-        resultWriter.writeString('{}'); resultWriter.writeString('fingerprint'); resultWriter.writeInt(3);
+        resultWriter.writeString('Dry-run ready'); resultWriter.writeInt(7); resultWriter.writeString('SQL');
+        resultWriter.writeString("UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;"); resultWriter.writeString('fingerprint'); resultWriter.writeInt(3);
         const result = new CatalogStudioDocumentResultMessageParser();
         expect(result.parse(new TestWrapper(new BinaryReader(resultWriter.getBuffer())) as any)).toBe(true);
-        expect(result).toMatchObject({ success: true, revision: 7, format: 'JSONC', changedEntities: 3 });
+        expect(result).toMatchObject({ success: true, revision: 7, format: 'SQL', changedEntities: 3 });
     });
 
     it('parses a studio session with actors and published versions', () =>
