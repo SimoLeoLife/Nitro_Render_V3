@@ -9,7 +9,6 @@ export class OutgoingHeader
     public static DELETE_MENTION = 4805;
 
     public static ACHIEVEMENT_LIST = 219;
-    public static AUTHENTICATION = -1;
     public static BOT_CONFIGURATION = 1986;
     public static BOT_PICKUP = 3323;
     public static BOT_PLACE = 1592;
@@ -126,8 +125,8 @@ export class OutgoingHeader
     public static ITEM_PAINT = 711;
     public static SET_OBJECT_DATA = 3608;
     public static ITEM_STACK_HELPER = 3839;
-    public static ITEM_WALL_CLICK = 210;
-    public static ITEM_WALL_UPDATE = 168;
+    public static ITEM_WALL_CLICK = OutgoingHeader.FURNITURE_WALL_MULTISTATE;
+    public static ITEM_WALL_UPDATE = OutgoingHeader.FURNITURE_WALL_UPDATE;
     public static MARKETPLACE_CONFIG = 2597;
     public static ACCEPT_FRIEND = 137;
     public static MESSENGER_CHAT = 3567;
@@ -355,7 +354,7 @@ export class OutgoingHeader
     public static CATALOG_REQUESET_PET_BREEDS = 1756;
     public static APPROVE_NAME = 2109;
     public static UNIT_GIVE_HANDITEM_PET = 2768;
-    public static PET_MOUNT = 1036;
+    public static PET_MOUNT = OutgoingHeader.PET_RIDE;
     public static PET_SUPPLEMENT = 749;
     public static FURNITURE_GROUP_INFO = 2651;
     public static ACHIEVEMENT_RESOLUTION_OPEN = 359;
@@ -366,7 +365,7 @@ export class OutgoingHeader
     public static UNSEEN_RESET_CATEGORY = 3493;
     public static UNSEEN_RESET_ITEMS = 2343;
     public static COMMUNITY_GOAL_VOTE_COMPOSER = 3536;
-    public static GET_PROMO_ARTICLES = 1827;
+    public static GET_PROMO_ARTICLES = OutgoingHeader.DESKTOP_NEWS;
     public static ACCEPT_QUEST = 3604;
     public static ACTIVATE_QUEST = 793;
     public static CANCEL_QUEST = 3133;
