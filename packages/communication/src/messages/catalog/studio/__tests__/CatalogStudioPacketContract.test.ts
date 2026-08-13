@@ -22,6 +22,7 @@ import { CatalogStudioDocumentResultMessageParser } from '../../../parser/catalo
 import { CatalogStudioPreviewMessageParser } from '../../../parser/catalog/studio/CatalogStudioPreviewMessageParser';
 import { CatalogStudioSessionMessageParser } from '../../../parser/catalog/studio/CatalogStudioSessionMessageParser';
 import { CatalogStudioValidationMessageParser } from '../../../parser/catalog/studio/CatalogStudioValidationMessageParser';
+import { CATALOG_STUDIO_DOCUMENT_ENCODING, decodeCatalogStudioDocument, encodeCatalogStudioDocument } from '../CatalogStudioDocumentWireCodec';
 
 class TestWrapper
 {
@@ -58,6 +59,8 @@ describe('catalog studio packet contract', () =>
 
     it('serializes requests in the frozen emulator field order', () =>
     {
+        const sql = "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;";
+        const encodedSql = encodeCatalogStudioDocument(sql);
         expect(new CatalogStudioOpenSessionComposer().getMessageArray()).toEqual([]);
         expect(new CatalogStudioAcquireLockComposer('op-acquire', 12, 'PAGE', 'BUILDER', 44).getMessageArray())
             .toEqual([ 'op-acquire', 12, 'PAGE', 'BUILDER', 44 ]);
@@ -72,10 +75,11 @@ describe('catalog studio packet contract', () =>
             .toEqual([ 'op-restore', 12, 7, 11 ]);
         expect(new CatalogStudioExportComposer('op-export', 12, 7, 'SQL').getMessageArray())
             .toEqual([ 'op-export', 12, 7, 'SQL' ]);
-        expect(new CatalogStudioDocumentDryRunComposer('op-dry', 12, 7, 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;").getMessageArray())
-            .toEqual([ 'op-dry', 12, 7, 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;" ]);
-        expect(new CatalogStudioDocumentApplyComposer('op-apply', 12, 7, 'root-token', 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;", 'abc', 'Import catalog').getMessageArray())
-            .toEqual([ 'op-apply', 12, 7, 'root-token', 'SQL', "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;", 'abc', 'Import catalog' ]);
+        expect(new CatalogStudioDocumentDryRunComposer('op-dry', 12, 7, 'SQL', sql).getMessageArray())
+            .toEqual([ 'op-dry', 12, 7, 'SQL', encodedSql.encoding, encodedSql.chunks.length, ...encodedSql.chunks ]);
+        expect(new CatalogStudioDocumentApplyComposer('op-apply', 12, 7, 'root-token', 'SQL', sql, 'abc', 'Import catalog').getMessageArray())
+            .toEqual([ 'op-apply', 12, 7, 'root-token', 'SQL', encodedSql.encoding, encodedSql.chunks.length,
+                ...encodedSql.chunks, 'abc', 'Import catalog' ]);
         expect(new CatalogStudioPreviewComposer('op-preview', 12, 7, 4, true, false, true, false, 500, { 5: 25 }).getMessageArray())
             .toEqual([ 'op-preview', 12, 7, 4, true, false, true, false, 500, 1, 5, 25 ]);
     });
@@ -96,10 +100,24 @@ describe('catalog studio packet contract', () =>
         const resultWriter = new BinaryWriter();
         resultWriter.writeString('op-dry'); resultWriter.writeByte(1); resultWriter.writeString('DRY_RUN_READY');
         resultWriter.writeString('Dry-run ready'); resultWriter.writeInt(7); resultWriter.writeString('SQL');
-        resultWriter.writeString("UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;"); resultWriter.writeString('fingerprint'); resultWriter.writeInt(3);
+        const encodedDocument = encodeCatalogStudioDocument("UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;");
+        resultWriter.writeString(encodedDocument.encoding); resultWriter.writeInt(encodedDocument.chunks.length);
+        encodedDocument.chunks.forEach(chunk => resultWriter.writeString(chunk));
+        resultWriter.writeString('fingerprint'); resultWriter.writeInt(3);
         const result = new CatalogStudioDocumentResultMessageParser();
         expect(result.parse(new TestWrapper(new BinaryReader(resultWriter.getBuffer())) as any)).toBe(true);
         expect(result).toMatchObject({ success: true, revision: 7, format: 'SQL', changedEntities: 3 });
+    });
+
+    it('round-trips SQL documents larger than the wire string limit as bounded chunks', () =>
+    {
+        const document = Array.from({ length: 80_000 }, (_, index) => `${index.toString(36)}:${Math.imul(index, 2_654_435_761) >>> 0}`).join('|');
+        const encoded = encodeCatalogStudioDocument(document);
+
+        expect(encoded.encoding).toBe(CATALOG_STUDIO_DOCUMENT_ENCODING);
+        expect(encoded.chunks.length).toBeGreaterThan(1);
+        expect(encoded.chunks.every(chunk => chunk.length <= 32_767)).toBe(true);
+        expect(decodeCatalogStudioDocument(encoded.encoding, encoded.chunks)).toBe(document);
     });
 
     it('parses a studio session with actors and published versions', () =>
