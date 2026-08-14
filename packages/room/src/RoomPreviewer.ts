@@ -7,6 +7,7 @@ import { RoomEngine } from './RoomEngine';
 import { ObjectRoomMapUpdateMessage } from './messages';
 import { RoomPlaneParser } from './object/RoomPlaneParser';
 import { LegacyWallGeometry } from './utils/LegacyWallGeometry';
+import { IRoomPreviewCapabilities, RoomPreviewMode } from './RoomPreviewCapabilities';
 
 export class RoomPreviewer
 {
@@ -39,6 +40,16 @@ export class RoomPreviewer
     private _backgroundColor: number = 0x000000;
     private _backgroundSprite: Sprite = null;
     private _disableUpdate: boolean = false;
+    private _currentPreviewMode: RoomPreviewMode = 'none';
+    private _previewCapabilities: IRoomPreviewCapabilities = {
+        mode: 'none',
+        canRotate: false,
+        canChangeState: false,
+        canUseAvatarActions: false,
+        canZoomIn: false,
+        canZoomOut: false
+    };
+    private _previewCapabilityListeners = new Set<() => void>();
 
     constructor(roomEngine: IRoomEngine, roomId: number = 1)
     {
@@ -63,6 +74,7 @@ export class RoomPreviewer
     public dispose(): void
     {
         this.reset(true);
+        this._previewCapabilityListeners.clear();
 
         if(this.isRoomEngineReady && GetEventDispatcher())
         {
@@ -132,6 +144,56 @@ export class RoomPreviewer
         }
 
         this._currentPreviewObjectCategory = RoomObjectCategory.MINIMUM;
+        this.setPreviewMode('none');
+    }
+
+    public getPreviewCapabilities(): IRoomPreviewCapabilities
+    {
+        return this._previewCapabilities;
+    }
+
+    public subscribePreviewCapabilities(listener: () => void): () => void
+    {
+        this._previewCapabilityListeners.add(listener);
+
+        return () => this._previewCapabilityListeners.delete(listener);
+    }
+
+    private setPreviewMode(mode: RoomPreviewMode): void
+    {
+        this._currentPreviewMode = mode;
+        this.refreshPreviewCapabilities();
+    }
+
+    private refreshPreviewCapabilities(): void
+    {
+        const isFurniture = (this._currentPreviewMode === 'floor') || (this._currentPreviewMode === 'wall');
+        const roomObject = (this._currentPreviewMode === 'none' || !this.isRoomEngineReady)
+            ? null
+            : this._roomEngine.getRoomObject(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, this._currentPreviewObjectCategory);
+        const directions = roomObject?.model?.getValue<number[]>(RoomObjectVariable.FURNITURE_ALLOWED_DIRECTIONS) ?? [];
+        const hasPreviewObject = !!roomObject;
+        const nextCapabilities: IRoomPreviewCapabilities = {
+            mode: hasPreviewObject ? this._currentPreviewMode : 'none',
+            canRotate: isFurniture && directions.length > 1,
+            canChangeState: isFurniture && hasPreviewObject,
+            canUseAvatarActions: (this._currentPreviewMode === 'avatar') && hasPreviewObject,
+            canZoomIn: hasPreviewObject && (this._currentPreviewScale === RoomPreviewer.SCALE_SMALL),
+            canZoomOut: hasPreviewObject && (this._currentPreviewScale === RoomPreviewer.SCALE_NORMAL)
+        };
+
+        if(
+            (nextCapabilities.mode === this._previewCapabilities.mode) &&
+            (nextCapabilities.canRotate === this._previewCapabilities.canRotate) &&
+            (nextCapabilities.canChangeState === this._previewCapabilities.canChangeState) &&
+            (nextCapabilities.canUseAvatarActions === this._previewCapabilities.canUseAvatarActions) &&
+            (nextCapabilities.canZoomIn === this._previewCapabilities.canZoomIn) &&
+            (nextCapabilities.canZoomOut === this._previewCapabilities.canZoomOut)
+        ) return;
+
+        this._previewCapabilities = nextCapabilities;
+
+        for(const listener of this._previewCapabilityListeners) listener();
     }
 
     public updatePreviewModel(model: string, wallHeight: number, scale: boolean = true): void
@@ -258,6 +320,8 @@ export class RoomPreviewer
 
                 if(roomObject && extra) roomObject.model.setValue(RoomObjectVariable.FURNITURE_EXTRAS, extra);
 
+                this.setPreviewMode('floor');
+
                 this.updatePreviewRoomView();
 
                 return RoomPreviewer.PREVIEW_OBJECT_ID;
@@ -284,6 +348,8 @@ export class RoomPreviewer
                 this._previousAutomaticStateChangeTime = GetTickerTime();
                 this._automaticStateChange = true;
 
+                this.setPreviewMode('wall');
+
                 this.updatePreviewRoomView();
 
                 return RoomPreviewer.PREVIEW_OBJECT_ID;
@@ -307,6 +373,7 @@ export class RoomPreviewer
             {
                 this._previousAutomaticStateChangeTime = GetTickerTime();
                 this._automaticStateChange = true;
+                this.setPreviewMode('avatar');
 
                 this.updateUserGesture(1);
                 this.updateUserEffect(effect);
@@ -335,6 +402,7 @@ export class RoomPreviewer
             {
                 this._previousAutomaticStateChangeTime = GetTickerTime();
                 this._automaticStateChange = false;
+                this.setPreviewMode('pet');
 
                 this.updateUserGesture(1);
                 this.updateUserPosture('std');
@@ -604,6 +672,8 @@ export class RoomPreviewer
             }
         }
 
+        this.refreshPreviewCapabilities();
+
         return point;
     }
 
@@ -626,6 +696,7 @@ export class RoomPreviewer
         this._currentPreviewScale = RoomPreviewer.SCALE_NORMAL;
         this._currentPreviewNeedsZoomOut = false;
         this._currentPreviewRectangle = null;
+        this.refreshPreviewCapabilities();
         this.updatePreviewRoomView(true);
     }
 
@@ -648,6 +719,7 @@ export class RoomPreviewer
         this._currentPreviewScale = RoomPreviewer.SCALE_SMALL;
         this._currentPreviewNeedsZoomOut = true;
         this._currentPreviewRectangle = null;
+        this.refreshPreviewCapabilities();
         this.updatePreviewRoomView(true);
     }
 
@@ -784,6 +856,8 @@ export class RoomPreviewer
                     this._roomEngine.updateRoomObjectWallLocation(event.roomId, event.objectId, new Vector3d(0.5, 2.3, (((3.6 - sizeZ) / 2) + centerZ)));
                 }
             }
+
+            this.refreshPreviewCapabilities();
         }
     }
 

@@ -13,7 +13,7 @@ vi.mock('./GetRoomEngine', () => ({
 const makePreviewer = (category = RoomObjectCategory.FLOOR) => {
     const roomObject = {
         getDirection: () => ({ x: 90 }),
-        model: {},
+        model: { getValue: vi.fn(() => [ 0, 90, 180, 270 ]) },
         setDirection: vi.fn()
     };
     const roomEngine = {
@@ -27,14 +27,30 @@ const makePreviewer = (category = RoomObjectCategory.FLOOR) => {
     const previewer = Object.create(RoomPreviewer.prototype) as RoomPreviewer;
     const internals = previewer as unknown as {
         _automaticStateChange: boolean;
+        _currentPreviewMode: string;
         _currentPreviewNeedsZoomOut: boolean;
+        _currentPreviewScale: number;
+        _previewCapabilities: object;
+        _previewCapabilityListeners: Set<() => void>;
+        refreshPreviewCapabilities(): void;
     };
 
     Object.assign(previewer, {
         _roomEngine: roomEngine,
         _previewRoomId: 77,
         _currentPreviewObjectCategory: category,
+        _currentPreviewMode: 'floor',
         _currentPreviewRectangle: null,
+        _currentPreviewScale: RoomPreviewer.SCALE_NORMAL,
+        _previewCapabilities: {
+            mode: 'none',
+            canRotate: false,
+            canChangeState: false,
+            canUseAvatarActions: false,
+            canZoomIn: false,
+            canZoomOut: false
+        },
+        _previewCapabilityListeners: new Set(),
         _automaticStateChange: true
     });
 
@@ -42,6 +58,49 @@ const makePreviewer = (category = RoomObjectCategory.FLOOR) => {
 };
 
 describe('RoomPreviewer catalog controls', () => {
+    it('reports stable capabilities for the object that is actually loaded', () => {
+        const { previewer, internals } = makePreviewer();
+
+        internals.refreshPreviewCapabilities();
+
+        expect((previewer as any).getPreviewCapabilities()).toEqual({
+            mode: 'floor',
+            canRotate: true,
+            canChangeState: true,
+            canUseAvatarActions: false,
+            canZoomIn: false,
+            canZoomOut: true
+        });
+    });
+
+    it('notifies subscribers when zoom availability changes', () => {
+        const { previewer, internals } = makePreviewer();
+        const listener = vi.fn();
+        const unsubscribe = (previewer as any).subscribePreviewCapabilities(listener);
+
+        internals.refreshPreviewCapabilities();
+        previewer.zoomOut();
+
+        expect(listener).toHaveBeenCalled();
+        expect((previewer as any).getPreviewCapabilities()).toMatchObject({ canZoomIn: true, canZoomOut: false });
+
+        unsubscribe();
+    });
+
+    it('distinguishes avatar actions from furniture interactions', () => {
+        const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
+
+        internals._currentPreviewMode = 'avatar';
+        internals.refreshPreviewCapabilities();
+
+        expect((previewer as any).getPreviewCapabilities()).toMatchObject({
+            mode: 'avatar',
+            canRotate: false,
+            canChangeState: false,
+            canUseAvatarActions: true
+        });
+    });
+
     it('rotates floor furniture in both requested directions and refreshes the preview', () => {
         const { previewer, roomEngine } = makePreviewer();
 
