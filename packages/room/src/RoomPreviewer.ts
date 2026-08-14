@@ -386,7 +386,11 @@ export class RoomPreviewer
         {
             this._automaticStateChange = false;
 
-            if(this._currentPreviewObjectCategory !== RoomObjectCategory.UNIT) this._roomEngine.changeObjectState(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, this._currentPreviewObjectCategory);
+            if(this._currentPreviewObjectCategory !== RoomObjectCategory.UNIT)
+            {
+                this._roomEngine.changeObjectState(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, this._currentPreviewObjectCategory);
+                this.updatePreviewRoomView(true);
+            }
         }
     }
 
@@ -395,7 +399,7 @@ export class RoomPreviewer
         this._automaticStateChange = enabled;
     }
 
-    public changeRoomObjectDirection(): void
+    public changeRoomObjectDirection(clockwise: boolean = true): void
     {
         if(this.isRoomEngineReady)
         {
@@ -403,7 +407,7 @@ export class RoomPreviewer
 
             if(!roomObject) return;
 
-            const direction = this._roomEngine.objectEventHandler.getValidRoomObjectDirection(roomObject, true);
+            const direction = this._roomEngine.objectEventHandler.getValidRoomObjectDirection(roomObject, clockwise);
 
             switch(this._currentPreviewObjectCategory)
             {
@@ -412,11 +416,18 @@ export class RoomPreviewer
                     const floorDirection = new Vector3d(direction, direction, direction);
 
                     this._roomEngine.updateRoomObjectFloor(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, floorLocation, floorDirection, null, null);
+                    this._currentPreviewRectangle = null;
+                    this.updatePreviewRoomView(true);
                     return;
                 }
-                case RoomObjectCategory.WALL:
-                    //this._roomEngine.updateRoomObjectWall(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, null, direction, null, null);
+                case RoomObjectCategory.WALL: {
+                    const wallDirection = (roomObject.getDirection().x === 90) ? 180 : 90;
+
+                    roomObject.setDirection(new Vector3d(wallDirection));
+                    this._currentPreviewRectangle = null;
+                    this.updatePreviewRoomView(true);
                     return;
+                }
             }
         }
     }
@@ -613,6 +624,9 @@ export class RoomPreviewer
         }
 
         this._currentPreviewScale = RoomPreviewer.SCALE_NORMAL;
+        this._currentPreviewNeedsZoomOut = false;
+        this._currentPreviewRectangle = null;
+        this.updatePreviewRoomView(true);
     }
 
     public zoomOut(): void
@@ -632,6 +646,9 @@ export class RoomPreviewer
         }
 
         this._currentPreviewScale = RoomPreviewer.SCALE_SMALL;
+        this._currentPreviewNeedsZoomOut = true;
+        this._currentPreviewRectangle = null;
+        this.updatePreviewRoomView(true);
     }
 
     public updateAvatarDirection(direction: number, headDirection: number): void
