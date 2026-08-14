@@ -1,4 +1,4 @@
-import { IGetImageListener, IImageResult, IObjectData, IRoomEngine, IRoomObjectController, IRoomRenderingCanvas, IVector3D, LegacyDataType, RoomObjectCategory, RoomObjectUserType, RoomObjectVariable } from '@nitrots/api';
+import { AvatarAction, IGetImageListener, IImageResult, IObjectData, IRoomEngine, IRoomObjectController, IRoomRenderingCanvas, IVector3D, LegacyDataType, RoomObjectCategory, RoomObjectUserType, RoomObjectVariable } from '@nitrots/api';
 import { FloorHeightMapMessageParser, RoomEntryTileMessageParser } from '@nitrots/communication';
 import { GetEventDispatcher, RoomEngineEvent, RoomEngineObjectEvent } from '@nitrots/events';
 import { GetTickerTime, RoomId, Vector3d } from '@nitrots/utils';
@@ -21,6 +21,13 @@ export class RoomPreviewer
 
     private static ALLOWED_IMAGE_CUT: number = 0.25;
     private static AUTOMATIC_STATE_CHANGE_INTERVAL: number = 2500;
+    private static AVATAR_ACTION_COUNT: number = 6;
+    private static AVATAR_ACTION_DANCE: number = 2;
+    private static AVATAR_ACTION_LAY: number = 4;
+    private static AVATAR_ACTION_SIT: number = 3;
+    private static AVATAR_ACTION_STAND: number = 0;
+    private static AVATAR_ACTION_WALK: number = 1;
+    private static AVATAR_ACTION_WAVE: number = 5;
     private static ZOOM_ENABLED: boolean = true;
 
     private _roomEngine: IRoomEngine;
@@ -35,6 +42,9 @@ export class RoomPreviewer
     private _currentPreviewScale: number = 64;
     private _currentPreviewNeedsZoomOut: boolean;
     private _automaticStateChange: boolean;
+    private _currentAvatarAction: number = RoomPreviewer.AVATAR_ACTION_STAND;
+    private _currentAvatarDirection: number = 2;
+    private _currentAvatarHeadDirection: number = 3;
     private _previousAutomaticStateChangeTime: number;
     private _addViewOffset: Point;
     private _backgroundColor: number = 0x000000;
@@ -144,6 +154,7 @@ export class RoomPreviewer
         }
 
         this._currentPreviewObjectCategory = RoomObjectCategory.MINIMUM;
+        this.resetAvatarPreviewState();
         this.setPreviewMode('none');
     }
 
@@ -175,7 +186,7 @@ export class RoomPreviewer
         const hasPreviewObject = !!roomObject;
         const nextCapabilities: IRoomPreviewCapabilities = {
             mode: hasPreviewObject ? this._currentPreviewMode : 'none',
-            canRotate: isFurniture && directions.length > 1,
+            canRotate: hasPreviewObject && ((this._currentPreviewMode === 'avatar') || (isFurniture && directions.length > 1)),
             canChangeState: isFurniture && hasPreviewObject,
             canUseAvatarActions: (this._currentPreviewMode === 'avatar') && hasPreviewObject,
             canZoomIn: hasPreviewObject && (this._currentPreviewScale === RoomPreviewer.SCALE_SMALL),
@@ -462,6 +473,22 @@ export class RoomPreviewer
         }
     }
 
+    public cycleAvatarAction(): void
+    {
+        if(!this.isRoomEngineReady || (this._currentPreviewMode !== 'avatar')) return;
+
+        let nextAction = this._currentAvatarAction;
+
+        do
+        {
+            nextAction = (nextAction + 1) % RoomPreviewer.AVATAR_ACTION_COUNT;
+        }
+        while(!this.isAvatarActionValidForDirection(nextAction, this._currentAvatarDirection));
+
+        this._currentAvatarAction = nextAction;
+        this.applyAvatarAction();
+    }
+
     public setAutomaticStateChange(enabled: boolean): void
     {
         this._automaticStateChange = enabled;
@@ -474,6 +501,12 @@ export class RoomPreviewer
             const roomObject = this._roomEngine.getRoomObject(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, this._currentPreviewObjectCategory);
 
             if(!roomObject) return;
+
+            if(this._currentPreviewMode === 'avatar')
+            {
+                this.rotateAvatar(clockwise);
+                return;
+            }
 
             const direction = this._roomEngine.objectEventHandler.getValidRoomObjectDirection(roomObject, clockwise);
 
@@ -725,10 +758,102 @@ export class RoomPreviewer
 
     public updateAvatarDirection(direction: number, headDirection: number): void
     {
-        if(this.isRoomEngineReady)
+        this._currentAvatarDirection = this.normalizeAvatarDirection(direction);
+        this._currentAvatarHeadDirection = this.normalizeAvatarDirection(headDirection);
+        this.updateAvatarDirectionAndLocation(this._currentAvatarDirection, this._currentAvatarHeadDirection);
+    }
+
+    public updateAvatarDirectionAndLocation(direction: number, headDirection: number, location: IVector3D = null): void
+    {
+        if(!this.isRoomEngineReady) return;
+
+        const avatarLocation = location || new Vector3d(RoomPreviewer.PREVIEW_OBJECT_LOCATION_X, RoomPreviewer.PREVIEW_OBJECT_LOCATION_Y, 0);
+
+        this._roomEngine.updateRoomObjectUserLocation(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, avatarLocation, avatarLocation, false, 0, new Vector3d((direction * 45), 0, 0), (headDirection * 45));
+    }
+
+    private resetAvatarPreviewState(): void
+    {
+        this._currentAvatarAction = RoomPreviewer.AVATAR_ACTION_STAND;
+        this._currentAvatarDirection = 2;
+        this._currentAvatarHeadDirection = 3;
+    }
+
+    private normalizeAvatarDirection(direction: number): number
+    {
+        return ((direction % 8) + 8) % 8;
+    }
+
+    private isAvatarActionValidForDirection(action: number, direction: number): boolean
+    {
+        if(action === RoomPreviewer.AVATAR_ACTION_SIT) return ((direction % 2) === 0);
+        if(action === RoomPreviewer.AVATAR_ACTION_LAY) return (direction === 0) || (direction === 2);
+
+        return true;
+    }
+
+    private getAvatarActionLocation(): IVector3D
+    {
+        if(this._currentAvatarAction === RoomPreviewer.AVATAR_ACTION_SIT) return new Vector3d(2, 2, 0.55);
+        if(this._currentAvatarAction === RoomPreviewer.AVATAR_ACTION_LAY) return new Vector3d(1, 1, 0.8);
+
+        return null;
+    }
+
+    private applyAvatarAction(): void
+    {
+        this.updateObjectUserAction(RoomObjectVariable.FIGURE_DANCE, 0);
+        this.updateObjectUserAction(RoomObjectVariable.FIGURE_EXPRESSION, 0);
+
+        switch(this._currentAvatarAction)
         {
-            this._roomEngine.updateRoomObjectUserLocation(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, new Vector3d(RoomPreviewer.PREVIEW_OBJECT_LOCATION_X, RoomPreviewer.PREVIEW_OBJECT_LOCATION_Y, 0), new Vector3d(RoomPreviewer.PREVIEW_OBJECT_LOCATION_X, RoomPreviewer.PREVIEW_OBJECT_LOCATION_Y, 0), false, 0, new Vector3d((direction * 45), 0, 0), (headDirection * 45));
+            case RoomPreviewer.AVATAR_ACTION_WALK:
+                this.updateUserPosture(AvatarAction.POSTURE_WALK);
+                break;
+            case RoomPreviewer.AVATAR_ACTION_DANCE:
+                this.updateUserPosture(AvatarAction.POSTURE_STAND);
+                this.updateObjectUserAction(RoomObjectVariable.FIGURE_DANCE, 1);
+                break;
+            case RoomPreviewer.AVATAR_ACTION_SIT:
+                this.updateUserPosture(AvatarAction.POSTURE_SIT);
+                break;
+            case RoomPreviewer.AVATAR_ACTION_LAY:
+                this.updateUserPosture(AvatarAction.POSTURE_LAY);
+                break;
+            case RoomPreviewer.AVATAR_ACTION_WAVE:
+                this.updateUserPosture(AvatarAction.POSTURE_STAND);
+                this.updateObjectUserAction(RoomObjectVariable.FIGURE_EXPRESSION, AvatarAction.getExpressionId(AvatarAction.EXPRESSION_WAVE));
+                break;
+            default:
+                this.updateUserPosture(AvatarAction.POSTURE_STAND);
+                break;
         }
+
+        this.updateAvatarDirectionAndLocation(this._currentAvatarDirection, this._currentAvatarHeadDirection, this.getAvatarActionLocation());
+        this._currentPreviewRectangle = null;
+        this.updatePreviewRoomView(true);
+    }
+
+    private rotateAvatar(clockwise: boolean): void
+    {
+        let step = clockwise ? 1 : -1;
+        let nextDirection = this.normalizeAvatarDirection(this._currentAvatarDirection + step);
+
+        if((this._currentAvatarAction === RoomPreviewer.AVATAR_ACTION_SIT) && ((nextDirection % 2) !== 0))
+        {
+            step *= 2;
+            nextDirection = this.normalizeAvatarDirection(this._currentAvatarDirection + step);
+        }
+        else if((this._currentAvatarAction === RoomPreviewer.AVATAR_ACTION_LAY) && !this.isAvatarActionValidForDirection(this._currentAvatarAction, nextDirection))
+        {
+            nextDirection = (this._currentAvatarDirection === 0) ? 2 : 0;
+        }
+
+        this._currentAvatarDirection = nextDirection;
+        this._currentAvatarHeadDirection = nextDirection;
+        this.updateAvatarDirectionAndLocation(nextDirection, nextDirection, this.getAvatarActionLocation());
+        this._currentPreviewRectangle = null;
+        this.updatePreviewRoomView(true);
     }
 
     public updateObjectRoom(floorType: string = null, wallType: string = null, landscapeType: string = null, forceUpdate: boolean = false): boolean

@@ -1,4 +1,4 @@
-import { RoomObjectCategory } from '@nitrots/api';
+import { AvatarAction, RoomObjectCategory, RoomObjectVariable } from '@nitrots/api';
 import { describe, expect, it, vi } from 'vitest';
 import { RoomPreviewer } from './RoomPreviewer';
 
@@ -22,11 +22,17 @@ const makePreviewer = (category = RoomObjectCategory.FLOOR) => {
         getRoomObject: vi.fn(() => roomObject),
         objectEventHandler: { getValidRoomObjectDirection: vi.fn((_object, clockwise) => (clockwise ? 180 : 0)) },
         setRoomInstanceRenderingCanvasScale: vi.fn(),
-        updateRoomObjectFloor: vi.fn()
+        updateRoomObjectFloor: vi.fn(),
+        updateRoomObjectUserAction: vi.fn(),
+        updateRoomObjectUserLocation: vi.fn(),
+        updateRoomObjectUserPosture: vi.fn()
     };
     const previewer = Object.create(RoomPreviewer.prototype) as RoomPreviewer;
     const internals = previewer as unknown as {
         _automaticStateChange: boolean;
+        _currentAvatarAction: number;
+        _currentAvatarDirection: number;
+        _currentAvatarHeadDirection: number;
         _currentPreviewMode: string;
         _currentPreviewNeedsZoomOut: boolean;
         _currentPreviewScale: number;
@@ -38,6 +44,9 @@ const makePreviewer = (category = RoomObjectCategory.FLOOR) => {
     Object.assign(previewer, {
         _roomEngine: roomEngine,
         _previewRoomId: 77,
+        _currentAvatarAction: 0,
+        _currentAvatarDirection: 2,
+        _currentAvatarHeadDirection: 3,
         _currentPreviewObjectCategory: category,
         _currentPreviewMode: 'floor',
         _currentPreviewRectangle: null,
@@ -95,10 +104,75 @@ describe('RoomPreviewer catalog controls', () => {
 
         expect((previewer as any).getPreviewCapabilities()).toMatchObject({
             mode: 'avatar',
-            canRotate: false,
+            canRotate: true,
             canChangeState: false,
             canUseAvatarActions: true
         });
+    });
+
+    it('cycles an avatar through walk, dance, sit, lay, wave and stand', () => {
+        const { previewer, internals, roomEngine } = makePreviewer(RoomObjectCategory.UNIT);
+
+        internals._currentPreviewMode = 'avatar';
+
+        previewer.cycleAvatarAction();
+        expect(roomEngine.updateRoomObjectUserPosture).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, AvatarAction.POSTURE_WALK, '');
+
+        previewer.cycleAvatarAction();
+        expect(roomEngine.updateRoomObjectUserAction).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, RoomObjectVariable.FIGURE_DANCE, 1, null);
+
+        previewer.cycleAvatarAction();
+        expect(roomEngine.updateRoomObjectUserPosture).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, AvatarAction.POSTURE_SIT, '');
+        expect(roomEngine.updateRoomObjectUserLocation).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, expect.objectContaining({ x: 2, y: 2, z: 0.55 }), expect.anything(), false, 0, expect.anything(), expect.any(Number));
+
+        previewer.cycleAvatarAction();
+        expect(roomEngine.updateRoomObjectUserPosture).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, AvatarAction.POSTURE_LAY, '');
+
+        previewer.cycleAvatarAction();
+        expect(roomEngine.updateRoomObjectUserAction).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, RoomObjectVariable.FIGURE_EXPRESSION, AvatarAction.getExpressionId(AvatarAction.EXPRESSION_WAVE), null);
+
+        previewer.cycleAvatarAction();
+        expect(internals._currentAvatarAction).toBe(0);
+        expect(roomEngine.updateRoomObjectUserPosture).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, AvatarAction.POSTURE_STAND, '');
+    });
+
+    it('skips avatar poses that are incompatible with the current direction', () => {
+        const { previewer, internals, roomEngine } = makePreviewer(RoomObjectCategory.UNIT);
+
+        internals._currentPreviewMode = 'avatar';
+        internals._currentAvatarAction = 2;
+        internals._currentAvatarDirection = 1;
+
+        previewer.cycleAvatarAction();
+
+        expect(internals._currentAvatarAction).toBe(5);
+        expect(roomEngine.updateRoomObjectUserAction).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, RoomObjectVariable.FIGURE_EXPRESSION, AvatarAction.getExpressionId(AvatarAction.EXPRESSION_WAVE), null);
+    });
+
+    it('keeps avatar rotation on valid directions for directional poses', () => {
+        const { previewer, internals, roomEngine } = makePreviewer(RoomObjectCategory.UNIT);
+
+        internals._currentPreviewMode = 'avatar';
+        internals._currentAvatarAction = 3;
+
+        previewer.changeRoomObjectDirection(true);
+
+        expect(internals._currentAvatarDirection).toBe(4);
+        expect(roomEngine.updateRoomObjectUserLocation).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, expect.anything(), expect.anything(), false, 0, expect.objectContaining({ x: 180 }), 180);
+    });
+
+    it('keeps laying avatars on the two supported directions', () => {
+        const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
+
+        internals._currentPreviewMode = 'avatar';
+        internals._currentAvatarAction = 4;
+        internals._currentAvatarDirection = 2;
+
+        previewer.changeRoomObjectDirection(true);
+        expect(internals._currentAvatarDirection).toBe(0);
+
+        previewer.changeRoomObjectDirection(false);
+        expect(internals._currentAvatarDirection).toBe(2);
     });
 
     it('rotates floor furniture in both requested directions and refreshes the preview', () => {
