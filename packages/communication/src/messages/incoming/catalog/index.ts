@@ -34,3 +34,5 @@ export * from './TargetedOfferNotFoundEvent';
 export * from './VoucherRedeemErrorMessageEvent';
 export * from './VoucherRedeemOkMessageEvent';
 export * from './studio';
+export * from './metadata';
+export * from './configuration';

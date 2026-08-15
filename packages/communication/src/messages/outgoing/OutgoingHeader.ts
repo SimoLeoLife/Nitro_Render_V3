@@ -551,6 +551,8 @@ export class OutgoingHeader
     public static CATALOG_STUDIO_EXPORT = 10078;
     public static CATALOG_STUDIO_DOCUMENT_DRY_RUN = 10079;
     public static CATALOG_STUDIO_DOCUMENT_APPLY = 10080;
+    public static CATALOG_PRODUCT_METADATA = 10081;
+    public static CATALOG_RUNTIME_CONFIGURATION = 10082;
 
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;
