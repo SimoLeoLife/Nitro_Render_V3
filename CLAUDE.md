@@ -13,8 +13,8 @@ top of.
 - **PixiJS v8** (`pixi.js@8.18`)
 - **Vite 8** for build + bundling
 - **Vitest 4** for unit tests
-- **Yarn 1.22 workspaces** (`packages/*`) — note: yarn 1, NOT yarn 4 like
-  the client. The two repos use different package managers on purpose.
+- **Yarn 4.18 workspaces** (`packages/*`) through Corepack, using the
+  `node-modules` linker for compatibility with the existing build tooling.
 - **No React** — this is a pure TS library; React lives in `../Nitro-V3`.
 
 ## Workspace layout
