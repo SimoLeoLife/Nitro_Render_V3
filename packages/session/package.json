@@ -16,7 +16,7 @@
     "@nitrots/events": "1.0.0",
     "@nitrots/localization": "1.0.0",
     "@nitrots/utils": "1.0.0",
-    "pixi.js": "^8.8.1"
+    "pixi.js": "^8.19.0"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
