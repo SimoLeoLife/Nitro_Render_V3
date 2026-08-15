@@ -10,12 +10,11 @@
   "main": "./index",
   "dependencies": {
     "@nitrots/api": "1.0.0",
-    "pako": "^2.1.0",
-    "pixi.js": "^8.8.1",
+    "pako": "^3.0.1",
+    "pixi.js": "^8.19.0",
     "strip-json-comments": "^5.0.3"
   },
   "devDependencies": {
-    "@types/pako": "^2.0.3",
     "typescript": "^6.0.3"
   }
 }
