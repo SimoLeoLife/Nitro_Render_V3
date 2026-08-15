@@ -49,3 +49,5 @@ export * from './TargetedOfferParser';
 export * from './VoucherRedeemErrorMessageParser';
 export * from './VoucherRedeemOkMessageParser';
 export * from './studio';
+export * from './metadata';
+export * from './configuration';

@@ -34,10 +34,46 @@ class TestGuildVisualization extends FurnitureGuildCustomizedVisualization
     {
         return FurnitureGuildCustomizedVisualization.BADGE;
     }
+
+    public hidesLayer(tag: string): boolean
+    {
+        return this.shouldHideInvisibleLayer(tag);
+    }
 }
 
 describe('FurnitureGuildCustomizedVisualization', () =>
 {
+    it('hides only layers tagged as invisible when preview mode requests it', () =>
+    {
+        let updateCounter = 1;
+        let hideInvisibleLayers = 0;
+        const model = {
+            get updateCounter(): number
+            {
+                return updateCounter;
+            },
+            getValue: <T>(key: string): T =>
+            {
+                if(key === RoomObjectVariable.FURNITURE_INVISIBLE_LAYER) return hideInvisibleLayers as T;
+
+                return undefined;
+            }
+        };
+        const visualization = new TestGuildVisualization();
+
+        visualization.object = { model } as unknown as IRoomObjectController;
+        visualization.updateFromModel(64);
+
+        expect(visualization.hidesLayer('invisible')).toBe(false);
+
+        hideInvisibleLayers = 1;
+        updateCounter++;
+        visualization.updateFromModel(64);
+
+        expect(visualization.hidesLayer('invisible')).toBe(true);
+        expect(visualization.hidesLayer('visible')).toBe(false);
+    });
+
     it('restores the generated badge texture when the furniture asset collection does not contain it', () =>
     {
         const badgeTexture = { label: 'badge_first' };

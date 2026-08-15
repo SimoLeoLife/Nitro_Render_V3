@@ -13,8 +13,9 @@ if(emulatorIndex < 0 || !argumentsList[emulatorIndex + 1])
 
 const rendererManifestPath = fileURLToPath(new URL('../protocol/packet-field-contracts.json', import.meta.url));
 const emulatorManifestPath = resolve(argumentsList[emulatorIndex + 1], 'protocol/packet-field-contracts.json');
-const rendererBytes = readFileSync(rendererManifestPath);
-const emulatorBytes = readFileSync(emulatorManifestPath);
+const normalizeLineEndings = bytes => Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n'));
+const rendererBytes = normalizeLineEndings(readFileSync(rendererManifestPath));
+const emulatorBytes = normalizeLineEndings(readFileSync(emulatorManifestPath));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const rendererHash = hash(rendererBytes);
 const emulatorHash = hash(emulatorBytes);

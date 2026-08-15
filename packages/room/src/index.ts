@@ -34,5 +34,6 @@ export * from './RoomObjectLogicFactory';
 export * from './RoomObjectManager';
 export * from './RoomObjectVisualizationFactory';
 export * from './RoomPreviewer';
+export * from './RoomPreviewCapabilities';
 export * from './RoomVariableEnum';
 export * from './utils';
