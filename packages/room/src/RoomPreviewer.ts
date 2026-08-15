@@ -18,6 +18,7 @@ export class RoomPreviewer
     public static PREVIEW_OBJECT_ID: number = 1;
     public static PREVIEW_OBJECT_LOCATION_X: number = 2;
     public static PREVIEW_OBJECT_LOCATION_Y: number = 2;
+    private static PREVIEW_WALL_ITEM_LOCATION: Vector3d = new Vector3d(0.5, 2.3, 1.8);
 
     private static ALLOWED_IMAGE_CUT: number = 0.25;
     private static AUTOMATIC_STATE_CHANGE_INTERVAL: number = 2500;
@@ -47,6 +48,7 @@ export class RoomPreviewer
     private _currentAvatarHeadDirection: number = 3;
     private _previousAutomaticStateChangeTime: number;
     private _addViewOffset: Point;
+    private _centerWallItems: boolean = false;
     private _backgroundColor: number = 0x000000;
     private _backgroundSprite: Sprite = null;
     private _disableUpdate: boolean = false;
@@ -178,7 +180,7 @@ export class RoomPreviewer
 
     private refreshPreviewCapabilities(): void
     {
-        const isFurniture = (this._currentPreviewMode === 'floor') || (this._currentPreviewMode === 'wall');
+        const isFloorFurniture = (this._currentPreviewMode === 'floor');
         const roomObject = (this._currentPreviewMode === 'none' || !this.isRoomEngineReady)
             ? null
             : this._roomEngine.getRoomObject(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, this._currentPreviewObjectCategory);
@@ -186,8 +188,8 @@ export class RoomPreviewer
         const hasPreviewObject = !!roomObject;
         const nextCapabilities: IRoomPreviewCapabilities = {
             mode: hasPreviewObject ? this._currentPreviewMode : 'none',
-            canRotate: hasPreviewObject && ((this._currentPreviewMode === 'avatar') || (isFurniture && directions.length > 1)),
-            canChangeState: isFurniture && hasPreviewObject,
+            canRotate: hasPreviewObject && ((this._currentPreviewMode === 'avatar') || (this._currentPreviewMode === 'wall') || (isFloorFurniture && directions.length > 1)),
+            canChangeState: (isFloorFurniture || (this._currentPreviewMode === 'wall')) && hasPreviewObject,
             canUseAvatarActions: (this._currentPreviewMode === 'avatar') && hasPreviewObject,
             canZoomIn: hasPreviewObject && (this._currentPreviewScale === RoomPreviewer.SCALE_SMALL),
             canZoomOut: hasPreviewObject && (this._currentPreviewScale === RoomPreviewer.SCALE_NORMAL)
@@ -329,7 +331,12 @@ export class RoomPreviewer
 
                 const roomObject = this._roomEngine.getRoomObject(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, this._currentPreviewObjectCategory);
 
-                if(roomObject && extra) roomObject.model.setValue(RoomObjectVariable.FURNITURE_EXTRAS, extra);
+                if(roomObject)
+                {
+                    if(extra) roomObject.model.setValue(RoomObjectVariable.FURNITURE_EXTRAS, extra);
+
+                    this.applyInvisibleLayerState(roomObject);
+                }
 
                 this.setPreviewMode('floor');
 
@@ -354,10 +361,14 @@ export class RoomPreviewer
             this._currentPreviewObjectCategory = RoomObjectCategory.WALL;
             this._currentPreviewObjectData = objectData;
 
-            if(this._roomEngine.addFurnitureWall(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, classId, new Vector3d(0.5, 2.3, 1.8), direction, 0, objectData, 0, 0, -1, '', false))
+            if(this._roomEngine.addFurnitureWall(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, classId, RoomPreviewer.PREVIEW_WALL_ITEM_LOCATION, direction, 0, objectData, 0, 0, -1, '', false))
             {
                 this._previousAutomaticStateChangeTime = GetTickerTime();
                 this._automaticStateChange = true;
+
+                const roomObject = this._roomEngine.getRoomObject(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, this._currentPreviewObjectCategory);
+
+                if(roomObject) this.applyInvisibleLayerState(roomObject);
 
                 this.setPreviewMode('wall');
 
@@ -525,6 +536,7 @@ export class RoomPreviewer
                     const wallDirection = (roomObject.getDirection().x === 90) ? 180 : 90;
 
                     roomObject.setDirection(new Vector3d(wallDirection));
+                    this.updatePreviewWallItemLocation(roomObject);
                     this._currentPreviewRectangle = null;
                     this.updatePreviewRoomView(true);
                     return;
@@ -612,6 +624,11 @@ export class RoomPreviewer
         return this._addViewOffset;
     }
 
+    public set centerWallItems(value: boolean)
+    {
+        this._centerWallItems = value;
+    }
+
     public updatePreviewObjectBoundingRectangle(point: Point = null): void
     {
         if(!point) point = new Point(0, 0);
@@ -682,7 +699,11 @@ export class RoomPreviewer
                 }
             }
 
-            else if(!this._currentPreviewNeedsZoomOut)
+            else if(
+                !this._currentPreviewNeedsZoomOut &&
+                ((this._currentPreviewRectangle.width << 1) < ((this._currentPreviewCanvasWidth * (1 + RoomPreviewer.ALLOWED_IMAGE_CUT)) - 5)) &&
+                ((this._currentPreviewRectangle.height << 1) < ((this._currentPreviewCanvasHeight * (1 + RoomPreviewer.ALLOWED_IMAGE_CUT)) - 5))
+            )
             {
                 if(RoomPreviewer.ZOOM_ENABLED)
                 {
@@ -870,9 +891,18 @@ export class RoomPreviewer
 
     private getCanvasOffset(point: Point): Point
     {
+        if(this._centerWallItems && (this._currentPreviewObjectCategory === RoomObjectCategory.WALL) && ((this._currentPreviewRectangle.width < 1) || (this._currentPreviewRectangle.height < 1)))
+        {
+            if(this._addViewOffset.x !== point.x) return new Point(this._addViewOffset.x, point.y);
+
+            return null;
+        }
+
         if(((this._currentPreviewRectangle.width < 1) || (this._currentPreviewRectangle.height < 1))) return point;
 
-        let x = (-(this._currentPreviewRectangle.left + this._currentPreviewRectangle.right) >> 1);
+        let x = (this._centerWallItems && (this._currentPreviewObjectCategory === RoomObjectCategory.WALL))
+            ? this._addViewOffset.x
+            : (-(this._currentPreviewRectangle.left + this._currentPreviewRectangle.right) >> 1);
         let y = (-(this._currentPreviewRectangle.top + this._currentPreviewRectangle.bottom) >> 1);
         const height = ((this._currentPreviewCanvasHeight - this._currentPreviewRectangle.height) >> 1);
 
@@ -893,7 +923,7 @@ export class RoomPreviewer
         }
 
         y = (y + this._addViewOffset.y);
-        x = (x + this._addViewOffset.x);
+        if(!this._centerWallItems || (this._currentPreviewObjectCategory !== RoomObjectCategory.WALL)) x = (x + this._addViewOffset.x);
 
         const offsetX = (x - point.x);
         const offsetY = (y - point.y);
@@ -971,19 +1001,36 @@ export class RoomPreviewer
 
             const roomObject = this._roomEngine.getRoomObject(event.roomId, event.objectId, event.category);
 
-            if(roomObject && roomObject.model && (event.category === RoomObjectCategory.WALL))
-            {
-                const sizeZ = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Z);
-                const centerZ = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_CENTER_Z);
+            if(roomObject) this.applyInvisibleLayerState(roomObject);
 
-                if((sizeZ !== null) || (centerZ !== null))
-                {
-                    this._roomEngine.updateRoomObjectWallLocation(event.roomId, event.objectId, new Vector3d(0.5, 2.3, (((3.6 - sizeZ) / 2) + centerZ)));
-                }
-            }
+            if(roomObject && (event.category === RoomObjectCategory.WALL)) this.updatePreviewWallItemLocation(roomObject);
 
             this.refreshPreviewCapabilities();
         }
+    }
+
+    private applyInvisibleLayerState(roomObject: IRoomObjectController): void
+    {
+        if(!roomObject?.model) return;
+
+        roomObject.model.setValue(RoomObjectVariable.FURNITURE_INVISIBLE_LAYER, 1);
+    }
+
+    private updatePreviewWallItemLocation(roomObject: IRoomObjectController): void
+    {
+        if(!roomObject) return;
+
+        const mirrored = ((((roomObject.getDirection().x % 360) + 360) % 360) === 180);
+        const x = mirrored ? RoomPreviewer.PREVIEW_WALL_ITEM_LOCATION.y : RoomPreviewer.PREVIEW_WALL_ITEM_LOCATION.x;
+        const y = mirrored ? RoomPreviewer.PREVIEW_WALL_ITEM_LOCATION.x : RoomPreviewer.PREVIEW_WALL_ITEM_LOCATION.y;
+        const sizeZ = roomObject.model?.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Z);
+        const centerZ = roomObject.model?.getValue<number>(RoomObjectVariable.FURNITURE_CENTER_Z);
+        const currentZ = roomObject.getLocation()?.z;
+        const z = (Number.isFinite(sizeZ) && Number.isFinite(centerZ))
+            ? (((3.6 - sizeZ) / 2) + centerZ)
+            : (Number.isFinite(currentZ) ? currentZ : RoomPreviewer.PREVIEW_WALL_ITEM_LOCATION.z);
+
+        this._roomEngine.updateRoomObjectWallLocation(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, new Vector3d(x, y, z));
     }
 
     public getRenderingCanvas(): IRoomRenderingCanvas

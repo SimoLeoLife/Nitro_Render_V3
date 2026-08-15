@@ -46,6 +46,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
     private _lookThrough: boolean;
     private _needsLookThroughUpdate: boolean;
     private _wiredClickThrough: boolean;
+    private _hideInvisibleLayers: boolean;
 
     constructor()
     {
@@ -83,6 +84,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         this._animationNumber = 0;
         this._lookThrough = false;
         this._wiredClickThrough = false;
+        this._hideInvisibleLayers = false;
     }
 
     public initialize(data: IObjectVisualizationData): boolean
@@ -249,6 +251,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         const wiredClickThrough = (model.getValue<number>(RoomObjectVariable.FURNITURE_WIRED_CLICK_THROUGH) === 1);
         const hiddenByConfInvisControl = (model.getValue<number>(RoomObjectVariable.FURNITURE_CONF_INVIS_HIDDEN) === 1);
         const hiddenByAreaHideControl = (model.getValue<number>(RoomObjectVariable.FURNITURE_AREA_HIDE_HIDDEN) === 1);
+        const hideInvisibleLayers = (model.getValue<number>(RoomObjectVariable.FURNITURE_INVISIBLE_LAYER) > 0);
 
         if(isNaN(alphaMultiplier)) alphaMultiplier = 1;
         alphaMultiplier = composeFurnitureAlphaMultiplier(alphaMultiplier, wiredOpacity, hiddenByConfInvisControl || hiddenByAreaHideControl);
@@ -258,6 +261,12 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
             this._alphaMultiplier = alphaMultiplier;
             this._wiredClickThrough = wiredClickThrough;
 
+            this._alphaChanged = true;
+        }
+
+        if(this._hideInvisibleLayers !== hideInvisibleLayers)
+        {
+            this._hideInvisibleLayers = hideInvisibleLayers;
             this._alphaChanged = true;
         }
 
@@ -331,6 +340,12 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                     sprite.blendMode = this.getLayerBlendMode(scale, this._direction, layerId);
                     sprite.alphaTolerance = furnitureAlphaTolerance(this.getLayerIgnoreMouse(scale, this._direction, layerId), this._wiredClickThrough);
 
+                    if(this.shouldHideInvisibleLayer(sprite.tag))
+                    {
+                        sprite.alpha = 0;
+                        sprite.alphaTolerance = AlphaTolerance.MATCH_NOTHING;
+                    }
+
                     relativeDepth = this.getLayerZOffset(scale, this._direction, layerId);
                     relativeDepth = (relativeDepth - (layerId * 0.001));
                 }
@@ -366,6 +381,11 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         {
             if(sprite) this.resetSprite(sprite);
         }
+    }
+
+    protected shouldHideInvisibleLayer(tag: string): boolean
+    {
+        return this._hideInvisibleLayers && (tag === 'invisible');
     }
 
     protected getLibraryAssetNameForSprite(asset: IGraphicAsset, sprite: IRoomObjectSprite): string
