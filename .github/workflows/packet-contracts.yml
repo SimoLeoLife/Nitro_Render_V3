@@ -57,7 +57,9 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: corepack yarn install --immutable
 
       - name: Verify renderer contracts
         run: yarn test packages/communication/src/messages/contracts/__tests__

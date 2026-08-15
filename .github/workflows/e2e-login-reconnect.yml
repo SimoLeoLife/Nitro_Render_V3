@@ -79,7 +79,9 @@ jobs:
           bash .e2e/emulator/e2e/start-emulator.sh
 
       - name: Install renderer dependencies
-        run: yarn install --frozen-lockfile
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: corepack yarn install --immutable
 
       - name: Run login reconnect scenario
         run: yarn test:e2e:login-reconnect

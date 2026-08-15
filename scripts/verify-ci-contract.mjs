@@ -7,7 +7,7 @@ const REQUIRED = [
     [ /pull_request:/, 'pull_request trigger' ],
     [ /branches:\s*\[\s*Dev\s*,\s*main\s*\]/, 'Dev and main pull-request branches' ],
     [ /node-version:\s*['"]?22['"]?/, 'Node.js 22' ],
-    [ /yarn install --frozen-lockfile/, 'frozen dependency install' ],
+    [ /corepack yarn install --immutable/, 'immutable Yarn dependency install' ],
     [ /run:\s*yarn test(?:\s|$)/m, 'test command' ],
     [ /run:\s*yarn compile(?:\s|$)/m, 'compile command' ],
     [ /run:\s*yarn build(?:\s|$)/m, 'build command' ]
