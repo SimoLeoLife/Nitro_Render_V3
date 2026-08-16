@@ -21,6 +21,7 @@ export class CommunicationManager implements ICommunicationManager
 
     private _machineIdPromise: Promise<string> = null;
     private _initResolved: boolean = false;
+    private _recoveryToken: string = '';
 
     private async generateMachineID(): Promise<string>
     {
@@ -48,7 +49,10 @@ export class CommunicationManager implements ICommunicationManager
         // Send the machine fingerprint (UniqueID) BEFORE the SSO ticket so the server
         // has the machineId available when it processes the login in Habbo.connect().
         this._connection.send(new UniqueIDMessageComposer(machineId, '', ''));
-        this._connection.send(new SSOTicketMessageComposer(GetConfiguration().getValue('sso.ticket', null), GetTickerTime()));
+        this._connection.send(new SSOTicketMessageComposer(
+            GetConfiguration().getValue('sso.ticket', null),
+            GetTickerTime(),
+            this._recoveryToken));
     }
 
     constructor()
@@ -99,6 +103,9 @@ export class CommunicationManager implements ICommunicationManager
             const authEvent = new AuthenticatedEvent((event: AuthenticatedEvent) =>
             {
                 const isReconnect = this._initResolved;
+                const parser = event.getParser();
+
+                this._recoveryToken = parser.recoveryToken;
 
                 NitroLogger.log('[CommunicationManager] AuthenticatedEvent received (isReconnect=' + isReconnect + ')');
 
@@ -120,7 +127,6 @@ export class CommunicationManager implements ICommunicationManager
                 if(isReconnect)
                 {
                     NitroLogger.log('[CommunicationManager] Dispatching SOCKET_REAUTHENTICATED');
-                    const parser = event.getParser();
                     GetEventDispatcher().dispatchEvent(new SocketReauthenticatedEvent(
                         NitroEventType.SOCKET_REAUTHENTICATED,
                         parser.sessionResumed,
@@ -172,6 +178,7 @@ export class CommunicationManager implements ICommunicationManager
             this._connection.removeMessageEvent(event);
         }
         this._messageEvents = [];
+        this._recoveryToken = '';
     }
 
     protected startPong(): void
