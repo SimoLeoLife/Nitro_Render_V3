@@ -10,14 +10,14 @@ They are integration tests, not browser UI tests. The connection, packet parsers
 
 ## Prerequisites
 
-- Node.js 22 and Yarn
+- Node.js 22 with Corepack
 - the companion Polaris repository with JDK 25, Maven and MariaDB
 - the environment and running runtime described in the emulator `e2e/README.md`
 
 Install dependencies once:
 
 ```bash
-yarn install --frozen-lockfile
+corepack yarn install --immutable
 ```
 
 ## Run locally

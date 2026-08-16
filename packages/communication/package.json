@@ -12,7 +12,9 @@
     "@nitrots/api": "1.0.0",
     "@nitrots/events": "1.0.0",
     "@nitrots/utils": "1.0.0",
-    "@thumbmarkjs/thumbmarkjs": "^1.9.0"
+    "@thumbmarkjs/thumbmarkjs": "^1.9.0",
+    "pako": "^3.0.1",
+    "pixi.js": "^8.19.0"
   },
   "devDependencies": {
     "typescript": "^6.0.3"

@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out renderer
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Resolve linked emulator branch
         id: emulator
@@ -44,20 +44,24 @@ jobs:
           fi
 
       - name: Check out linked emulator
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ steps.emulator.outputs.repository }}
           ref: ${{ steps.emulator.outputs.ref }}
           path: emulator
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: yarn
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: corepack yarn install --immutable
 
       - name: Verify renderer contracts
         run: yarn test packages/communication/src/messages/contracts/__tests__

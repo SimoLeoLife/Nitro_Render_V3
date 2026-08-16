@@ -103,6 +103,9 @@ export class RoomCameraWidgetManager implements IRoomCameraWidgetManager
             {
                 const effectSprite = new Sprite(effect.texture);
 
+                effectSprite.width = texture.width;
+                effectSprite.height = texture.height;
+
                 effectSprite.alpha = selectedEffect.strength;
                 effectSprite.blendMode = effect.blendMode;
 

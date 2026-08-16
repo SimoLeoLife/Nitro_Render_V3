@@ -522,6 +522,8 @@ export class IncomingHeader
     public static CATALOG_STUDIO_RESTORE = 10076;
     public static CATALOG_STUDIO_PREVIEW = 10077;
     public static CATALOG_STUDIO_DOCUMENT_RESULT = 10078;
+    public static CATALOG_PRODUCT_METADATA = 10081;
+    public static CATALOG_RUNTIME_CONFIGURATION = 10082;
 
     // Custom Prefixes
     public static USER_PREFIXES = 7001;

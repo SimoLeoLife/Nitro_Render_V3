@@ -3,10 +3,17 @@
   "description": "Javascript library for rendering Nitro in the browser using PixiJS",
   "version": "2.1.0",
   "private": true,
+  "packageManager": "yarn@4.18.0",
   "type": "module",
   "workspaces": [
     "packages/*"
   ],
+  "resolutions": {
+    "pako": "3.0.1",
+    "pixi.js": "8.19.0",
+    "vite": "8.2.1",
+    "vitest": "4.1.10"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -37,7 +44,6 @@
     "@thumbmarkjs/thumbmarkjs": "^1.9.0",
     "gifuct-js": "^2.1.2",
     "howler": "^2.2.4",
-    "pako": "^2.1.0",
     "pixi-filters": "^6.1.5",
     "pixi.js": "^8.19.0",
     "strip-json-comments": "^5.0.3"
@@ -47,15 +53,14 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/howler": "^2.2.11",
     "@types/node": "^20.14.12",
-    "@types/pako": "^2.0.3",
     "@typescript/native-preview": "^7.0.0-dev.20260510.1",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.8.0",
     "jsdom": "^27.4.0",
     "tslib": "^2.6.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.26.1",
-    "vite": "^8.0.10",
-    "vitest": "^4.1.5"
+    "typescript-eslint": "^8.67.0",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   }
 }

@@ -3366,7 +3366,8 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         {
             texture = TextureUtils.generateTexture({
                 target: canvas.master,
-                frame: bounds
+                frame: bounds,
+                resolution: 1
             });
         }
         else

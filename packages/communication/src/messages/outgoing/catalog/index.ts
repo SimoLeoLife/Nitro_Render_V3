@@ -50,3 +50,5 @@ export * from './SelectClubGiftComposer';
 export * from './SetTargetedOfferStateComposer';
 export * from './ShopTargetedOfferViewedComposer';
 export * from './studio';
+export * from './metadata';
+export * from './configuration';

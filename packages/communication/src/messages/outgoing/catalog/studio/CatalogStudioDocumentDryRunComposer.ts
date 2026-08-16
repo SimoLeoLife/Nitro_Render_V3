@@ -1,11 +1,13 @@
 import { IMessageComposer } from '@nitrots/api';
+import { encodeCatalogStudioDocument } from '../../../catalog/studio/CatalogStudioDocumentWireCodec';
 
-export class CatalogStudioDocumentDryRunComposer implements IMessageComposer<ConstructorParameters<typeof CatalogStudioDocumentDryRunComposer>>
+export class CatalogStudioDocumentDryRunComposer implements IMessageComposer<(string | number)[]>
 {
-    private _data: ConstructorParameters<typeof CatalogStudioDocumentDryRunComposer>;
-    constructor(operationId: string, draftVersionId: number, expectedRevision: number, format: 'JSONC' | 'SQL' | 'BULK', document: string)
+    private _data: (string | number)[];
+    constructor(operationId: string, draftVersionId: number, expectedRevision: number, format: 'SQL', document: string)
     {
-        this._data = [ operationId, draftVersionId, expectedRevision, format, document ];
+        const encoded = encodeCatalogStudioDocument(document);
+        this._data = [ operationId, draftVersionId, expectedRevision, format, encoded.encoding, encoded.chunks.length, ...encoded.chunks ];
     }
     public dispose(): void { this._data = null; }
     public getMessageArray() { return this._data; }
