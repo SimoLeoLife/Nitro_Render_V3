@@ -3,6 +3,8 @@ import { NitroLogger } from '@nitrots/utils';
 import { Howl, Howler } from 'howler';
 import { TraxData } from '../trax/TraxData';
 
+const HowlerUnlockState = Howler as typeof Howler & { _audioUnlocked?: boolean };
+
 export class MusicPlayer
 {
     private _currentSong: TraxData | undefined;
@@ -121,7 +123,7 @@ export class MusicPlayer
 
     private async unlockAudio(): Promise<void>
     {
-        if(Howler._audioUnlocked) return;
+        if(HowlerUnlockState._audioUnlocked) return;
 
         const ctx = Howler.ctx;
 
@@ -131,7 +133,7 @@ export class MusicPlayer
         {
             if(ctx.state !== 'running') await ctx.resume();
 
-            if(ctx.state === 'running') Howler._audioUnlocked = true;
+            if(ctx.state === 'running') HowlerUnlockState._audioUnlocked = true;
         }
         catch
         {
@@ -222,7 +224,7 @@ export class MusicPlayer
     {
         if(!this._currentSong || !this._sequence) return;
 
-        if(!Howler._audioUnlocked)
+        if(!HowlerUnlockState._audioUnlocked)
         {
             return;
         }
