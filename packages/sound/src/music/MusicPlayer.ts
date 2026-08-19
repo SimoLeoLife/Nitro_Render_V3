@@ -39,12 +39,10 @@ export class MusicPlayer
         this._playLength = playLength;
         this._currentPos = this._startPos;
         this._currentSongId = currentSongId;
-        //this.emit('loading');
         await this.preload();
         await this.unlockAudio();
         this._isPlaying = true;
-        //this.emit('playing', this._currentPos, this._playLength - 1);
-        this.tick(); // to evade initial 1 sec delay
+        this.tick();
         this._tickerInterval = window.setInterval(() => this.tick(), 1000);
     }
 
@@ -66,7 +64,6 @@ export class MusicPlayer
     public pause(): void
     {
         this._isPlaying = false;
-        //this.emit('paused', this._currentPos);
 
         Howler.stop();
     }
@@ -74,7 +71,6 @@ export class MusicPlayer
     public resume(): void
     {
         this._isPlaying = true;
-        //this.emit('playing', this._currentPos, this._playLength - 1 );
     }
 
     public stop(): void
@@ -82,32 +78,18 @@ export class MusicPlayer
         const songId = this._currentSongId;
         this.reset();
         GetEventDispatcher().dispatchEvent(new SoundManagerEvent(SoundManagerEvent.TRAX_SONG_COMPLETE, songId));
-        //this.emit('stopped');
     }
 
-    /**
-     * Sets global howler volume for all sounds
-     * @param volume value from 0.0 to 1.0
-     */
     public setVolume(volume: number): void
     {
         Howler.volume(volume);
     }
 
-    /**
-     * Gets global howler volume for all sounds
-     * @returns value from 0.0 to 1.0
-     */
     public getVolume(): number
     {
         return Howler.volume();
     }
 
-    /**
-     * Gets sample from cache or loads it if not in cache
-     * @param id sample id
-     * @returns howl sound object
-     */
     public async getSample(id: number): Promise<Howl>
     {
         let sample = this._cache.get(id);
@@ -117,11 +99,6 @@ export class MusicPlayer
         return Promise.resolve(sample);
     }
 
-    /**
-     * Plays a single sample once (trax-editor audition). Reuses the same
-     * howler cache as full playback, so auditioned samples are already
-     * warm when the preview starts.
-     */
     public async playSampleOnce(sampleId: number): Promise<void>
     {
         this.stopSampleOnce();
@@ -142,16 +119,8 @@ export class MusicPlayer
         this._auditionPlayId = -1;
     }
 
-    /**
-     * Howler only unlocks its AudioContext from a document-level capture
-     * listener that is registered when the first Howl is created — one click
-     * too late for a fresh session, which made the first play/audition after
-     * login silent. Chrome grants Web Audio sticky user activation, so the
-     * gesture that triggered this call is enough to resume the context here.
-     */
     private async unlockAudio(): Promise<void>
     {
-        //@ts-ignore
         if(Howler._audioUnlocked) return;
 
         const ctx = Howler.ctx;
@@ -162,12 +131,10 @@ export class MusicPlayer
         {
             if(ctx.state !== 'running') await ctx.resume();
 
-            //@ts-ignore
             if(ctx.state === 'running') Howler._audioUnlocked = true;
         }
         catch
         {
-            // Stays locked; howler's own listener unlocks on the next gesture.
         }
     }
 
@@ -182,13 +149,14 @@ export class MusicPlayer
             const sequenceEntryArray: ISequenceEntry[] = [];
             for(const sample of channel.items)
             {
-                const sampleSound = await this.getSample(sample.id);
+                const isRestSample = (sample.id === -1) || (sample.id === 0);
+                const sampleDuration = isRestSample ? 1 : Math.ceil((await this.getSample(sample.id)).duration());
 
-                const sampleCount = Math.ceil((sample.length * 2) / Math.ceil(sampleSound.duration()));
+                const sampleCount = Math.ceil((sample.length * 2) / sampleDuration);
 
                 for(let i = 0; i < sampleCount; i++)
                 {
-                    for(let j = 0; j < Math.ceil(sampleSound.duration()); j++)
+                    for(let j = 0; j < sampleDuration; j++)
                     {
                         sequenceEntryArray.push({ sampleId: sample.id, offset: j });
                     }
@@ -205,7 +173,7 @@ export class MusicPlayer
     {
         const traxData = new TraxData(song);
 
-        await Promise.all(traxData.getSampleIds().map(id => this.getSample(id)));
+        await Promise.all(traxData.getSampleIds().filter(id => (id !== -1) && (id !== 0)).map(id => this.getSample(id)));
     }
 
     private async loadSong(songId: number): Promise<Howl>
@@ -243,7 +211,6 @@ export class MusicPlayer
         {
             if(this._currentSong)
             {
-                //this.emit('time', this._currentPos);
                 this.playPosition(this._currentPos);
             }
 
@@ -255,10 +222,8 @@ export class MusicPlayer
     {
         if(!this._currentSong || !this._sequence) return;
 
-        //@ts-ignore
         if(!Howler._audioUnlocked)
         {
-            //console.log('skipping due to locked audio');
             return;
         }
 
@@ -268,8 +233,6 @@ export class MusicPlayer
 
             if(!entry) continue;
 
-            // sample -1 is play none
-            // sample 0 is 1 second of empty noise
             if(entry.sampleId === -1 || entry.sampleId === 0) continue;
 
             const sampleAudio = this._cache.get(entry.sampleId);
