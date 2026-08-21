@@ -214,6 +214,38 @@ describe('RoomPreviewer catalog controls', () => {
         expect(internals._currentAvatarDirection).toBe(2);
     });
 
+    it('keeps sitting, laying and waving anchored to the same floor reference', () => {
+        const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
+        const floorReference = new Rectangle(-30, -110, 60, 120);
+
+        internals._currentPreviewMode = 'avatar';
+        internals._currentAvatarAction = 2;
+        internals._currentPreviewRectangle = floorReference;
+
+        previewer.cycleAvatarAction();
+        expect(internals._currentPreviewRectangle).toBe(floorReference);
+
+        previewer.cycleAvatarAction();
+        expect(internals._currentPreviewRectangle).toBe(floorReference);
+
+        previewer.cycleAvatarAction();
+        expect(internals._currentPreviewRectangle).toBe(floorReference);
+    });
+
+    it('keeps a laying avatar anchored while rotating', () => {
+        const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
+        const floorReference = new Rectangle(-30, -110, 60, 120);
+
+        internals._currentPreviewMode = 'avatar';
+        internals._currentAvatarAction = 4;
+        internals._currentAvatarDirection = 2;
+        internals._currentPreviewRectangle = floorReference;
+
+        previewer.changeRoomObjectDirection(true);
+
+        expect(internals._currentPreviewRectangle).toBe(floorReference);
+    });
+
     it('rotates floor furniture in both requested directions and refreshes the preview', () => {
         const { previewer, roomEngine } = makePreviewer();
 

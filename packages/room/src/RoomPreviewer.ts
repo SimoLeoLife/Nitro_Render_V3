@@ -851,7 +851,6 @@ export class RoomPreviewer
         }
 
         this.updateAvatarDirectionAndLocation(this._currentAvatarDirection, this._currentAvatarHeadDirection, this.getAvatarActionLocation());
-        this._currentPreviewRectangle = null;
         this.updatePreviewRoomView(true);
     }
 
@@ -873,7 +872,6 @@ export class RoomPreviewer
         this._currentAvatarDirection = nextDirection;
         this._currentAvatarHeadDirection = nextDirection;
         this.updateAvatarDirectionAndLocation(nextDirection, nextDirection, this.getAvatarActionLocation());
-        this._currentPreviewRectangle = null;
         this.updatePreviewRoomView(true);
     }
 
