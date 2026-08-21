@@ -1,4 +1,5 @@
 import { AutoDetectOptions, Renderer, Texture, autoDetectRenderer } from 'pixi.js';
+import { GetDesiredScaleMode } from './DprRenderingMode';
 
 let renderer: Renderer = null;
 
@@ -36,12 +37,46 @@ const patchGlTextureSystem = (r: Renderer): void =>
             {
                 source = Texture.EMPTY.source;
             }
+            else if(!source.nitroFixedScaleMode)
+            {
+                const scaleMode = GetDesiredScaleMode();
+
+                if(source.style.scaleMode !== scaleMode)
+                {
+                    source.style.scaleMode = scaleMode;
+                    source.style.update();
+                }
+            }
 
             return origBindSource.call(this, source, location);
         };
 
         proto.__patchedBindSource = true;
     }
+};
+
+const patchResizeSkip = (r: Renderer): void =>
+{
+    const origResize = r.resize.bind(r);
+
+    r.resize = ((width: number, height: number, resolution?: number): void =>
+    {
+        origResize(width, height, resolution);
+
+        const view = (r as any).view;
+        const source = view?.texture?.source;
+
+        if(!source) return;
+
+        source.resizeCanvas?.();
+        source.emit('resize', source);
+
+        if(view.screen)
+        {
+            view.screen.width = source.width;
+            view.screen.height = source.height;
+        }
+    }) as typeof r.resize;
 };
 
 export const PrepareRenderer = async (options: Partial<AutoDetectOptions>): Promise<Renderer> =>
@@ -51,6 +86,7 @@ export const PrepareRenderer = async (options: Partial<AutoDetectOptions>): Prom
     renderer.events?.destroy();
 
     patchGlTextureSystem(renderer);
+    patchResizeSkip(renderer);
 
     return renderer;
 };
