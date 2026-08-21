@@ -6,6 +6,14 @@ export interface CatalogStudioChangedEntity
     entityId: number;
 }
 
+export interface CatalogStudioPublishConflict
+{
+    catalogType: string;
+    entityType: string;
+    entityId: number;
+    field: string;
+}
+
 export class CatalogStudioOperationMessageParser implements IMessageParser
 {
     public operationId = '';
@@ -14,6 +22,8 @@ export class CatalogStudioOperationMessageParser implements IMessageParser
     public message = '';
     public revision = 0;
     public changedEntities: CatalogStudioChangedEntity[] = [];
+    public importedChanges = 0;
+    public conflicts: CatalogStudioPublishConflict[] = [];
 
     public flush(): boolean
     {
@@ -23,6 +33,8 @@ export class CatalogStudioOperationMessageParser implements IMessageParser
         this.message = '';
         this.revision = 0;
         this.changedEntities = [];
+        this.importedChanges = 0;
+        this.conflicts = [];
         return true;
     }
 
@@ -36,6 +48,14 @@ export class CatalogStudioOperationMessageParser implements IMessageParser
         this.revision = wrapper.readInt();
         this.changedEntities = Array.from({ length: wrapper.readInt() }, () => ({
             entityType: wrapper.readString(), entityId: wrapper.readInt()
+        }));
+        if(!wrapper.bytesAvailable) return true;
+        this.importedChanges = wrapper.readInt();
+        this.conflicts = Array.from({ length: wrapper.readInt() }, () => ({
+            catalogType: wrapper.readString(),
+            entityType: wrapper.readString(),
+            entityId: wrapper.readInt(),
+            field: wrapper.readString()
         }));
         return true;
     }
