@@ -20,6 +20,7 @@ import {
 import { CatalogStudioHistoryMessageParser } from '../../../parser/catalog/studio/CatalogStudioHistoryMessageParser';
 import { CatalogStudioDocumentResultMessageParser } from '../../../parser/catalog/studio/CatalogStudioDocumentResultMessageParser';
 import { CatalogStudioPreviewMessageParser } from '../../../parser/catalog/studio/CatalogStudioPreviewMessageParser';
+import { CatalogStudioOperationMessageParser } from '../../../parser/catalog/studio/CatalogStudioOperationMessageParser';
 import { CatalogStudioSessionMessageParser } from '../../../parser/catalog/studio/CatalogStudioSessionMessageParser';
 import { CatalogStudioValidationMessageParser } from '../../../parser/catalog/studio/CatalogStudioValidationMessageParser';
 import { CATALOG_STUDIO_DOCUMENT_ENCODING, decodeCatalogStudioDocument, encodeCatalogStudioDocument } from '../CatalogStudioDocumentWireCodec';
@@ -107,6 +108,23 @@ describe('catalog studio packet contract', () =>
         const result = new CatalogStudioDocumentResultMessageParser();
         expect(result.parse(new TestWrapper(new BinaryReader(resultWriter.getBuffer())) as any)).toBe(true);
         expect(result).toMatchObject({ success: true, revision: 7, format: 'SQL', changedEntities: 3 });
+    });
+
+    it('parses automatic live imports and publish conflicts', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeString('op-publish'); writer.writeByte(0); writer.writeString('LIVE_SYNC_CONFLICT');
+        writer.writeString('One conflict'); writer.writeInt(8); writer.writeInt(1);
+        writer.writeString('OFFER'); writer.writeInt(77);
+        writer.writeInt(2); writer.writeInt(1);
+        writer.writeString('NORMAL'); writer.writeString('OFFER'); writer.writeInt(77); writer.writeString('costCredits');
+
+        const parser = new CatalogStudioOperationMessageParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+        expect(parser.importedChanges).toBe(2);
+        expect(parser.conflicts).toEqual([
+            { catalogType: 'NORMAL', entityType: 'OFFER', entityId: 77, field: 'costCredits' }
+        ]);
     });
 
     it('round-trips SQL documents larger than the wire string limit as bounded chunks', () =>
