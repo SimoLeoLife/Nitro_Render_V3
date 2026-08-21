@@ -166,6 +166,7 @@ describe('RoomPreviewer catalog controls', () => {
 
         previewer.cycleAvatarAction();
         expect(roomEngine.updateRoomObjectUserPosture).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, AvatarAction.POSTURE_LAY, '');
+        expect(roomEngine.updateRoomObjectUserLocation).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, expect.objectContaining({ x: 1, y: 1, z: 0 }), expect.anything(), false, 0, expect.anything(), expect.any(Number));
 
         previewer.cycleAvatarAction();
         expect(roomEngine.updateRoomObjectUserAction).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, RoomObjectVariable.FIGURE_EXPRESSION, AvatarAction.getExpressionId(AvatarAction.EXPRESSION_WAVE), null);
