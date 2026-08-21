@@ -976,7 +976,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
         if((this._posture === 'sit') || (this._posture === 'lay'))
         {
-            this._postureOffset = ((AvatarVisualization.BASE_Y_SCALE + this._verticalOffset) * scale) / (4 * AvatarVisualization.BASE_Y_SCALE);
+            this._postureOffset = scale / 2;
         }
         else
         {

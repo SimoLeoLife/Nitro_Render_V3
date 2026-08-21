@@ -166,6 +166,7 @@ describe('RoomPreviewer catalog controls', () => {
 
         previewer.cycleAvatarAction();
         expect(roomEngine.updateRoomObjectUserPosture).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, AvatarAction.POSTURE_LAY, '');
+        expect(roomEngine.updateRoomObjectUserLocation).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, expect.objectContaining({ x: 1, y: 1, z: 0 }), expect.anything(), false, 0, expect.anything(), expect.any(Number));
 
         previewer.cycleAvatarAction();
         expect(roomEngine.updateRoomObjectUserAction).toHaveBeenLastCalledWith(77, RoomPreviewer.PREVIEW_OBJECT_ID, RoomObjectVariable.FIGURE_EXPRESSION, AvatarAction.getExpressionId(AvatarAction.EXPRESSION_WAVE), null);
@@ -212,6 +213,38 @@ describe('RoomPreviewer catalog controls', () => {
 
         previewer.changeRoomObjectDirection(false);
         expect(internals._currentAvatarDirection).toBe(2);
+    });
+
+    it('keeps sitting, laying and waving anchored to the same floor reference', () => {
+        const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
+        const floorReference = new Rectangle(-30, -110, 60, 120);
+
+        internals._currentPreviewMode = 'avatar';
+        internals._currentAvatarAction = 2;
+        internals._currentPreviewRectangle = floorReference;
+
+        previewer.cycleAvatarAction();
+        expect(internals._currentPreviewRectangle).toBe(floorReference);
+
+        previewer.cycleAvatarAction();
+        expect(internals._currentPreviewRectangle).toBe(floorReference);
+
+        previewer.cycleAvatarAction();
+        expect(internals._currentPreviewRectangle).toBe(floorReference);
+    });
+
+    it('keeps a laying avatar anchored while rotating', () => {
+        const { previewer, internals } = makePreviewer(RoomObjectCategory.UNIT);
+        const floorReference = new Rectangle(-30, -110, 60, 120);
+
+        internals._currentPreviewMode = 'avatar';
+        internals._currentAvatarAction = 4;
+        internals._currentAvatarDirection = 2;
+        internals._currentPreviewRectangle = floorReference;
+
+        previewer.changeRoomObjectDirection(true);
+
+        expect(internals._currentPreviewRectangle).toBe(floorReference);
     });
 
     it('rotates floor furniture in both requested directions and refreshes the preview', () => {
