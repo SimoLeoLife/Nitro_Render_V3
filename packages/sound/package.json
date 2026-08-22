@@ -1,6 +1,6 @@
 {
   "name": "@nitrots/sound",
-  "description": "Nitro sound module",
+  "description": "Octane Renderer sound module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",

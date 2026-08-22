@@ -1,6 +1,6 @@
 {
   "name": "@nitrots/utils",
-  "description": "Nitro utils module",
+  "description": "Octane Renderer utilities module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",

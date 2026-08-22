@@ -4,15 +4,15 @@
 
 **Goal:** When the furnidata file changes, push only the changed names to every connected client so catalog/inventory/infostand update live, without a giant re-download and without a reconnect.
 
-**Architecture:** The emulator (building on Piece 1) computes a **delta** during reindex, a single-threaded **file watcher** (debounced + throttled) broadcasts a new `FurnitureDataReload` packet (delta, or a compact reload-hint above a cap). The renderer parses it, patches `FurnitureData` + the localization keys, and dispatches the existing `nitro-localization-updated` window event — so the three already-subscribed client surfaces refresh. **No Nitro-V3 client code changes.**
+**Architecture:** The emulator (building on Piece 1) computes a **delta** during reindex, a single-threaded **file watcher** (debounced + throttled) broadcasts a new `FurnitureDataReload` packet (delta, or a compact reload-hint above a cap). The renderer parses it, patches `FurnitureData` + the localization keys, and dispatches the existing `nitro-localization-updated` window event — so the three already-subscribed client surfaces refresh. **No Octane-UI client code changes.**
 
-**Tech Stack:** Java (Arcturus, Gson, java.nio WatchService) + TypeScript (Nitro_Render_V3, Vitest).
+**Tech Stack:** Java (Arcturus, Gson, java.nio WatchService) + TypeScript (Octane-Renderer, Vitest).
 
 **Depends on:** Piece 1 plan (`FurnitureTextProvider`, `FurnidataReader`, `FurnidataEntry`, `Item.getDisplayName()`) merged on the same branch.
 
 **Spec:** `docs/superpowers/specs/2026-06-04-furni-names-from-json-server-design.md` (§5, §7, §8).
 
-**Repos / branch:** `feat/furni-names-from-json-server` in both `Arcturus-Morningstar-Extended` and `Nitro_Render_V3`.
+**Repos / branch:** `feat/furni-names-from-json-server` in both `Arcturus-Morningstar-Extended` and `Octane-Renderer`.
 
 **Wire contract — packet `FurnitureDataReload` (server → client), header `10047`:**
 ```
@@ -26,9 +26,9 @@ count × { string type ("S"|"I"); int id; string classname; string name; string 
 
 ---
 
-## Part A — Renderer (Nitro_Render_V3)
+## Part A — Renderer (Octane-Renderer)
 
-All paths relative to `Nitro_Render_V3/`. Build/test: `yarn build`, `yarn test`.
+All paths relative to `Octane-Renderer/`. Build/test: `yarn build`, `yarn test`.
 
 ### Task R1: IncomingHeader + parser + event
 
@@ -742,7 +742,7 @@ git commit -m "feat(items): furnidata file watcher — debounce, throttle, delta
 
 - [ ] **Step 1: Renderer build + tests**
 
-Run (in `Nitro_Render_V3/`): `yarn compile:fast && yarn test`
+Run (in `Octane-Renderer/`): `yarn compile:fast && yarn test`
 Expected: no compile errors; all tests pass including `SessionDataManager.furnidataDelta`.
 
 - [ ] **Step 2: Emulator build + tests**
@@ -774,6 +774,6 @@ git commit --allow-empty -m "docs(items): document items.furnidata.watch.* confi
 
 - **Header id must match** on both sides: `IncomingHeader.FURNITURE_DATA_RELOAD` (renderer) == `Outgoing.FurnitureDataReloadComposer` (Arcturus) == `10047`. Verify both Step-2 grep checks before wiring.
 - **Do not reuse or modify** the editor path: `FurniDataUpdatedEvent`/`FurniDataUpdatedParser`/`applyLiveFurnitureNameUpdate` stay untouched; the new path is parallel (per the spec decision "keep separate").
-- **No Nitro-V3 client changes.** The three surfaces (`useCatalog.ts:919`, `useInventoryFurni.ts:137`, `useAvatarInfoWidget.ts:425`) already subscribe to `nitro-localization-updated`. If a regression test is wanted, add it under Nitro-V3 separately; it is not required for this plan.
+- **No Octane-UI client changes.** The three surfaces (`useCatalog.ts:919`, `useInventoryFurni.ts:137`, `useAvatarInfoWidget.ts:425`) already subscribe to `nitro-localization-updated`. If a regression test is wanted, add it under Octane-UI separately; it is not required for this plan.
 - **Locale no-clobber (spec §7.1):** re-registering `roomItem.name.{id}` from the base furnidata will override an active per-locale text override for that id. If this hotel ships per-locale furni override files, follow up by re-applying overrides after the delta (out of scope here; single-furnidata hotels are unaffected).
 - **Cache-busting** for the reload-hint: `applyFurnidataReloadHint` re-runs `FurnitureDataLoader.init()` against the configured `furnidata.url`; if the asset host serves a cached copy, add a `?v=<timestamp>` buster to the loader fetch (optional follow-up).

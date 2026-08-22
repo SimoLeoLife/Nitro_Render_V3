@@ -1,6 +1,6 @@
 {
   "name": "@nitrots/avatar",
-  "description": "Nitro communication module",
+  "description": "Octane Renderer avatar module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",

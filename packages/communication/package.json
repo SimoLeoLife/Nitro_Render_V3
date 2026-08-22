@@ -1,6 +1,6 @@
 {
   "name": "@nitrots/communication",
-  "description": "Nitro communication module",
+  "description": "Octane Renderer communication module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",

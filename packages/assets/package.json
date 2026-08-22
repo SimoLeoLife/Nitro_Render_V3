@@ -1,6 +1,6 @@
 {
   "name": "@nitrots/assets",
-  "description": "Nitro assets module",
+  "description": "Octane Renderer assets module",
   "version": "1.0.0",
   "type": "module",
   "publishConfig": {

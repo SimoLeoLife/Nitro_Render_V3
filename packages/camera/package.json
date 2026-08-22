@@ -1,6 +1,6 @@
 {
   "name": "@nitrots/camera",
-  "description": "Nitro camera module",
+  "description": "Octane Renderer camera module",
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0",
