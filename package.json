@@ -19,13 +19,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/duckietm/Nitro_Render_V3.git"
+    "url": "https://github.com/duckietm/Octane-Renderer.git"
   },
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/duckietm/Nitro_Render_V3/issues"
+    "url": "https://github.com/duckietm/Octane-Renderer/issues"
   },
-  "homepage": "https://github.com/duckietm/Nitro_Render_V3",
+  "homepage": "https://github.com/duckietm/Octane-Renderer",
   "scripts": {
     "build": "vite build",
     "compile": "tsc --project ./tsconfig.json --noEmit false",
