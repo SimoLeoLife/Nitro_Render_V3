@@ -816,7 +816,7 @@ export class RoomPreviewer
     private getAvatarActionLocation(): IVector3D
     {
         if(this._currentAvatarAction === RoomPreviewer.AVATAR_ACTION_SIT) return new Vector3d(2, 2, 0.55);
-        if(this._currentAvatarAction === RoomPreviewer.AVATAR_ACTION_LAY) return new Vector3d(1, 1, 0.8);
+        if(this._currentAvatarAction === RoomPreviewer.AVATAR_ACTION_LAY) return new Vector3d(1, 1, 0);
 
         return null;
     }
@@ -851,7 +851,6 @@ export class RoomPreviewer
         }
 
         this.updateAvatarDirectionAndLocation(this._currentAvatarDirection, this._currentAvatarHeadDirection, this.getAvatarActionLocation());
-        this._currentPreviewRectangle = null;
         this.updatePreviewRoomView(true);
     }
 
@@ -873,7 +872,6 @@ export class RoomPreviewer
         this._currentAvatarDirection = nextDirection;
         this._currentAvatarHeadDirection = nextDirection;
         this.updateAvatarDirectionAndLocation(nextDirection, nextDirection, this.getAvatarActionLocation());
-        this._currentPreviewRectangle = null;
         this.updatePreviewRoomView(true);
     }
 
