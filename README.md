@@ -1,6 +1,12 @@
-# Nitro Renderer
+# Octane Renderer
 
-nitro-renderer is a Javascript library for rendering Nitro in the browser using PixiJS
+Octane originated as a fork of [Nitro React](https://github.com/billsonnn/nitro-react) and its companion [Nitro Renderer](https://github.com/billsonnn/nitro-renderer).
+
+Since then, Octane has evolved beyond its origins. Both the client and renderer have been expanded, improved and maintained through numerous fixes and new features.
+
+While Octane remains grateful to the Nitro project and its contributors, it is no longer intended to be a simple fork or reskin. It is an independently developed platform with its own identity, technical direction and long-term vision.
+
+Octane Renderer is a Javascript library for rendering Octane in the browser using PixiJS
 
 ## Installation
 
@@ -35,7 +41,7 @@ URL hints are still honoured: files ending in `.jsonc` (or served with a
 ### Wiring the flag into a host
 
 The renderer does **not** ship its own build for the flag — the host application
-(typically [Nitro V3](https://github.com/duckietm/Nitro-V3.git)) defines it via
+(typically [Octane](https://github.com/duckietm/Nitro-V3.git)) defines it via
 its bundler. Example with Vite:
 
 ```js
@@ -119,5 +125,5 @@ const furnidata = await loadGamedata('https://example.com/gamedata/furnidata/');
 const merged = mergeGamedata(coreData, customData);
 ```
 
-A CLI splitter for legacy single-file gamedata lives in the Nitro V3 client
-repo at `scripts/split-gamedata.mjs` — see the Nitro V3 README for usage.
+A CLI splitter for legacy single-file gamedata lives in the Octane client
+repo at `scripts/split-gamedata.mjs` — see the Octane README for usage.
