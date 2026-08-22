@@ -715,7 +715,13 @@ export class RoomPlane implements IRoomPlane
             }
         }
 
-        return true;
+        // Report a changed plane only when this call actually rebuilt static
+        // geometry/texture data, advanced a landscape animation, or refreshed
+        // a window reflection. Returning true for an idle visible plane makes
+        // RoomVisualization advance its sprite counter on every animation
+        // tick, which in turn forces preview consumers to repaint unchanged
+        // frames.
+        return needsUpdate || animationUpdate || reflectionUpdate;
     }
 
     private renderAnimationLayers(timeSinceStartMs: number, geometry: IRoomGeometry): void
