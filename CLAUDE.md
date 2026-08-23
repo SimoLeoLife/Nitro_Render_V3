@@ -1,8 +1,8 @@
-# Nitro_Render_V3 — Claude project context
+# Octane Renderer — Claude project context
 
 Pure-TypeScript renderer library for the Nitro retro Habbo client.
 Wraps **PixiJS v8** for room/avatar rendering and provides the WebSocket
-+ event-bus infrastructure that the React client (`../Nitro-V3`) sits on
++ event-bus infrastructure that the React client (`../octane`) sits on
 top of.
 
 ## Stack
@@ -15,7 +15,7 @@ top of.
 - **Vitest 4** for unit tests
 - **Yarn 4.18 workspaces** (`packages/*`) through Corepack, using the
   `node-modules` linker for compatibility with the existing build tooling.
-- **No React** — this is a pure TS library; React lives in `../Nitro-V3`.
+- **No React** — this is a pure TS library; React lives in `../octane`.
 
 ## Workspace layout
 
@@ -231,7 +231,7 @@ yarn test:coverage      # vitest with v8 coverage
 
 ## Consumed by
 
-`../Nitro-V3` consumes this library via `link:../Nitro_Render_V3`
+`../octane` consumes this library via `link:../octane-renderer`
 (yarn 4 node-modules linker). DO NOT use `yarn link` — it confuses
 vite's asset resolution. The client's `vite.config.js` then maps each
 `@nitrots/*` package directly to its source `index.ts` so there's no
@@ -239,7 +239,7 @@ build step needed for development.
 
 When making changes to renderer APIs the React client uses, the
 client's `feat/react19-*` branches contain consumers — check
-`Nitro-V3/src/hooks/events/` and `Nitro-V3/src/hooks/{session,rooms}/`
+`octane/src/hooks/events/` and `octane/src/hooks/{session,rooms}/`
 for the React-side bridge code.
 
 ## Gotchas
@@ -274,7 +274,7 @@ for the React-side bridge code.
 
 ## Sister projects in the same DEV folder
 
-- `../Nitro-V3` — React 19 client (consumes this lib via link)
+- `../octane` — React 19 client (consumes this lib via link)
 - `../Arcturus-Morningstar-Extended` — Java emulator (server side)
 - `../NitroV3-Housekeeping` — Next.js + Prisma admin CMS
 
