@@ -5,22 +5,15 @@ import { NitroMessages } from '../../../../NitroMessages';
 import { IncomingHeader } from '../../../incoming/IncomingHeader';
 import { OutgoingHeader } from '../../../outgoing/OutgoingHeader';
 import {
-    CatalogStudioAcquireLockComposer,
     CatalogStudioDocumentApplyComposer,
     CatalogStudioDocumentDryRunComposer,
     CatalogStudioExportComposer,
     CatalogStudioHistoryComposer,
     CatalogStudioOpenSessionComposer,
-    CatalogStudioPublishComposer,
-    CatalogStudioPreviewComposer,
-    CatalogStudioRenewLockComposer,
-    CatalogStudioRestoreComposer,
     CatalogStudioUndoComposer
 } from '../../../outgoing/catalog/studio';
 import { CatalogStudioHistoryMessageParser } from '../../../parser/catalog/studio/CatalogStudioHistoryMessageParser';
 import { CatalogStudioDocumentResultMessageParser } from '../../../parser/catalog/studio/CatalogStudioDocumentResultMessageParser';
-import { CatalogStudioPreviewMessageParser } from '../../../parser/catalog/studio/CatalogStudioPreviewMessageParser';
-import { CatalogStudioOperationMessageParser } from '../../../parser/catalog/studio/CatalogStudioOperationMessageParser';
 import { CatalogStudioSessionMessageParser } from '../../../parser/catalog/studio/CatalogStudioSessionMessageParser';
 import { CatalogStudioValidationMessageParser } from '../../../parser/catalog/studio/CatalogStudioValidationMessageParser';
 import { CATALOG_STUDIO_DOCUMENT_ENCODING, decodeCatalogStudioDocument, encodeCatalogStudioDocument } from '../CatalogStudioDocumentWireCodec';
@@ -46,16 +39,12 @@ describe('catalog studio packet contract', () =>
     {
         const messages = new NitroMessages();
 
-        for(let header = 10067; header <= 10076; header++)
-        {
-            expect(messages.composers.has(header)).toBe(true);
-            expect(messages.events.has(header)).toBe(true);
-        }
-
+        [ 10067, 10071, 10072, 10073, 10078, 10079, 10080 ].forEach(header =>
+            expect(messages.composers.has(header)).toBe(true));
+        [ 10067, 10071, 10072, 10073, 10078 ].forEach(header =>
+            expect(messages.events.has(header)).toBe(true));
         expect(OutgoingHeader.CATALOG_STUDIO_OPEN_SESSION).toBe(10067);
-        expect(IncomingHeader.CATALOG_STUDIO_RESTORE).toBe(10076);
-        for(let header = 10077; header <= 10080; header++) expect(messages.composers.has(header)).toBe(true);
-        for(let header = 10077; header <= 10078; header++) expect(messages.events.has(header)).toBe(true);
+        expect(IncomingHeader.CATALOG_STUDIO_LOAD_HISTORY).toBe(10071);
     });
 
     it('serializes requests in the frozen emulator field order', () =>
@@ -63,41 +52,20 @@ describe('catalog studio packet contract', () =>
         const sql = "UPDATE catalog_pages SET caption = 'Shop' WHERE id = 1;";
         const encodedSql = encodeCatalogStudioDocument(sql);
         expect(new CatalogStudioOpenSessionComposer().getMessageArray()).toEqual([]);
-        expect(new CatalogStudioAcquireLockComposer('op-acquire', 12, 'PAGE', 'BUILDER', 44).getMessageArray())
-            .toEqual([ 'op-acquire', 12, 'PAGE', 'BUILDER', 44 ]);
-        expect(new CatalogStudioRenewLockComposer('op-renew', 12, 'OFFER', 'NORMAL', 77, 'token').getMessageArray())
-            .toEqual([ 'op-renew', 12, 'OFFER', 'NORMAL', 77, 'token' ]);
-        expect(new CatalogStudioHistoryComposer(12, -4, 5000).getMessageArray()).toEqual([ 12, -4, 5000 ]);
-        expect(new CatalogStudioUndoComposer('op-undo', 12, 7, 91).getMessageArray())
-            .toEqual([ 'op-undo', 12, 7, 91 ]);
-        expect(new CatalogStudioPublishComposer('op-publish', 12, 7).getMessageArray())
-            .toEqual([ 'op-publish', 12, 7 ]);
-        expect(new CatalogStudioRestoreComposer('op-restore', 12, 7, 11).getMessageArray())
-            .toEqual([ 'op-restore', 12, 7, 11 ]);
-        expect(new CatalogStudioExportComposer('op-export', 12, 7, 'SQL').getMessageArray())
-            .toEqual([ 'op-export', 12, 7, 'SQL' ]);
-        expect(new CatalogStudioDocumentDryRunComposer('op-dry', 12, 7, 'SQL', sql).getMessageArray())
-            .toEqual([ 'op-dry', 12, 7, 'SQL', encodedSql.encoding, encodedSql.chunks.length, ...encodedSql.chunks ]);
-        expect(new CatalogStudioDocumentApplyComposer('op-apply', 12, 7, 'root-token', 'SQL', sql, 'abc', 'Import catalog').getMessageArray())
-            .toEqual([ 'op-apply', 12, 7, 'root-token', 'SQL', encodedSql.encoding, encodedSql.chunks.length,
+        expect(new CatalogStudioHistoryComposer(1, -4, 5000).getMessageArray()).toEqual([ 1, -4, 5000 ]);
+        expect(new CatalogStudioUndoComposer('op-undo', 1, 7, 91).getMessageArray())
+            .toEqual([ 'op-undo', 1, 7, 91 ]);
+        expect(new CatalogStudioExportComposer('op-export', 1, 7, 'SQL').getMessageArray())
+            .toEqual([ 'op-export', 1, 7, 'SQL' ]);
+        expect(new CatalogStudioDocumentDryRunComposer('op-dry', 1, 7, 'SQL', sql).getMessageArray())
+            .toEqual([ 'op-dry', 1, 7, 'SQL', encodedSql.encoding, encodedSql.chunks.length, ...encodedSql.chunks ]);
+        expect(new CatalogStudioDocumentApplyComposer('op-apply', 1, 7, '', 'SQL', sql, 'abc', 'Import catalog').getMessageArray())
+            .toEqual([ 'op-apply', 1, 7, '', 'SQL', encodedSql.encoding, encodedSql.chunks.length,
                 ...encodedSql.chunks, 'abc', 'Import catalog' ]);
-        expect(new CatalogStudioPreviewComposer('op-preview', 12, 7, 4, true, false, true, false, 500, { 5: 25 }).getMessageArray())
-            .toEqual([ 'op-preview', 12, 7, 4, true, false, true, false, 500, 1, 5, 25 ]);
     });
 
-    it('parses exact preview and document results', () =>
+    it('parses exact document results', () =>
     {
-        const previewWriter = new BinaryWriter();
-        previewWriter.writeString('op-preview'); previewWriter.writeInt(7);
-        previewWriter.writeString('[{"catalogType":"NORMAL","pageId":17}]');
-        previewWriter.writeString('[{"offer":{"catalogType":"NORMAL","offerId":42},"eligible":false,"reasons":["RANK"],"products":[{"productType":"S","productClassId":456,"extraParam":"","productCount":1,"uniqueLimitedItem":false,"uniqueLimitedSeriesSize":0,"uniqueLimitedItemsLeft":0}],"giftable":true}]');
-        const preview = new CatalogStudioPreviewMessageParser();
-        expect(preview.parse(new TestWrapper(new BinaryReader(previewWriter.getBuffer())) as any)).toBe(true);
-        expect(preview.pages[0].pageId).toBe(17);
-        expect(preview.offers[0].reasons).toEqual([ 'RANK' ]);
-        expect(preview.offers[0].products[0].productClassId).toBe(456);
-        expect(preview.offers[0].giftable).toBe(true);
-
         const resultWriter = new BinaryWriter();
         resultWriter.writeString('op-dry'); resultWriter.writeByte(1); resultWriter.writeString('DRY_RUN_READY');
         resultWriter.writeString('Dry-run ready'); resultWriter.writeInt(7); resultWriter.writeString('SQL');
@@ -105,26 +73,16 @@ describe('catalog studio packet contract', () =>
         resultWriter.writeString(encodedDocument.encoding); resultWriter.writeInt(encodedDocument.chunks.length);
         encodedDocument.chunks.forEach(chunk => resultWriter.writeString(chunk));
         resultWriter.writeString('fingerprint'); resultWriter.writeInt(3);
+        resultWriter.writeInt(1);
+        resultWriter.writeString('PAGE'); resultWriter.writeString('NORMAL'); resultWriter.writeInt(1);
+        resultWriter.writeString('UPDATE'); resultWriter.writeInt(2); resultWriter.writeString('caption'); resultWriter.writeString('visible');
         const result = new CatalogStudioDocumentResultMessageParser();
         expect(result.parse(new TestWrapper(new BinaryReader(resultWriter.getBuffer())) as any)).toBe(true);
         expect(result).toMatchObject({ success: true, revision: 7, format: 'SQL', changedEntities: 3 });
-    });
-
-    it('parses automatic live imports and publish conflicts', () =>
-    {
-        const writer = new BinaryWriter();
-        writer.writeString('op-publish'); writer.writeByte(0); writer.writeString('LIVE_SYNC_CONFLICT');
-        writer.writeString('One conflict'); writer.writeInt(8); writer.writeInt(1);
-        writer.writeString('OFFER'); writer.writeInt(77);
-        writer.writeInt(2); writer.writeInt(1);
-        writer.writeString('NORMAL'); writer.writeString('OFFER'); writer.writeInt(77); writer.writeString('costCredits');
-
-        const parser = new CatalogStudioOperationMessageParser();
-        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
-        expect(parser.importedChanges).toBe(2);
-        expect(parser.conflicts).toEqual([
-            { catalogType: 'NORMAL', entityType: 'OFFER', entityId: 77, field: 'costCredits' }
-        ]);
+        expect(result.changes).toEqual([ {
+            entityType: 'PAGE', catalogType: 'NORMAL', entityId: 1,
+            operation: 'UPDATE', fields: [ 'caption', 'visible' ]
+        } ]);
     });
 
     it('round-trips SQL documents larger than the wire string limit as bounded chunks', () =>
@@ -138,7 +96,7 @@ describe('catalog studio packet contract', () =>
         expect(decodeCatalogStudioDocument(encoded.encoding, encoded.chunks)).toBe(document);
     });
 
-    it('parses a studio session with actors and published versions', () =>
+    it('parses the direct-live manager session', () =>
     {
         const pages = [{
             catalogType: 'NORMAL', pageId: 17, parentId: -1, captionSave: 'front_page', caption: 'Front Page',
@@ -149,20 +107,19 @@ describe('catalog studio packet contract', () =>
         }];
         const encodedPages = Buffer.from(gzip(JSON.stringify(pages))).toString('base64');
         const writer = new BinaryWriter();
-        writer.writeInt(11); writer.writeInt(12); writer.writeInt(7);
+        writer.writeInt(1); writer.writeInt(1); writer.writeInt(7);
         writer.writeString('2026-08-02T10:00:00Z'); writer.writeString('2026-08-02T10:05:00Z');
-        writer.writeInt(3); writer.writeInt(1); writer.writeInt(9); writer.writeString('Alice');
-        writer.writeByte(1); writer.writeInt(2); writer.writeInt(1);
-        writer.writeInt(11); writer.writeString('Summer catalog'); writer.writeString('2026-08-02T10:00:00Z');
+        writer.writeInt(0); writer.writeInt(0);
+        writer.writeByte(1); writer.writeInt(2); writer.writeInt(0);
         writer.writeString('GZIP_BASE64_JSON'); writer.writeInt(2);
         writer.writeString(encodedPages.slice(0, 40)); writer.writeString(encodedPages.slice(40));
 
         const parser = new CatalogStudioSessionMessageParser();
         expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
-        expect(parser.draftVersionId).toBe(12);
-        expect(parser.actors).toEqual([ { id: 9, username: 'Alice' } ]);
+        expect(parser.draftVersionId).toBe(1);
+        expect(parser.actors).toEqual([]);
         expect(parser.validationCurrent).toBe(true);
-        expect(parser.publishedVersions[0].label).toBe('Summer catalog');
+        expect(parser.publishedVersions).toEqual([]);
         expect(parser.pages).toEqual(pages);
         expect(parser.offers).toEqual([]);
     });

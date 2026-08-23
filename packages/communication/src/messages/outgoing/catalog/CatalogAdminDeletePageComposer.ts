@@ -4,9 +4,9 @@ export class CatalogAdminDeletePageComposer implements IMessageComposer<Construc
 {
     private _data: ConstructorParameters<typeof CatalogAdminDeletePageComposer>;
 
-    constructor(pageId: number, catalogMode: string = 'NORMAL', draftVersionId: number = 0, expectedRevision: number = 0, lockToken: string = '', summary: string = '')
+    constructor(pageId: number, catalogMode: string = 'NORMAL', draftVersionId: number = 0, expectedRevision: number = 0, lockToken: string = '', summary: string = '', operationId: string = '')
     {
-        this._data = [ pageId, catalogMode, draftVersionId, expectedRevision, lockToken, summary ];
+        this._data = [ pageId, catalogMode, draftVersionId, expectedRevision, lockToken, summary, operationId ];
     }
 
     dispose(): void
