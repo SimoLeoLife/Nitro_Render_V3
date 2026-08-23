@@ -344,6 +344,43 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         return url;
     }
 
+    /** AIR AvatarImage.getCroppedImage: extract the native body-part union bounds. */
+    public processAsCroppedImageUrl(setType: string): string
+    {
+        if(!this._mainAction) return null;
+
+        if(!this._actionsSorted) this.endActionAppends();
+
+        const avatarCanvas = this._structure.getCanvas(this._scale, this._mainAction.definition.geometryType);
+
+        if(!avatarCanvas) return null;
+
+        const container = this.buildAvatarContainer(avatarCanvas, setType);
+
+        if(!container) return null;
+
+        try
+        {
+            const canvas = TextureUtils.generateCanvas({ target: container, resolution: 1 });
+            const url = canvas.toDataURL('image/png');
+
+            canvas.width = 0;
+            canvas.height = 0;
+
+            return url;
+        }
+        finally
+        {
+            for(const child of container.children)
+            {
+                child.removeChildren();
+            }
+
+            container.destroy({ children: true });
+            this.disposeTransientBodyParts();
+        }
+    }
+
     public processAsContainer(setType: string): Container
     {
         if(!this._mainAction) return null;

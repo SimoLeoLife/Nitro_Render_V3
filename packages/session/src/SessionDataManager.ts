@@ -756,6 +756,11 @@ export class SessionDataManager implements ISessionDataManager
         return this._isEmailVerified;
     }
 
+    public get isSafetyLocked(): boolean
+    {
+        return this._safetyLocked;
+    }
+
     public get isNoob(): boolean
     {
         return (this._noobnessLevel !== NoobnessLevelEnum.OLD_IDENTITY);

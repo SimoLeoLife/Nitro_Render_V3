@@ -67,6 +67,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     private _useObject: number;
     private _ownUser: boolean;
     private _habbiconTriggerSequence: number;
+    private _habbiconSpinOffset: number;
 
     private _isLaying: boolean;
     private _layInside: boolean;
@@ -126,6 +127,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this._useObject = 0;
         this._ownUser = false;
         this._habbiconTriggerSequence = 0;
+        this._habbiconSpinOffset = 0;
 
         this._isLaying = false;
         this._layInside = false;
@@ -573,6 +575,12 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             headDirection -= ((headDirection % 90) - 45);
         }
 
+        if(this._habbiconSpinOffset !== 0)
+        {
+            direction = this.normalizeDirectionAngle(direction + this._habbiconSpinOffset);
+            headDirection = this.normalizeDirectionAngle(headDirection + this._habbiconSpinOffset);
+        }
+
         if((direction !== this._angle) || force)
         {
             update = true;
@@ -864,14 +872,15 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
         const habbiconId = (model.getValue<number>(RoomObjectVariable.FIGURE_HABBICON) || 0);
         const habbiconTriggerSequence = (model.getValue<number>(RoomObjectVariable.FIGURE_HABBICON_TRIGGER_SEQUENCE) || 0);
-        const habbiconAddition = this.getAddition(AvatarVisualization.HABBICON_BUBBLE_ID);
+        const habbiconAddition = this.getAddition(AvatarVisualization.HABBICON_BUBBLE_ID) as HabbiconBubbleAddition;
+        const habbiconSpinOffset = (model.getValue<number>(RoomObjectVariable.FIGURE_HABBICON_SPIN_OFFSET) || 0);
 
         if(habbiconId > 0)
         {
-            if(!habbiconAddition || (habbiconTriggerSequence !== this._habbiconTriggerSequence))
+            if(!habbiconAddition || (habbiconAddition.habbiconId !== habbiconId) || (habbiconTriggerSequence !== this._habbiconTriggerSequence))
             {
                 this.removeAddition(AvatarVisualization.HABBICON_BUBBLE_ID);
-                this.addAddition(new HabbiconBubbleAddition(AvatarVisualization.HABBICON_BUBBLE_ID, habbiconId, this));
+                this.addAddition(new HabbiconBubbleAddition(AvatarVisualization.HABBICON_BUBBLE_ID, habbiconId, habbiconTriggerSequence, this));
 
                 this._habbiconTriggerSequence = habbiconTriggerSequence;
                 needsUpdate = true;
@@ -884,6 +893,12 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                 this.removeAddition(AvatarVisualization.HABBICON_BUBBLE_ID);
                 needsUpdate = true;
             }
+        }
+
+        if(habbiconSpinOffset !== this._habbiconSpinOffset)
+        {
+            this._habbiconSpinOffset = habbiconSpinOffset;
+            needsUpdate = true;
         }
 
         let expressionAddition = this.getAddition(AvatarVisualization.EXPRESSION_ID);
@@ -1311,6 +1326,29 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     public get posture(): string
     {
         return this._posture;
+    }
+
+    public get habbiconFacingDirection(): number
+    {
+        if(!this._avatarImage) return 0;
+
+        return AvatarVisualization.resolveHabbiconFacingDirection(this._avatarImage.getDirection());
+    }
+
+    private static resolveHabbiconFacingDirection(direction: number): number
+    {
+        const facing = ((direction % 8) + 8) % 8;
+
+        if(facing <= 2) return 1;
+
+        if((facing >= 4) && (facing <= 6)) return -1;
+
+        return 0;
+    }
+
+    private normalizeDirectionAngle(angle: number): number
+    {
+        return ((angle % 360) + 360) % 360;
     }
 
     public get angle(): number

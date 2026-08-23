@@ -1,4 +1,4 @@
-name: Safe Sync - Nitro_Render_V3
+name: Safe Sync - Octane Renderer
 
 on:
   schedule:
@@ -24,7 +24,7 @@ jobs:
 
       - name: Fetch and Merge Upstream
         run: |
-          git remote add upstream https://github.com/duckietm/Nitro_Render_V3.git
+          git remote add upstream https://github.com/duckietm/Octane-Renderer.git
           git fetch upstream
           
           for branch in $(git branch -r | grep 'upstream/' | grep -v 'HEAD'); do

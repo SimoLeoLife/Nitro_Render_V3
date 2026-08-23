@@ -473,7 +473,14 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         this.updateBoundaryMask();
 
 
-        if(update || updateVisuals) this._canvasUpdated = true;
+        // `updateVisuals` only means that visualizations were given an
+        // animation tick. It does not mean that any visualization actually
+        // changed a sprite. `renderObject` marks the canvas dirty when its
+        // visualization counter, location, or forced update changes; treating
+        // every animation tick as dirty makes DOM preview consumers perform a
+        // full GPU readback and repaint at the configured animation FPS even
+        // for a completely static room.
+        if(update) this._canvasUpdated = true;
 
         this._renderTimestamp = this._totalTimeRunning;
         this._renderedWidth = this._width;
@@ -776,6 +783,11 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         if(!this._display) return;
 
         if(spriteCount < 0) spriteCount = 0;
+
+        // Removing the last (or any trailing) sprite is a real visual change,
+        // even though there may be no remaining object whose renderObject call
+        // can set the dirty flag.
+        if(spriteCount !== this._activeSpriteCount) this._canvasUpdated = true;
 
         if((spriteCount < this._activeSpriteCount) || !this._activeSpriteCount)
         {

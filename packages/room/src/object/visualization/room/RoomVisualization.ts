@@ -186,7 +186,10 @@ export class RoomVisualization extends RoomObjectSpriteVisualization implements 
             }
         }
 
-        this.updateSpriteCounter++;
+        // RoomSpriteCanvas uses this counter as its actual visual-dirty
+        // signal. Do not advance it for a no-op animation tick: static room
+        // planes otherwise force preview texture readbacks every frame.
+        if(needsUpdate) this.updateSpriteCounter++;
 
         this.updateModelCounter = objectModel.updateCounter;
     }
