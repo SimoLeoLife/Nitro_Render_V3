@@ -3,6 +3,7 @@ import { AvatarAction, IRoomGeometry, IRoomObjectModel, IVector3D, MouseEventTyp
 import { RoomObjectFurnitureActionEvent, RoomObjectMouseEvent, RoomObjectMoveEvent, RoomSpriteMouseEvent } from '@nitrots/events';
 import { GetTickerTime, Vector3d } from '@nitrots/utils';
 import { ObjectAvatarCarryObjectUpdateMessage, ObjectAvatarChatUpdateMessage, ObjectAvatarDanceUpdateMessage, ObjectAvatarEffectUpdateMessage, ObjectAvatarExpressionUpdateMessage, ObjectAvatarFigureUpdateMessage, ObjectAvatarFlatControlUpdateMessage, ObjectAvatarGestureUpdateMessage, ObjectAvatarHabbiconUpdateMessage, ObjectAvatarMutedUpdateMessage, ObjectAvatarOwnMessage, ObjectAvatarPlayerValueUpdateMessage, ObjectAvatarPlayingGameUpdateMessage, ObjectAvatarPostureUpdateMessage, ObjectAvatarSelectedMessage, ObjectAvatarSignUpdateMessage, ObjectAvatarSleepUpdateMessage, ObjectAvatarTypingUpdateMessage, ObjectAvatarUpdateMessage, ObjectAvatarUseObjectUpdateMessage, RoomObjectUpdateMessage } from '../../messages';
+import { HabbiconAssetManager } from '../visualization/avatar/additions/HabbiconAssetManager';
 import { MovingObjectLogic } from './MovingObjectLogic';
 
 export class AvatarLogic extends MovingObjectLogic
@@ -14,6 +15,10 @@ export class AvatarLogic extends MovingObjectLogic
     private static EFFECT_TYPE_SWIM: number = 29;
     private static EFFECT_TYPE_SPLASH_DARK: number = 184;
     private static EFFECT_TYPE_SWIM_DARK: number = 185;
+    private static HABBICON_VISIBLE_DURATION_MS: number = 6000;
+    private static HABBICON_SPIN_DURATION_MS: number = 3200;
+    private static HABBICON_SPIN_STEP_MS: number = 100;
+    private static HABBICON_SPIN_STEP_DEGREES: number = -45;
 
     private _selected: boolean;
     private _reportedLocation: IVector3D;
@@ -31,6 +36,11 @@ export class AvatarLogic extends MovingObjectLogic
     private _signEndTimestamp: number;
     private _gestureEndTimestamp: number;
     private _numberValueEndTimestamp: number;
+    private _habbiconEndTimestamp: number;
+    private _habbiconSpinStartTimestamp: number;
+    private _habbiconSpinEndTimestamp: number;
+    private _habbiconSpinOffset: number;
+    private _pendingSpinHabbiconId: number;
 
     constructor()
     {
@@ -52,6 +62,11 @@ export class AvatarLogic extends MovingObjectLogic
         this._signEndTimestamp = 0;
         this._gestureEndTimestamp = 0;
         this._numberValueEndTimestamp = 0;
+        this._habbiconEndTimestamp = 0;
+        this._habbiconSpinStartTimestamp = 0;
+        this._habbiconSpinEndTimestamp = 0;
+        this._habbiconSpinOffset = 0;
+        this._pendingSpinHabbiconId = 0;
     }
 
     public getEventTypes(): string[]
@@ -216,6 +231,21 @@ export class AvatarLogic extends MovingObjectLogic
 
             this._numberValueEndTimestamp = 0;
         }
+
+        if((this._habbiconEndTimestamp > 0) && (time > this._habbiconEndTimestamp))
+        {
+            model.setValue(RoomObjectVariable.FIGURE_HABBICON, 0);
+            model.setValue(RoomObjectVariable.FIGURE_HABBICON_TRIGGER_SEQUENCE, 0);
+            this.clearHabbiconSpin(model);
+            this._habbiconEndTimestamp = 0;
+        }
+
+        if(this._pendingSpinHabbiconId > 0)
+        {
+            this.updateHabbiconSpinForHabbicon(this._pendingSpinHabbiconId, this._habbiconSpinStartTimestamp || time, model);
+        }
+
+        this.updateHabbiconSpin(time, model);
     }
 
     public processUpdateMessage(message: RoomObjectUpdateMessage): void
@@ -323,11 +353,12 @@ export class AvatarLogic extends MovingObjectLogic
 
         if(message instanceof ObjectAvatarHabbiconUpdateMessage)
         {
-            const sequence = (model.getValue<number>(RoomObjectVariable.FIGURE_HABBICON_TRIGGER_SEQUENCE) || 0) + 1;
+            const now = this.time;
 
             model.setValue(RoomObjectVariable.FIGURE_HABBICON, message.habbiconId);
-            model.setValue(RoomObjectVariable.FIGURE_HABBICON_TRIGGER_SEQUENCE, sequence);
-            model.setValue(RoomObjectVariable.FIGURE_HABBICON_SPIN_OFFSET, 0);
+            model.setValue(RoomObjectVariable.FIGURE_HABBICON_TRIGGER_SEQUENCE, now);
+            this._habbiconEndTimestamp = now + AvatarLogic.HABBICON_VISIBLE_DURATION_MS;
+            this.updateHabbiconSpinForHabbicon(message.habbiconId, now, model);
 
             return;
         }
@@ -414,6 +445,63 @@ export class AvatarLogic extends MovingObjectLogic
 
             return;
         }
+    }
+
+    private updateHabbiconSpinForHabbicon(habbiconId: number, startedAt: number, model: IRoomObjectModel): void
+    {
+        const nameKey = HabbiconAssetManager.getInstance().getNameKey(habbiconId);
+
+        if(!nameKey)
+        {
+            this._pendingSpinHabbiconId = habbiconId;
+
+            if(!this._habbiconSpinStartTimestamp) this._habbiconSpinStartTimestamp = startedAt;
+
+            return;
+        }
+
+        this._pendingSpinHabbiconId = 0;
+
+        if(nameKey === HabbiconAssetManager.SPINNING_DUCK_NAME)
+        {
+            this._habbiconSpinStartTimestamp = startedAt;
+            this._habbiconSpinEndTimestamp = startedAt + AvatarLogic.HABBICON_SPIN_DURATION_MS;
+            this.setHabbiconSpinOffset(0, model);
+            return;
+        }
+
+        this.clearHabbiconSpin(model);
+    }
+
+    private updateHabbiconSpin(time: number, model: IRoomObjectModel): void
+    {
+        if(this._habbiconSpinEndTimestamp <= 0) return;
+
+        if(time >= this._habbiconSpinEndTimestamp)
+        {
+            this.clearHabbiconSpin(model);
+            return;
+        }
+
+        const offset = (Math.trunc((time - this._habbiconSpinStartTimestamp) / AvatarLogic.HABBICON_SPIN_STEP_MS) * AvatarLogic.HABBICON_SPIN_STEP_DEGREES) % 360;
+
+        this.setHabbiconSpinOffset(offset, model);
+    }
+
+    private setHabbiconSpinOffset(offset: number, model: IRoomObjectModel): void
+    {
+        if(this._habbiconSpinOffset === offset) return;
+
+        this._habbiconSpinOffset = offset;
+        model.setValue(RoomObjectVariable.FIGURE_HABBICON_SPIN_OFFSET, offset);
+    }
+
+    private clearHabbiconSpin(model: IRoomObjectModel): void
+    {
+        this._pendingSpinHabbiconId = 0;
+        this._habbiconSpinStartTimestamp = 0;
+        this._habbiconSpinEndTimestamp = 0;
+        this.setHabbiconSpinOffset(0, model);
     }
 
     private updateAvatarEffect(effect: number, delay: number, model: IRoomObjectModel): void

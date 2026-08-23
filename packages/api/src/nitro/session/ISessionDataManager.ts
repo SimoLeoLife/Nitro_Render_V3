@@ -46,6 +46,8 @@ export interface ISessionDataManager
     clubLevel: number;
     securityLevel: number;
     isAmbassador: boolean;
+    isEmailVerified: boolean;
+    isSafetyLocked: boolean;
     isNoob: boolean;
     isRealNoob: boolean;
     isSystemOpen: boolean;

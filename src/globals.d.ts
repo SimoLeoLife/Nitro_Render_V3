@@ -2,7 +2,7 @@
  * Vite injects `import.meta.glob(pattern, options)` at runtime but TS
  * doesn't see it without `vite/client` types — and we don't want to pull
  * the full `vite/client` because it overrides asset module declarations
- * the consumer (`../Octane-UI`) owns. Augment `ImportMeta` with just the
+ * the consumer (`../octane`) owns. Augment `ImportMeta` with just the
  * glob signature.
  *
  * For eager image globs (the only flavor `AssetManager` uses) Vite

@@ -41,7 +41,7 @@ URL hints are still honoured: files ending in `.jsonc` (or served with a
 ### Wiring the flag into a host
 
 The renderer does **not** ship its own build for the flag — the host application
-(typically [Octane](https://github.com/duckietm/Octane-UI.git)) defines it via
+(typically [Octane](https://github.com/duckietm/Octane.git)) defines it via
 its bundler. Example with Vite:
 
 ```js
