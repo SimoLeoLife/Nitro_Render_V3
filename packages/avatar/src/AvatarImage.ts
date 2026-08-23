@@ -344,8 +344,8 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         return url;
     }
 
-    /** AIR AvatarImage.getCroppedImage: extract and trim to the native visible body-part bounds. */
-    public processAsCroppedImageUrl(setType: string): string
+    /** AIR AvatarImage.getCroppedImage: extract the native body-part union bounds. */
+    public processAsCroppedImageUrl(setType: string, trimTransparentPixels: boolean = false): string
     {
         if(!this._mainAction) return null;
 
@@ -363,7 +363,7 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         {
             const canvas = TextureUtils.generateCanvas({ target: container, resolution: 1 });
 
-            AvatarImage.cropCanvasToOpaqueBounds(canvas);
+            if(trimTransparentPixels) AvatarImage.cropCanvasToOpaqueBounds(canvas);
 
             const url = canvas.toDataURL('image/png');
 

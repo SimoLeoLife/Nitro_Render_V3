@@ -164,7 +164,8 @@ export class RoomObjectSpriteVisualization implements IRoomObjectSpriteVisualiza
         }
 
         return TextureUtils.generateTexture({
-            target: container
+            target: container,
+            resolution: 1
         });
     }
 
