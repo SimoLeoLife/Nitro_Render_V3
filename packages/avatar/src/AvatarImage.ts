@@ -1,6 +1,6 @@
 import { AvatarAction, AvatarDirectionAngle, AvatarScaleType, AvatarSetType, IActiveActionData, IAnimationLayerData, IAvatarDataContainer, IAvatarEffectListener, IAvatarFigureContainer, IAvatarImage, IGraphicAsset, IPartColor, ISpriteDataContainer } from '@nitrots/api';
 import { GetRenderer, GetTexturePool, GetTickerTime, PaletteMapFilter, TextureUtils } from '@nitrots/utils';
-import { ColorMatrixFilter, Container, Filter, RenderTexture, Sprite, Texture } from 'pixi.js';
+import { ColorMatrixFilter, Container, Filter, ICanvas, RenderTexture, Sprite, Texture } from 'pixi.js';
 import { AvatarFigureContainer } from './AvatarFigureContainer';
 import { AvatarImageBodyPartContainer } from './AvatarImageBodyPartContainer';
 import { AvatarStructure } from './AvatarStructure';
@@ -344,7 +344,7 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         return url;
     }
 
-    /** AIR AvatarImage.getCroppedImage: extract the native body-part union bounds. */
+    /** AIR AvatarImage.getCroppedImage: extract and trim to the native visible body-part bounds. */
     public processAsCroppedImageUrl(setType: string): string
     {
         if(!this._mainAction) return null;
@@ -362,6 +362,9 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         try
         {
             const canvas = TextureUtils.generateCanvas({ target: container, resolution: 1 });
+
+            AvatarImage.cropCanvasToOpaqueBounds(canvas);
+
             const url = canvas.toDataURL('image/png');
 
             canvas.width = 0;
@@ -378,6 +381,59 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
 
             container.destroy({ children: true });
             this.disposeTransientBodyParts();
+        }
+    }
+
+    private static cropCanvasToOpaqueBounds(canvas: ICanvas): void
+    {
+        if(!canvas || canvas.width <= 0 || canvas.height <= 0) return;
+
+        try
+        {
+            const context = canvas.getContext('2d');
+
+            if(!context) return;
+
+            const sourceWidth = canvas.width;
+            const sourceHeight = canvas.height;
+            const pixels = context.getImageData(0, 0, sourceWidth, sourceHeight).data;
+            const alphaThreshold = 8;
+            let minX = sourceWidth;
+            let minY = sourceHeight;
+            let maxX = -1;
+            let maxY = -1;
+
+            for(let y = 0; y < sourceHeight; y++)
+            {
+                const rowStart = y * sourceWidth * 4;
+
+                for(let x = 0; x < sourceWidth; x++)
+                {
+                    if(pixels[rowStart + (x * 4) + 3] <= alphaThreshold) continue;
+
+                    if(x < minX) minX = x;
+                    if(x > maxX) maxX = x;
+                    if(y < minY) minY = y;
+                    if(y > maxY) maxY = y;
+                }
+            }
+
+            if(maxX < minX || maxY < minY) return;
+
+            const width = (maxX - minX) + 1;
+            const height = (maxY - minY) + 1;
+
+            if(width === sourceWidth && height === sourceHeight) return;
+
+            const croppedImage = context.getImageData(minX, minY, width, height);
+
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d')?.putImageData(croppedImage, 0, 0);
+        }
+        catch
+        {
+            // Keep the renderer-generated canvas if pixel inspection is unavailable.
         }
     }
 
