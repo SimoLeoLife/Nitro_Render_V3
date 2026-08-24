@@ -15,7 +15,7 @@ export interface IAvatarImage
     getLayerData(sprite: ISpriteDataContainer): IAnimationLayerData;
     processAsTexture(setType: string, hightlight: boolean, texture?: Texture): Texture;
     processAsImageUrl(setType: string): string;
-    processAsCroppedImageUrl(setType: string): string;
+    processAsCroppedImageUrl(setType: string, trimTransparentPixels?: boolean): string;
     processAsContainer(setType: string): Container;
     getDirection(): number;
     getDirectionOffset(): number;
