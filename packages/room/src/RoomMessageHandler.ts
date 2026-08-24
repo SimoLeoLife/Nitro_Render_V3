@@ -595,7 +595,10 @@ export class RoomMessageHandler
 
     private applyRollingUnitMovement(movement: ObjectRolling): void
     {
-        this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, movement.id, movement.location, movement.targetLocation, false, 0, null, NaN, true);
+        // isSlide must be set so MovingObjectLogic treats consecutive roller
+        // pulses as a chain (queueing + cadence smoothing) instead of
+        // restarting a fresh move on every pulse.
+        this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, movement.id, movement.location, movement.targetLocation, false, 0, null, NaN, true, true);
 
         const object = this._roomEngine.getRoomObjectUser(this._currentRoomId, movement.id);
 
