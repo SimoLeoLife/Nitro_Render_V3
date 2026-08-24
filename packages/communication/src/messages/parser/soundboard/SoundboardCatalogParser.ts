@@ -8,6 +8,8 @@ export interface ISoundboardCatalogSound
     enabled: boolean;
     sortOrder: number;
     minRank: number;
+    /** Key into gamedata/SoundData.json; empty for url-addressed pads. */
+    classname: string;
 }
 
 export class SoundboardCatalogParser implements IMessageParser
@@ -40,9 +42,15 @@ export class SoundboardCatalogParser implements IMessageParser
                 url: wrapper.readString(),
                 enabled: wrapper.readBoolean(),
                 sortOrder: wrapper.readInt(),
-                minRank: wrapper.readInt()
+                minRank: wrapper.readInt(),
+                classname: ''
             });
         }
+
+        // Trailing block after the records — see SoundboardSettingsParser.
+        if(!wrapper.bytesAvailable) return true;
+
+        for(let index = 0; index < count; index++) this._sounds[index].classname = wrapper.readString();
 
         return true;
     }

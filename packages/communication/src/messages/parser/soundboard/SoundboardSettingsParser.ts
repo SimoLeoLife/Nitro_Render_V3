@@ -5,6 +5,16 @@ export interface ISoundboardSound
     id: number;
     name: string;
     url: string;
+    /**
+     * Key into gamedata/SoundData.json, which owns the audio file. Empty when
+     * the pad is addressed by an explicit `url` instead, or when the server
+     * predates asset-backed sounds.
+     *
+     * Optional so call sites that build a sound literal by hand (local
+     * fallback catalogs, tests) do not have to carry a field the wire may not
+     * even provide; the parser always sets it.
+     */
+    classname?: string;
 }
 
 export class SoundboardSettingsParser implements IMessageParser
@@ -38,9 +48,18 @@ export class SoundboardSettingsParser implements IMessageParser
             this._sounds.push({
                 id: wrapper.readInt(),
                 name: wrapper.readString(),
-                url: wrapper.readString()
+                url: wrapper.readString(),
+                classname: ''
             });
         }
+
+        // Classnames arrive as their own block after the records, so one
+        // check covers the whole optional tier. Never read an optional field
+        // per record inside the loop above: on a server that does not emit it
+        // the read steals bytes from the next record.
+        if(!wrapper.bytesAvailable) return true;
+
+        for(let i = 0; i < count; i++) this._sounds[i].classname = wrapper.readString();
 
         return true;
     }

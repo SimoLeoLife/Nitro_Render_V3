@@ -38,14 +38,40 @@ describe('SoundboardSettingsParser', () =>
 
         expect(parser.enabled).toBe(true);
         expect(parser.cooldownSeconds).toBe(60);
+        // No trailing classname block: this is what an emulator that predates
+        // asset-backed sounds sends, and it must still parse.
         expect(parser.sounds).toEqual([
-            { id: 7, name: 'Campanella', url: '/sounds/soundboard/campanella.mp3' }
+            { id: 7, name: 'Campanella', url: '/sounds/soundboard/campanella.mp3', classname: '' }
         ]);
 
         parser.flush();
         expect(parser.enabled).toBe(false);
         expect(parser.cooldownSeconds).toBe(0);
         expect(parser.sounds).toEqual([]);
+    });
+
+    it('reads the trailing classname block for every sound in order', () =>
+    {
+        const writer = new BinaryWriter();
+        writer.writeByte(1);
+        writer.writeInt(60);
+        writer.writeInt(2);
+        writer.writeInt(7);
+        writer.writeString('Campanella');
+        writer.writeString('');
+        writer.writeInt(8);
+        writer.writeString('Applauso');
+        writer.writeString('');
+        writer.writeString('campanella');
+        writer.writeString('applauso');
+
+        const parser = new SoundboardSettingsParser();
+        expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
+
+        expect(parser.sounds).toEqual([
+            { id: 7, name: 'Campanella', url: '', classname: 'campanella' },
+            { id: 8, name: 'Applauso', url: '', classname: 'applauso' }
+        ]);
     });
 
     it('clamps a negative cooldown to zero', () =>
@@ -134,7 +160,7 @@ describe('Soundboard management parsers', () =>
         const parser = new SoundboardCatalogParser();
         expect(parser.parse(new TestWrapper(new BinaryReader(writer.getBuffer())) as any)).toBe(true);
         expect(parser.sounds).toEqual([
-            { id: 7, name: 'Campanella', url: '/sounds/bell.mp3', enabled: false, sortOrder: 20, minRank: 5 }
+            { id: 7, name: 'Campanella', url: '/sounds/bell.mp3', enabled: false, sortOrder: 20, minRank: 5, classname: '' }
         ]);
     });
 

@@ -8,6 +8,7 @@ export class SoundboardPlayParser implements IMessageParser
     private _actorUserId: number = 0;
     private _actorRoomIndex: number = 0;
     private _username: string = '';
+    private _classname: string = '';
 
     public flush(): boolean
     {
@@ -17,6 +18,7 @@ export class SoundboardPlayParser implements IMessageParser
         this._actorUserId = 0;
         this._actorRoomIndex = 0;
         this._username = '';
+        this._classname = '';
 
         return true;
     }
@@ -32,6 +34,11 @@ export class SoundboardPlayParser implements IMessageParser
         this._actorRoomIndex = wrapper.readInt();
         this._username = wrapper.readString();
 
+        // Single record, so a plain trailing field is safe here.
+        if(!wrapper.bytesAvailable) return true;
+
+        this._classname = wrapper.readString();
+
         return true;
     }
 
@@ -41,4 +48,5 @@ export class SoundboardPlayParser implements IMessageParser
     public get actorUserId(): number { return this._actorUserId; }
     public get actorRoomIndex(): number { return this._actorRoomIndex; }
     public get username(): string { return this._username; }
+    public get classname(): string { return this._classname; }
 }
