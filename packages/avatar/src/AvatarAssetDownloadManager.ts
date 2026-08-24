@@ -248,6 +248,12 @@ export class AvatarAssetDownloadManager
     {
         if(!partSet || !partSet.parts) return false;
 
+        // NFT libraries re-declare shared base parts (hd:1, bd:1, lh:1,
+        // rh:1, ...), so "any part in an NFT library" would classify base
+        // figure sets as NFT. A set is NFT only when every library that can
+        // serve one of its parts is an NFT library.
+        let hasNftLibrary = false;
+
         for(const part of partSet.parts)
         {
             if(!part) continue;
@@ -259,11 +265,15 @@ export class AvatarAssetDownloadManager
 
             for(const library of libraries)
             {
-                if(library && library.libraryName.toLowerCase().includes('nft')) return true;
+                if(!library) continue;
+
+                if(!library.libraryName.toLowerCase().includes('nft')) return false;
+
+                hasNftLibrary = true;
             }
         }
 
-        return false;
+        return hasNftLibrary;
     }
 
     public downloadAvatarFigure(container: IAvatarFigureContainer, listener: IAvatarImageListener): void

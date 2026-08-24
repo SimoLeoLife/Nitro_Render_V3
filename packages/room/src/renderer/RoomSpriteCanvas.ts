@@ -9,6 +9,8 @@ import { ExtendedSprite, ObjectMouseData, SortableSprite } from './utils';
 
 export class RoomSpriteCanvas implements IRoomRenderingCanvas
 {
+	private static OBJECT_ALTITUDE_DEPTH: number = 0.2;
+	
     private _geometry: RoomGeometry;
     private _animationFPS: number;
     private _renderTimestamp: number = 0;
@@ -553,7 +555,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
         let x = vector.x;
         let y = vector.y;
-        let z = vector.z;
+        let z = (vector.z - (object.getLocation().z * RoomSpriteCanvas.OBJECT_ALTITUDE_DEPTH));
 
         if(x > 0) z = (z + (x * 1.2E-7));
         else z = (z + (-(x) * 1.2E-7));
