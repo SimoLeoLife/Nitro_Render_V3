@@ -11,9 +11,10 @@ export class CatalogAdminSavePageIconComposer implements IMessageComposer<Constr
         draftVersionId: number = 0,
         expectedRevision: number = 0,
         lockToken: string = '',
-        summary: string = '')
+        summary: string = '',
+        operationId: string = '')
     {
-        this._data = [ pageId, iconId, catalogType, draftVersionId, expectedRevision, lockToken, summary ];
+        this._data = [ pageId, iconId, catalogType, draftVersionId, expectedRevision, lockToken, summary, operationId ];
     }
 
     dispose(): void

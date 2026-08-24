@@ -33,7 +33,7 @@ export class NodeData
         return true;
     }
 
-    private static readonly MAX_OFFERS: number = 1000;
+    private static readonly MAX_OFFERS: number = 4000;
     private static readonly MAX_CHILDREN: number = 500;
     private static readonly MAX_DEPTH: number = 20;
 

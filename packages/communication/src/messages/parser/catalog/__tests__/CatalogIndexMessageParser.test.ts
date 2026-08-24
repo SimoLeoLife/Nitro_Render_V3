@@ -63,10 +63,10 @@ describe('CatalogIndexMessageParser', () =>
 {
     it('rejects an oversized offer list before the packet cursor becomes misaligned', () =>
     {
-        const wrapper = new EvaWireDataWrapper(0, new BinaryReader(createRootPacket(1001, 1001)));
+        const wrapper = new EvaWireDataWrapper(0, new BinaryReader(createRootPacket(4001, 4001)));
         const parser = new CatalogIndexMessageParser();
 
-        expect(() => parser.parse(wrapper)).toThrowError('Catalog index offer count 1001 exceeds limit 1000');
+        expect(() => parser.parse(wrapper)).toThrowError('Catalog index offer count 4001 exceeds limit 4000');
     });
 
     it('reports a truncated offer list without leaking a DataView RangeError', () =>

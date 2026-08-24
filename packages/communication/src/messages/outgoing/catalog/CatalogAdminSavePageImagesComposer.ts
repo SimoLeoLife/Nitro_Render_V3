@@ -12,9 +12,10 @@ export class CatalogAdminSavePageImagesComposer implements IMessageComposer<Cons
         draftVersionId: number = 0,
         expectedRevision: number = 0,
         lockToken: string = '',
-        summary: string = '')
+        summary: string = '',
+        operationId: string = '')
     {
-        this._data = [ pageId, headerImage, teaserImage, catalogType, draftVersionId, expectedRevision, lockToken, summary ];
+        this._data = [ pageId, headerImage, teaserImage, catalogType, draftVersionId, expectedRevision, lockToken, summary, operationId ];
     }
 
     dispose(): void

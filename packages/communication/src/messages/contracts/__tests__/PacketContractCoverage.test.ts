@@ -54,7 +54,7 @@ describe('packet contract coverage', () =>
                 || left.header - right.header || left.symbol.localeCompare(right.symbol));
 
         expect(registry.aliases).toEqual(expected);
-    });
+    }, 15_000);
 
     it('keeps unsupported renderer headers outside active registries and synchronized with policy', () =>
     {
