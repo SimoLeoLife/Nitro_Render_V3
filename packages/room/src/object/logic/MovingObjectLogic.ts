@@ -9,6 +9,17 @@ export class MovingObjectLogic extends RoomObjectLogicBase
     private static LOCATION_EPSILON: number = 0.01;
     private static TEMP_VECTOR: Vector3d = new Vector3d();
 
+    // Roller pulses arrive once per server tick with the same duration the
+    // client interpolates at, so every hop finishes just before the next
+    // packet lands and the object visibly stalls for the network jitter.
+    // When consecutive slides arrive at a steady cadence we stretch each
+    // fresh hop slightly past that cadence so the next pulse still finds an
+    // active interpolation and chains through the queue, then drain queued
+    // hops at the cadence itself so the backlog stays a constant one buffer.
+    private static SLIDE_CHAIN_BUFFER: number = 100;
+    private static SLIDE_PERIOD_MIN: number = 100;
+    private static SLIDE_PERIOD_MAX: number = 4000;
+
     private _liftAmount: number;
 
     private _location: Vector3d;
@@ -19,6 +30,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
     private _changeTime: number;
     private _updateInterval: number;
     private _queuedMoveMessages: ObjectMoveUpdateMessage[];
+    private _lastSlideArrivalTime: number;
+    private _estimatedSlidePeriod: number;
 
     constructor()
     {
@@ -34,12 +47,16 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         this._changeTime = 0;
         this._updateInterval = MovingObjectLogic.DEFAULT_UPDATE_INTERVAL;
         this._queuedMoveMessages = [];
+        this._lastSlideArrivalTime = 0;
+        this._estimatedSlidePeriod = 0;
     }
 
     public dispose(): void
     {
         this._liftAmount = 0;
         this._queuedMoveMessages = [];
+        this._lastSlideArrivalTime = 0;
+        this._estimatedSlidePeriod = 0;
 
         super.dispose();
     }
@@ -155,6 +172,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
                 return;
             }
 
+            if(message.isSlide && !message.anchorObject && (message.elapsed === 0)) this.trackSlideArrival();
+
             const requiresCustomMoveHandling = !!message.anchorObject || (message.elapsed > 0);
 
             if(requiresCustomMoveHandling)
@@ -162,6 +181,19 @@ export class MovingObjectLogic extends RoomObjectLogicBase
                 if(this.object && message.direction) this.object.setDirection(message.direction);
 
                 return this.processMoveMessage(message);
+            }
+
+            // A chained slide must be queued BEFORE the base handler runs:
+            // super.processUpdateMessage snaps the object to the message's
+            // start location, which teleports it to the end of the hop it is
+            // still interpolating through.
+            if(this.shouldQueueMoveMessage(message))
+            {
+                if(this.object && message.direction) this.object.setDirection(message.direction);
+
+                this.queueMoveMessage(message);
+
+                return;
             }
         }
 
@@ -179,7 +211,40 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         return this.matchesLocation(message.location, message.targetLocation);
     }
 
-    private processMoveMessage(message: ObjectMoveUpdateMessage): void
+    private trackSlideArrival(): void
+    {
+        const arrivalTime = this._lastUpdateTime;
+        const sincePrevious = (arrivalTime - this._lastSlideArrivalTime);
+
+        if((this._lastSlideArrivalTime > 0) && (sincePrevious >= MovingObjectLogic.SLIDE_PERIOD_MIN) && (sincePrevious <= MovingObjectLogic.SLIDE_PERIOD_MAX))
+        {
+            this._estimatedSlidePeriod = sincePrevious;
+        }
+        else
+        {
+            this._estimatedSlidePeriod = 0;
+        }
+
+        this._lastSlideArrivalTime = arrivalTime;
+    }
+
+    private getSlideDuration(message: ObjectMoveUpdateMessage, fromQueue: boolean): number
+    {
+        const baseDuration = ((message.duration > 0) ? message.duration : ObjectMoveUpdateMessage.DEFAULT_DURATION);
+
+        if(!message.isSlide || !!message.anchorObject) return baseDuration;
+
+        // Only smooth cadences at or slightly above the hop duration (fast
+        // rollers). Slower cadences keep the classic move-then-rest look, and
+        // one-shot slides (wired choreography) keep their exact duration.
+        const chained = ((this._estimatedSlidePeriod > 0) && (this._estimatedSlidePeriod <= (baseDuration + (2 * MovingObjectLogic.SLIDE_CHAIN_BUFFER))));
+
+        if(!chained) return baseDuration;
+
+        return fromQueue ? this._estimatedSlidePeriod : (this._estimatedSlidePeriod + MovingObjectLogic.SLIDE_CHAIN_BUFFER);
+    }
+
+    private processMoveMessage(message: ObjectMoveUpdateMessage, fromQueue: boolean = false): void
     {
         if(!message || !this.object || !message.location) return;
 
@@ -191,7 +256,7 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         }
 
         const hadActiveInterpolation = this.isInterpolating();
-        const duration = ((message.duration > 0) ? message.duration : ObjectMoveUpdateMessage.DEFAULT_DURATION);
+        const duration = this.getSlideDuration(message, fromQueue);
         const startLocation = hadActiveInterpolation
             ? this.object.getLocation()
             : message.location;
@@ -252,6 +317,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         this._followOffset.assign(new Vector3d());
         this._queuedMoveMessages = [];
         this._changeTime = this._lastUpdateTime;
+        this._lastSlideArrivalTime = 0;
+        this._estimatedSlidePeriod = 0;
     }
 
     private isInterpolating(): boolean
@@ -292,7 +359,7 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
         if(!nextMoveMessage) return;
 
-        this.processMoveMessage(nextMoveMessage);
+        this.processMoveMessage(nextMoveMessage, true);
     }
 
     private getQueuedMovementTailLocation(): IVector3D
