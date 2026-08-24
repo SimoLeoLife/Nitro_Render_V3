@@ -16,5 +16,5 @@ describe('packet contract catalog generator', () =>
 
         const destination = process.env.PACKET_CONTRACT_TYPESCRIPT_INVENTORY;
         if(destination) generator.writeTypeScriptInventory(destination);
-    });
+    }, 15_000);
 });

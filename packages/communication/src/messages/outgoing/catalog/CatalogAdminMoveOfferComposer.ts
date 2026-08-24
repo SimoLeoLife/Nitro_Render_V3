@@ -11,9 +11,10 @@ export class CatalogAdminMoveOfferComposer implements IMessageComposer<Construct
         draftVersionId: number = 0,
         expectedRevision: number = 0,
         lockToken: string = '',
-        summary: string = '')
+        summary: string = '',
+        operationId: string = '')
     {
-        this._data = [ offerId, orderNumber, catalogMode, draftVersionId, expectedRevision, lockToken, summary ];
+        this._data = [ offerId, orderNumber, catalogMode, draftVersionId, expectedRevision, lockToken, summary, operationId ];
     }
 
     dispose(): void

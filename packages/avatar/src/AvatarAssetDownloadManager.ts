@@ -263,6 +263,9 @@ export class AvatarAssetDownloadManager
 
             if(!libraries) continue;
 
+            let hasNftLibrary = false;
+            let hasStandardLibrary = false;
+
             for(const library of libraries)
             {
                 if(!library) continue;
@@ -271,6 +274,11 @@ export class AvatarAssetDownloadManager
 
                 hasNftLibrary = true;
             }
+
+            // Common body parts are intentionally repeated inside composite
+            // NFT libraries. Only a part supplied exclusively by NFT assets is
+            // evidence that the containing figure set is itself an NFT set.
+            if(hasNftLibrary && !hasStandardLibrary) return true;
         }
 
         return hasNftLibrary;
