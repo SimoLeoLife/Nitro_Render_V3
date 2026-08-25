@@ -21,12 +21,25 @@ describe('Soundboard management composers', () =>
 
     it('keeps the authoritative upsert wire order', () =>
     {
+        expect(new SoundboardCatalogUpsertComposer(7, 'Campanella', '/sounds/bell.mp3', 5, false, 'bell').getMessageArray()).toEqual([
+            7,
+            'Campanella',
+            '/sounds/bell.mp3',
+            5,
+            false,
+            'bell'
+        ]);
+    });
+
+    it('appends an empty classname when none is given', () =>
+    {
         expect(new SoundboardCatalogUpsertComposer(7, 'Campanella', '/sounds/bell.mp3', 5, false).getMessageArray()).toEqual([
             7,
             'Campanella',
             '/sounds/bell.mp3',
             5,
-            false
+            false,
+            ''
         ]);
     });
 
